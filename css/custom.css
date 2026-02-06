@@ -34,7 +34,26 @@
       text-align: center;  /* optional */
     }
     
+  .Navbar {
+      position: relative;
+      background-color: #f1f9fc;
+      padding: .5rem 1rem;
+      flex-flow: row wrap;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: .875rem;
+      line-height: .75rem;
+      transition: all .2s ease
+  }
 
+  .fixed-top {
+      position: fixed;
+      top: 0;
+      right: 0;
+      left: 0;
+      z-index: 1030
+  }
 
     .controls {
       width: 100%;
