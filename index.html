@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Telemetry Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .controls { margin-bottom: 20px; }
+    label { margin-right: 10px; }
+    canvas { max-width: 900px; }
+  </style>
+</head>
+<body>
+  <h1>Telemetry Dashboard</h1>
+
+  <div class="controls">
+    <label>
+      Tag ID:
+      <select id="tagIdSelect"></select>
+    </label>
+    <label>
+      From:
+      <input id="fromInput" type="date">
+    </label>
+    <label>
+      To:
+      <input id="toInput" type="date">
+    </label>
+    <button onclick="loadData()">Load</button>
+  </div>
+
+  <h3>Temperature (°C)</h3>
+  <canvas id="tempChart"></canvas>
+
+  <h3>Humidity (%)</h3>
+  <canvas id="humChart"></canvas>
+
+  <script>
+    // Replace this with your actual Function App URL:
+    const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
+
+    let tempChart, humChart;
+
+    // Load tags on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadTags();
+    });
+
+    async function loadTags() {
+      const select = document.getElementById('tagIdSelect');
+      select.innerHTML = ''; // clear
+
+      try {
+        const res = await fetch(`${API_BASE}/tags`);
+        if (!res.ok) {
+          const text = await res.text();
+          console.error('Error fetching tags:', text);
+          alert('Error loading tag IDs: ' + text);
+          return;
+        }
+
+        const tags = await res.json(); // array of strings
+        if (!Array.isArray(tags) || tags.length === 0) {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'No tags found';
+          select.appendChild(opt);
+          return;
+        }
+
+        // Optional: add a default prompt
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '-- select tag --';
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        select.appendChild(placeholder);
+
+        for (const tag of tags) {
+          const opt = document.createElement('option');
+          opt.value = tag;
+          opt.textContent = tag;
+          select.appendChild(opt);
+        }
+      } catch (err) {
+        console.error('Error loading tags:', err);
+        alert('Error loading tag IDs (see console).');
+      }
+    }
+
+    async function loadData() {
+      const select = document.getElementById('tagIdSelect');
+      const tagId = select.value;
+      const from = document.getElementById('fromInput').value;
+      const to = document.getElementById('toInput').value;
+
+      if (!tagId) {
+        alert('Please select a tagId');
+        return;
+      }
+
+      const params = new URLSearchParams({ tagId });
+      if (from) params.append('from', from);
+      if (to) params.append('to', to);
+
+      const url = `${API_BASE}/telemetry?${params.toString()}`;
+      console.log('Requesting:', url);
+
+      const res = await fetch(url);
+      if (!res.ok) {
+        const text = await res.text();
+        alert('API error: ' + text);
+        return;
+      }
+
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        alert('No data returned for this tag/time range.');
+        return;
+      }
+
+      const labels = [];
+      const temps = [];
+      const hums = [];
+
+      for (const d of data) {
+        const ts = d.sensorData?.eventDateUtc || '';
+        labels.push(ts);
+        temps.push(d.sensorData?.temperatureEv ?? null);
+        hums.push(d.sensorData?.humidityEv ?? null);
+      }
+
+      renderCharts(labels, temps, hums);
+    }
+
+    function renderCharts(labels, temps, hums) {
+      const tempCtx = document.getElementById('tempChart').getContext('2d');
+      const humCtx = document.getElementById('humChart').getContext('2d');
+
+      if (tempChart) tempChart.destroy();
+      if (humChart) humChart.destroy();
+
+      tempChart = new Chart(tempCtx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Temperature (°C)',
+            data: temps,
+            borderColor: 'red',
+            backgroundColor: 'rgba(255,0,0,0.1)',
+            tension: 0.1
+          }]
+        },
+        options: {
+          scales: {
+            x: { title: { display: true, text: 'Time' } },
+            y: { title: { display: true, text: '°C' } }
+          }
+        }
+      });
+
+      humChart = new Chart(humCtx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Humidity (%)',
+            data: hums,
+            borderColor: 'blue',
+            backgroundColor: 'rgba(0,0,255,0.1)',
+            tension: 0.1
+          }]
+        },
+        options: {
+          scales: {
+            x: { title: { display: true, text: 'Time' } },
+            y: { title: { display: true, text: '%' } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

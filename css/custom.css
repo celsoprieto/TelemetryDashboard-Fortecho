@@ -1,0 +1,115 @@
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      display: flex;
+      justify-content: center; /* center horizontally */
+      align-items: center;     /* center vertically */
+      background: #f5f7fb;
+      font-family: system-ui, sans-serif;
+    }
+
+    .page-center {
+      /* optional: card-style wrapper */
+      padding: 24px;
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    .page-title {
+      color: #008c8c;     /* change to any hex, rgb, etc. */
+      text-align: center;  /* optional */
+    }
+    
+    .controls { 
+      display: flex;
+      align-items: center;      /* horizontal center */
+      gap: 16px;                /* space between rows */
+    }
+
+    label { margin-right: 10px; }
+    /* canvas { max-width: 900px; } */
+
+  .sensor-list {
+    display: flex;
+    gap: 12px;
+  }
+
+  /* Tag ID / From / To labels as horizontal mini-rows */
+  .control-field {
+    display: inline-flex;
+    align-items: center;   /* vertical center label text + input/select */
+    gap: 6px;
+    margin: 0;
+  }
+
+  /* optional, just styling */
+  .control-label {
+    font-size: 14px;
+  }
+
+  .sensor-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #d0d7e2;
+    background: #f5f7fb;
+    color: #008c8c;              /* icon + text color */
+    font-family: system-ui, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .sensor-button:hover {
+    background: #e6f5f5;
+  }
+
+  .sensor-button.active {
+    background: #008c8c;
+    color: #ffffff;
+    border-color: #008c8c;
+  }
+
+  .sensor-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .sensor-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .sensor-value {
+    line-height: 1;
+  }
+
+  .time-input {
+    height: 50px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #fff;
+    box-sizing: border-box;
+  }
+
+  /* optional: remove default arrow look differences (varies by browser) */
+  .time-input {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+  }
+
+  .section-class {
+    background-color: #ffffff;   /* white background */
+    padding: 16px;              /* inner spacing */
+    border-radius: 8px;         /* optional: rounded corners */
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08); /* optional: subtle shadow */
+    margin: 16px auto;          /* center horizontally with margin */
+  }
