@@ -3,184 +3,208 @@
 <head>
   <meta charset="utf-8" />
   <title>Telemetry Dashboard</title>
+  <link rel="stylesheet" href="css/custom.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: sans-serif; margin: 20px; }
-    .controls { margin-bottom: 20px; }
-    label { margin-right: 10px; }
-    canvas { max-width: 900px; }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/date-fns@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+  <!-- Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
+  <script src="js/fortecho.js"></script>
+  <style>  </style>
 </head>
 <body>
-  <h1>Telemetry Dashboard</h1>
 
-  <div class="controls">
-    <label>
-      Tag ID:
-      <select id="tagIdSelect"></select>
-    </label>
-    <label>
-      From:
-      <input id="fromInput" type="date">
-    </label>
-    <label>
-      To:
-      <input id="toInput" type="date">
-    </label>
-    <button onclick="loadData()">Load</button>
-  </div>
+  <nav class="fixed top-0 w-full bg-white shadow z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-end h-16">
+        <ul class="flex flex-row items-center list-none p-0 m-0 gap-6">
+          <li>
+            <a href="https://cpfileshared.z43.web.core.windows.net/" class="text-gray-700 hover:text-teal-600 font-medium">Home</a>
+          </li>
+          <li>
+            <a href="#" class="text-gray-700 hover:text-teal-600 font-medium">Where is Telemetry?</a>
+          </li>
+          <li>
+            <a href="#" class="text-gray-700 hover:text-teal-600 font-medium">Español</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-  <h3>Temperature (°C)</h3>
-  <canvas id="tempChart"></canvas>
+  <main class="mainclass">
+    <!-- <h1 class="page-title">Telemetry Dashboard</h1> -->
 
-  <h3>Humidity (%)</h3>
-  <canvas id="humChart"></canvas>
+    <div class="controls">
+      <div class="sensor-list" id="sensorList1" >
 
-  <script>
-    // Replace this with your actual Function App URL:
-    const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
+        <button class="sensor-button active" type="button" data-metric="temp-humidity">
+          <span class="sensor-icon" style="display: flex; flex-direction: column; align-items: center; gap: 4px; width: 2em; height: 3.5em;">
+            <!-- Thermometer -->
+            <svg xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-thermometer"
+                style="width: 100%; height: 50%;">
+              <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path>
+            </svg>
 
-    let tempChart, humChart;
+            <!-- Droplets -->
+            <svg xmlns="http://www.w3.org/2000/svg" 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              stroke-width="2" 
+              stroke-linecap="round" 
+              stroke-linejoin="round" 
+              class="lucide lucide-droplets">
+              <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"></path>
+              <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"></path>
+            </svg>
+          </span>
+        </button>
 
-    // Load tags on page load
-    window.addEventListener('DOMContentLoaded', () => {
-      loadTags();
-    });
 
-    async function loadTags() {
-      const select = document.getElementById('tagIdSelect');
-      select.innerHTML = ''; // clear
+        <button class="sensor-button" type="button" data-metric="temperature">
+          <span class="sensor-icon">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-thermometer">
+              <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path>
+            </svg>
+          </span>
+          <span class="sensor-value">°C</span>
+        </button>
 
-      try {
-        const res = await fetch(`${API_BASE}/tags`);
-        if (!res.ok) {
-          const text = await res.text();
-          console.error('Error fetching tags:', text);
-          alert('Error loading tag IDs: ' + text);
-          return;
-        }
+        <button class="sensor-button" type="button" data-metric="humidity">
+          <span class="sensor-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              stroke-width="2" 
+              stroke-linecap="round" 
+              stroke-linejoin="round" 
+              class="lucide lucide-droplets">
+              <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"></path>
+              <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"></path>
+            </svg>
+          </span>
+          <span class="sensor-value">%</span>
+        </button>
 
-        const tags = await res.json(); // array of strings
-        if (!Array.isArray(tags) || tags.length === 0) {
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = 'No tags found';
-          select.appendChild(opt);
-          return;
-        }
+        
 
-        // Optional: add a default prompt
-        const placeholder = document.createElement('option');
-        placeholder.value = '';
-        placeholder.textContent = '-- select tag --';
-        placeholder.disabled = true;
-        placeholder.selected = true;
-        select.appendChild(placeholder);
+        <button class="sensor-button" type="button" data-metric="light">
+          <span class="sensor-icon">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-sun-high">
+              <circle cx="12" cy="12" r="5"></circle>
+              <path d="M12 1v2"></path>
+              <path d="M12 21v2"></path>
+              <path d="M4.22 4.22l1.42 1.42"></path>
+              <path d="M18.36 18.36l1.42 1.42"></path>
+              <path d="M1 12h2"></path>
+              <path d="M21 12h2"></path>
+              <path d="M4.22 19.78l1.42-1.42"></path>
+              <path d="M18.36 5.64l1.42-1.42"></path>
+            </svg>
+          </span>
+          <span class="sensor-value">Lux</span>
+        </button>
+      
+      
+      <button class="load-button" type="button" data-metric="last24h" onclick="last24h()">
+        <span class="sensor-icon">
+          <svg xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-clock">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </span>
+        <span class="sensor-value">Last 24 hours</span>
+      </button>
 
-        for (const tag of tags) {
-          const opt = document.createElement('option');
-          opt.value = tag;
-          opt.textContent = tag;
-          select.appendChild(opt);
-        }
-      } catch (err) {
-        console.error('Error loading tags:', err);
-        alert('Error loading tag IDs (see console).');
-      }
-    }
+      <button class="load-button" type="button" data-metric="loadData" onclick="loadData()">
+        <span class="sensor-icon">
+          <svg xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-loader">
+            <line x1="12" y1="2" x2="12" y2="6"></line>
+            <line x1="12" y1="18" x2="12" y2="22"></line>
+            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+            <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+            <line x1="2" y1="12" x2="6" y2="12"></line>
+            <line x1="18" y1="12" x2="22" y2="12"></line>
+            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+            <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+          </svg>
+        </span>
+        <span class="sensor-value">Load</span>
+      </button>
+      </div>
+      <!-- Tag + dates -->
+      <div class="time-controls">
+        <label class="control-field">
+          <span class="control-label">Tag ID:</span>
+          <select id="tagIdSelect" class="time-input"></select>
+        </label>
 
-    async function loadData() {
-      const select = document.getElementById('tagIdSelect');
-      const tagId = select.value;
-      const from = document.getElementById('fromInput').value;
-      const to = document.getElementById('toInput').value;
+        <label class="control-field">
+          <span class="control-label">From:</span>
+          <input id="fromInput" type="datetime-local" class="time-input">
+        </label>
 
-      if (!tagId) {
-        alert('Please select a tagId');
-        return;
-      }
+        <label class="control-field">
+          <span class="control-label">To:</span>
+          <input id="toInput" type="datetime-local" class="time-input">
+        </label>
+      </div>
 
-      const params = new URLSearchParams({ tagId });
-      if (from) params.append('from', from);
-      if (to) params.append('to', to);
+    </div>
 
-      const url = `${API_BASE}/telemetry?${params.toString()}`;
-      console.log('Requesting:', url);
+    <div id="loadingOverlay" class="loading-overlay hidden">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading data…</div>
+    </div>
 
-      const res = await fetch(url);
-      if (!res.ok) {
-        const text = await res.text();
-        alert('API error: ' + text);
-        return;
-      }
-
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) {
-        alert('No data returned for this tag/time range.');
-        return;
-      }
-
-      const labels = [];
-      const temps = [];
-      const hums = [];
-
-      for (const d of data) {
-        const ts = d.sensorData?.eventDateUtc || '';
-        labels.push(ts);
-        temps.push(d.sensorData?.temperatureEv ?? null);
-        hums.push(d.sensorData?.humidityEv ?? null);
-      }
-
-      renderCharts(labels, temps, hums);
-    }
-
-    function renderCharts(labels, temps, hums) {
-      const tempCtx = document.getElementById('tempChart').getContext('2d');
-      const humCtx = document.getElementById('humChart').getContext('2d');
-
-      if (tempChart) tempChart.destroy();
-      if (humChart) humChart.destroy();
-
-      tempChart = new Chart(tempCtx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Temperature (°C)',
-            data: temps,
-            borderColor: 'red',
-            backgroundColor: 'rgba(255,0,0,0.1)',
-            tension: 0.1
-          }]
-        },
-        options: {
-          scales: {
-            x: { title: { display: true, text: 'Time' } },
-            y: { title: { display: true, text: '°C' } }
-          }
-        }
-      });
-
-      humChart = new Chart(humCtx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: 'Humidity (%)',
-            data: hums,
-            borderColor: 'blue',
-            backgroundColor: 'rgba(0,0,255,0.1)',
-            tension: 0.1
-          }]
-        },
-        options: {
-          scales: {
-            x: { title: { display: true, text: 'Time' } },
-            y: { title: { display: true, text: '%' } }
-          }
-        }
-      });
-    }
-  </script>
+    <section class="section-class">
+      <h2 id="chartTitle"></h2>
+      <div class="chart-container">
+          <canvas id="mainChart"></canvas>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

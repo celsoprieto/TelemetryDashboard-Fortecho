@@ -7,17 +7,11 @@
     let lastTemps = [];
     let lastHums = [];
     let lastLights = [];
-    let currentMetric = 'temperature'; // or 'humidity'
+    let currentMetric = 'temp-humidity'; // or 'humidity'
+    let tagsById = {};   // <--- stores full objects by tagId
 
     // Load tags on page load
     window.addEventListener('DOMContentLoaded', async () => {
-      await loadTags();
-      setLast24Hours();
-      loadData();
-
-      
-    });
-
       const sensorList = document.getElementById('sensorList1');
       const buttons = sensorList.querySelectorAll('.sensor-button');
 
@@ -35,6 +29,24 @@
           // console.log('Selected:', btn.textContent.trim());
         });
       });
+
+
+      await loadTags();
+      setLast24Hours();
+      await loadData();
+
+      const tagSelect = document.getElementById('tagIdSelect');
+      tagSelect.addEventListener('change', () => {
+        // when user picks another Tag ID, reload chart data
+        loadData();
+      });
+
+      document.getElementById("fromInput").addEventListener("change", applyXAxisRange);
+      document.getElementById("toInput").addEventListener("change", applyXAxisRange);
+      
+    });
+
+      
 
     
 
@@ -55,7 +67,8 @@
 
     async function loadTags() {
       const select = document.getElementById('tagIdSelect');
-      select.innerHTML = ''; // clear
+      select.innerHTML = ''; // clear existing options
+      tagsById = {}; // reset
 
       try {
         const res = await fetch(`${API_BASE}/tags`);
@@ -66,7 +79,7 @@
           return;
         }
 
-        const tags = await res.json(); // array of strings
+        const tags = await res.json(); // array of objects
         if (!Array.isArray(tags) || tags.length === 0) {
           const opt = document.createElement('option');
           opt.value = '';
@@ -75,7 +88,7 @@
           return;
         }
 
-        // Optional: add a default prompt
+        // Add a default placeholder
         const placeholder = document.createElement('option');
         placeholder.value = '';
         placeholder.textContent = '-- select tag --';
@@ -84,13 +97,22 @@
         select.appendChild(placeholder);
 
         for (const tag of tags) {
+          // save full object in memory
+          tagsById[tag.tagId] = tag;
           const opt = document.createElement('option');
-          opt.value = tag;
-          opt.textContent = tag;
+          opt.value = tag.tagId;
+          // Show a nice label: "TAG001 - BrandA X100 (SN123)"
+          let text = `${tag.tagId} - ${tag.serialNumber || ''}`;
+          // Truncate to max 50 characters
+          if (text.length > 50) {
+            text = text.substring(0, 47) + '...'; // add ellipsis if truncated
+          }
+          opt.textContent = text ;
           select.appendChild(opt);
         }
-        // Select the first tag automatically
-        select.value = tags[0];
+
+        // Optionally select the first real tag
+        select.value = tags[0].tagId;
 
       } catch (err) {
         console.error('Error loading tags:', err);
@@ -98,231 +120,445 @@
       }
     }
 
+
     
     async function loadData() {
-      const select = document.getElementById('tagIdSelect');
-      const tagId = select.value;
-      const from = document.getElementById('fromInput').value;
-      const to   = document.getElementById('toInput').value;
+      showLoading();
 
-      if (!tagId) {
-        alert('Please select a tagId');
-        return;
-      }
+    try {
+        const select = document.getElementById('tagIdSelect');
+        const tagId = select.value;
+        const sitecode = 33; // hardcoded for now, can be dynamic if needed
+        const from = document.getElementById('fromInput').value;
+        const to   = document.getElementById('toInput').value;
 
-      const params = new URLSearchParams({ tagId });
-      if (from) params.append('from', from);
-      if (to)   params.append('to', to);
+        const fromUtc = new Date(from).toISOString(); // e.g. "2026-02-04T15:30:00.000Z"
+        const toUtc   = new Date(to).toISOString();
 
-      const url = `${API_BASE}/telemetry?${params.toString()}`;
-      console.log('Requesting:', url);
-
-      const res = await fetch(url);
-      if (!res.ok) {
-        const text = await res.text();
-        alert('API error: ' + text);
-        return;
-      }
-
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) {
-        alert('No data returned for this tag/time range.');
-        return;
-      }
-
-      const TempHumLabels = [];
-      const LightLabels = [];
-      const temps  = [];
-      const hums   = [];
-      const lights = [];
-
-      for (const d of data) {
-        const s = d.sensorData;
-        if (!s) continue;
-
-        const utcTs = s.eventDateUtc || '';
-        let localLabel = utcTs;
-        if (utcTs) {
-          const dateObj = new Date(utcTs);
-          localLabel = dateObj.toLocaleString(); // browser local time
+        if (!tagId) {
+          alert('Please select a tagId');
+          return;
         }
 
-        // Temp/Humidity labels and values when sensorTrH = 1
-        if (s.sensorTrH === 1) {
-          TempHumLabels.push(localLabel);
+        const params = new URLSearchParams({ sitecode });
+        if (tagId) params.append('tagId', tagId);
+        if (from) params.append('from', fromUtc);
+        if (to)   params.append('to', toUtc);
 
-          const t = s.temperatureEv;
-          const h = s.humidityEv;
+        const url = `${API_BASE}/telemetry?${params.toString()}`;
+        console.log('Requesting:', url);
 
-          // keep temp as-is (can be < 0), ignore invalid humidity (< 0)
-          temps.push(t ?? null);
-          hums.push(h != null && h >= 0 ? h : null);
+        const res = await fetch(url);
+        if (!res.ok) {
+          const text = await res.text();
+          alert('API error: ' + text);
+          return;
         }
 
-        // Light labels and values when sensorLum = 1
-        if (s.sensorLum === 1) {
-          LightLabels.push(localLabel);
-
-          const l = s.luxEv;
-          // ignore values < 0
-          lights.push(l != null && l >= 0 ? l : null);
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          alert('No data returned for this tag/time range.');
+          return;
         }
+
+        const TempHumLabels = [];
+        const LightLabels = [];
+        const temps  = [];
+        const hums   = [];
+        const lights = [];
+
+        for (const d of data) {
+          const s = d.sensorData;
+          if (!s) continue;
+
+          const utcTs = s.eventDateUtc || '';
+          let localLabel = utcTs;
+          // if (utcTs) {
+          //   // const dateObj = new Date(utcTs);
+          //   // localLabel = dateObj.toLocaleString(); // browser local time
+          //   // // Replace the comma with " - "
+          //   // localLabel = localLabel.replace(',', ' -');
+          //   const dateObj = new Date(utcTs);
+          //   // Ajuste a hora local y convertir a ISO string sin zona
+          //   localLabel = new Date(dateObj.getTime() - dateObj.getTimezoneOffset() * 60000)
+          //                   .toISOString()
+          //                   .slice(0, 19);
+          // }
+
+          // Temp/Humidity labels and values when sensorTrH = 1
+          if (s.sensorTrH === 1) {
+            TempHumLabels.push(localLabel);
+
+            const t = s.temperatureEv;
+            const h = s.humidityEv;
+
+            // keep temp as-is (can be < 0), ignore invalid humidity (< 0)
+            temps.push(t ?? null);
+            hums.push(h != null && h >= 0 ? h : null);
+          }
+
+          // Light labels and values when sensorLum = 1
+          if (s.sensorLum === 1) {
+            LightLabels.push(localLabel);
+
+            const l = s.luxEv;
+            // ignore values < 0
+            lights.push(l != null && l >= 0 ? l : null);
+          }
+        }
+
+        // store for toggle use
+        lastTempHumLabels  = TempHumLabels ;
+        lastLightLabels   = LightLabels ;
+        lastTemps  = temps;
+        lastHums   = hums;
+        lastLights = lights;
+
+        updateMetricButtons();
+
+        // default metric after loading: temperature
+        //currentMetric = 'temperature';
+        renderChart();
+
+      } catch (err) {
+        console.error(err);
+        alert("Load failed: " + err.message);
+      } finally {
+        hideLoading();
       }
-
-      // store for toggle use
-      lastTempHumLabels  = TempHumLabels ;
-      lastLightLabels   = LightLabels ;
-      lastTemps  = temps;
-      lastHums   = hums;
-      lastLights = lights;
-
-      // default metric after loading: temperature
-      currentMetric = 'temperature';
-      renderChart();
       
     }
 
-    function renderChart() {
-      const ctx = document.getElementById('mainChart').getContext('2d');
+    function updateMetricButtons() {
+    const tempBtn = document.querySelector('.sensor-button[data-metric="temperature"]');
+    const humBtn  = document.querySelector('.sensor-button[data-metric="humidity"]');
+    const luxBtn  = document.querySelector('.sensor-button[data-metric="light"]');
+    const tempHumBtn  = document.querySelector('.sensor-button[data-metric="temp-humidity"]');
 
-      let labels, dataSeries, label, color, yTitle;
+    // helper: has non‑empty array
+    const hasData = arr => Array.isArray(arr) && arr.length > 0;
 
-      if (currentMetric === 'temperature') {
-        labels     = lastTempHumLabels;
-        dataSeries = lastTemps;
-        label      = 'Temperature (°C)';
-        color      = 'red';
-        yTitle     = '°C';
-      } else if (currentMetric === 'humidity') {
-        labels     = lastTempHumLabels;
-        dataSeries = lastHums;
-        label      = 'Humidity (%)';
-        color      = 'blue';
-        yTitle     = '%';
-      } else { // light
-        labels     = lastLightLabels;
-        dataSeries = lastLights;
-        label      = 'Light (lux)';
-        color      = 'orange';
-        yTitle     = 'lux';
+    if (tempBtn) tempBtn.disabled = !hasData(lastTemps);
+    if (humBtn)  humBtn.disabled  = !hasData(lastHums);
+    if (luxBtn)  luxBtn.disabled  = !hasData(lastLights);
+    if (tempHumBtn)  luxBtn.disabled  = !hasData(lastLights);
+  }
+
+  function renderChart() {
+    const canvas = document.getElementById("mainChart");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    const { fromDate, toDate } = getFromToDates();
+
+    // ---- pick labels + datasets depending on metric ----
+    let labels = [];
+    let chartTitle = "";
+    let datasets = {};
+    let scales = {};
+
+    if (currentMetric === "temperature") {
+      labels = lastTempHumLabels;
+      chartTitle = "Temperature (°C)";
+      datasets = [
+        makeDataset("", lastTemps, "red", "rgba(255,0,0,0.1)")
+      ];
+      scales = { y: makeYAxis("Temperature (°C)") };
+
+    } else if (currentMetric === "humidity") {
+      labels = lastTempHumLabels;
+      chartTitle = "Humidity (%)";
+      datasets = [
+        makeDataset("", lastHums, "blue", "rgba(0,0,255,0.1)")
+      ];
+      scales = { y: makeYAxis("Humidity (%)") };
+
+    } else if (currentMetric === "light") {
+      labels = lastLightLabels;
+      chartTitle = "Light (lux)";
+      datasets = [
+        makeDataset("", lastLights, "orange", "rgba(255,165,0,0.1)")
+      ];
+      scales = { y: makeYAxis("Light (lux)") };
+
+    } else if (currentMetric === "temp-humidity") {
+      labels = lastTempHumLabels;
+      chartTitle = "Temperature (°C) & Humidity (%)";
+
+      datasets = [
+        makeDataset("Temperature", lastTemps, "red", "rgba(255,0,0,0.1)", "yTemp"),
+        makeDataset("Humidity", lastHums, "blue", "rgba(0,0,255,0.1)", "yHum")
+      ];
+
+      scales = {
+        yTemp: makeYAxis("Temperature (°C)", "left"),
+        yHum:  makeYAxis("Humidity (%)", "right", true)
+      };
+    }
+
+    // ---- no labels? clear chart ----
+    if (!labels || labels.length === 0) {
+      if (mainChart) mainChart.destroy();
+      return;
+    }
+
+    // ---- update title ----
+    const titleEl = document.getElementById("chartTitle");
+    if (titleEl) titleEl.textContent = chartTitle;
+
+    // ---- destroy previous chart ----
+    if (mainChart) mainChart.destroy();
+
+    const solidTooltipColorBox = {
+      id: "solidTooltipColorBox",
+      beforeTooltipDraw(chart) {
+        const tooltip = chart.tooltip;
+        if (!tooltip) return;
+
+        // Force the color boxes to be solid and equal to dataset borderColor
+        tooltip.labelColors = tooltip.dataPoints.map(dp => {
+          const ds = chart.data.datasets[dp.datasetIndex];
+          const c = ds.borderColor || "#000";
+
+          return {
+            borderColor: c,
+            backgroundColor: c,
+            borderWidth: 0
+          };
+        });
       }
+    };
 
-      if (!labels || !labels.length) {
-        if (mainChart) mainChart.destroy();
-        return;
-      }
+    Chart.register(solidTooltipColorBox);
 
-      if (mainChart) {
-        mainChart.destroy();
-      }
+    // ---- create chart ----
+    mainChart = new Chart(ctx, {
+      type: "line",
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
 
-      const titleEl = document.getElementById('chartTitle');
-      titleEl.textContent = label; // e.g. "Temperature (°C)"
+        // store metric here for tooltip callback
+        currentMetric,
 
-      mainChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            // remove / ignore dataset label here
-            label: '',
-            data: dataSeries,
-            borderColor: color,
-            borderWidth: 1,
-            backgroundColor:
-              color === 'red'  ? 'rgba(255,0,0,0.1)'  :
-              color === 'blue' ? 'rgba(0,0,255,0.1)' :
-                                'rgba(255,165,0,0.1)',
-            tension: 0.1,
-            pointRadius: 4     // optional: hide points if you want a clean line
-          }]
+        plugins: {
+          legend: { display: false },
+          tooltip: makeTooltipOptions()
         },
-        options: {
-          plugins: {
-            legend: {
-              display: false   // hide the legend box entirely
+
+        hover: {
+          mode: "index",
+          intersect: false
+        },
+
+        scales: {
+          x: {
+            ...makeXAxis(),
+            min : fromDate,
+            max : toDate  
             },
-          tooltip: {
-              mode: 'index',        // use the x-index under the cursor
-              intersect: false,     // don't require being exactly on a point
-              enabled: true,
-              backgroundColor: '#ffffff',   // white square
-              borderColor: '#d0d7e2',
-              borderWidth: 1,
-              titleColor: '#0f172a',
-              bodyColor: '#0f172a',
-              displayColors: false,         // remove colored box
-              callbacks: {
-                // put everything in one line: "Time • 23.5 °C"
-                label: function (context) {
-                  const x = context.label;          // time
-                  const y = context.formattedValue; // value
-                  let unit = '';
-                  switch (context.chart.options.currentMetric) {
-                    case 'temperature': unit = ' °C';  break;
-                    case 'humidity':    unit = ' %';   break;
-                    case 'light':       unit = ' Lux'; break;
-                  }
-                  return `${x} • ${y}${unit}`;
-                },
-                title: () => ''  // no separate title row
-              },
-              padding: 8,
-              bodyFont: {
-                size: 12
-              }
-            }
-          },
-          hover: {
-            mode: 'index',          // same behavior for hover
-            intersect: false
-          },
-          scales: {
-            x: { title: { display: true, text: 'Time' } },
-            y: { title: { display: true, text: yTitle } }
-          },
-          currentMetric: currentMetric  // e.g. 'temperature' | 'humidity' | 'light'
+          ...scales
         }
-      });
-    }
+      }
+    });
+  }
+
+  function getFromToDates() {
+    const fromVal = document.getElementById("fromInput").value;
+    const toVal   = document.getElementById("toInput").value;
+
+    const fromDate = fromVal ? new Date(fromVal) : null;
+    const toDate   = toVal   ? new Date(toVal)   : null;
+
+    return { fromDate, toDate };
+}
+
+function applyXAxisRange() {
+  if (!mainChart) return;
+
+  const { fromDate, toDate } = getFromToDates();
+
+  mainChart.options.scales.x.min = fromDate ? fromDate.getTime() : undefined;
+  mainChart.options.scales.x.max = toDate   ? toDate.getTime()   : undefined;
+
+  mainChart.update();
+}
 
 
 
 
-    function last24h() {
-      const toInput = document.getElementById('toInput');
-      const fromInput = document.getElementById('fromInput');
 
-      const now = new Date();
-      const past = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+/* ---------------- HELPERS ---------------- */
 
-      toInput.value = formatForDateTimeLocal(now);
-      fromInput.value = formatForDateTimeLocal(past);
+  function makeDataset(label, data, borderColor, backgroundColor, yAxisID) {
+    return {
+      label,
+      data,
+      yAxisID,
+      borderColor,
+      backgroundColor,
+      borderWidth: 1,
+      tension: 0.3,
+      pointRadius: 2
+    };
+  }
 
-      loadData();
-    }
+  function formatLocalDDMMYYYY_HHMMSS(value) {
+    const d = new Date(value);
 
-    function setLast24Hours() {
-      const toInput = document.getElementById('toInput');
-      const fromInput = document.getElementById('fromInput');
+    const pad = (n) => String(n).padStart(2, "0");
 
-      const now = new Date();
-      const past = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} - ` +
+          `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
 
-      toInput.value = formatForDateTimeLocal(now);
-      fromInput.value = formatForDateTimeLocal(past);
-    }
+ 
 
-    function formatForDateTimeLocal(d) {
-      // Pad to 2 digits
-      const pad = (n) => n.toString().padStart(2, '0');
+  function makeXAxis() {
+    return {
+      type: "time",
+      time: {
+        tooltipFormat: "dd/MM/yyyy - HH:mm:ss"
+        //,
+        // displayFormats: {
+        //   millisecond: "yyyy-MM-dd HH:mm:ss.SSS",
+        //   second:      "yyyy-MM-dd HH:mm:ss",
+        //   minute:      "yyyy-MM-dd HH:mm",
+        //   hour:        "yyyy-MM-dd HH:mm",
+        //   day:         "yyyy-MM-dd",
+        //   week:        "yyyy-MM-dd",
+        //   month:       "yyyy-MM",
+        //   quarter:     "yyyy-'Q'q",
+        //   year:        "yyyy"
+        // }
+      },
+      ticks: {
+        autoSkip: true,
+        maxTicksLimit: 12,
+        maxRotation: 90,
+        minRotation: 90,
+        font: {
+          family: "sans-serif",
+          size: 11,
+          weight: "normal"         // optional
+        },
+        color: "rgb(51,51,51)",
+        callback: (value) => formatLocalDDMMYYYY_HHMMSS(value)
+      },
+        grid: {
+        tickColor: "rgb(51,51,51)",
+        tickWidth: 1
+      }
+    };
+  }
 
-      const year = d.getFullYear();
-      const month = pad(d.getMonth() + 1); // 0-based
-      const day = pad(d.getDate());
-      const hour = pad(d.getHours());
-      const minute = pad(d.getMinutes());
+  
 
-      // "yyyy-MM-ddTHH:mm" format required by datetime-local
-      return `${year}-${month}-${day}T${hour}:${minute}`;
-    }
+  function makeYAxis(title, position = "left", hideGrid = false) {
+    return {
+      type: "linear",
+      position,
+      title: {
+        display: true,
+        text: title,
+        font: { family: "sans-serif", size: 11 },
+        color: "rgb(51,51,51)"
+      },
+      ticks: {
+        font: { family: "sans-serif", size: 11 },
+        color: "rgb(51,51,51)"
+      },
+       grid: hideGrid ? { drawOnChartArea: false } : {
+        tickColor: "rgb(51,51,51)",
+        tickWidth: 1
+      }
+    };
+  }
+
+  function makeTooltipOptions() {
+    return {
+      mode: "index",
+      intersect: false,
+      enabled: true,
+      displayColors: true,
+      backgroundColor: "#ffffff",
+      borderColor: "#d0d7e2",
+      borderWidth: 1,
+      titleColor: "#0f172a",
+      bodyColor: "#0f172a",
+      padding: 8,
+      boxPadding: 8,   // <-- space between color square and text
+      bodyFont: { size: 12 },
+
+      callbacks: {
+        title: () => "",
+        label: function (context) {
+          const x = context.label;
+          const y = context.formattedValue;
+
+          let unit = "";
+
+          const metric = context.chart.options.currentMetric;
+
+          if (metric === "temperature") unit = " °C";
+          else if (metric === "humidity") unit = " %";
+          else if (metric === "light") unit = " Lux";
+          else if (metric === "temp-humidity") {
+            if (context.dataset.label === "Temperature") unit = " °C";
+            if (context.dataset.label === "Humidity") unit = " %";
+          }
+
+          return `${x} • ${y}${unit}`;
+        }
+      }
+    };
+  }
+
+
+  function last24h() {
+    const toInput = document.getElementById('toInput');
+    const fromInput = document.getElementById('fromInput');
+
+    const now = new Date();
+    const past = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    toInput.value = formatForDateTimeLocal(now);
+    fromInput.value = formatForDateTimeLocal(past);
+
+    loadData();
+  }
+
+  function setLast24Hours() {
+    const toInput = document.getElementById('toInput');
+    const fromInput = document.getElementById('fromInput');
+
+    const now = new Date();
+    const past = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    toInput.value = formatForDateTimeLocal(now);
+    fromInput.value = formatForDateTimeLocal(past);
+  }
+
+  function formatForDateTimeLocal(d) {
+    // Pad to 2 digits
+    const pad = (n) => n.toString().padStart(2, '0');
+
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1); // 0-based
+    const day = pad(d.getDate());
+    const hour = pad(d.getHours());
+    const minute = pad(d.getMinutes());
+
+    // "yyyy-MM-ddTHH:mm" format required by datetime-local
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+  }
+
+  function showLoading() {
+    document.getElementById("loadingOverlay").classList.remove("hidden");
+  }
+
+  function hideLoading() {
+    document.getElementById("loadingOverlay").classList.add("hidden");
+  }
