@@ -20,7 +20,8 @@
        if (!btn_menu || !menu) return;
 
         btn_menu.addEventListener("click", () => {
-          menu.classList.toggle("hidden");
+          menu.classList.toggle("translate-x-full"); // oculta
+          menu.classList.toggle("translate-x-0");    // muestra
         });
 
       buttons.forEach((btn) => {
@@ -429,18 +430,6 @@ function applyXAxisRange() {
       type: "time",
       time: {
         tooltipFormat: "dd/MM/yyyy - HH:mm:ss"
-        //,
-        // displayFormats: {
-        //   millisecond: "yyyy-MM-dd HH:mm:ss.SSS",
-        //   second:      "yyyy-MM-dd HH:mm:ss",
-        //   minute:      "yyyy-MM-dd HH:mm",
-        //   hour:        "yyyy-MM-dd HH:mm",
-        //   day:         "yyyy-MM-dd",
-        //   week:        "yyyy-MM-dd",
-        //   month:       "yyyy-MM",
-        //   quarter:     "yyyy-'Q'q",
-        //   year:        "yyyy"
-        // }
       },
       ticks: {
         autoSkip: true,
@@ -498,7 +487,7 @@ function applyXAxisRange() {
       bodyColor: "#0f172a",
       padding: 8,
       boxPadding: 8,   // <-- space between color square and text
-      bodyFont: { size: 12 },
+      bodyFont: { size: 12, family: "sans-serif", weight: "normal" },
 
       callbacks: {
         title: () => "",
@@ -519,6 +508,12 @@ function applyXAxisRange() {
           }
 
           return `${x} • ${y}${unit}`;
+        },
+         labelColor: function(context) {
+            return {
+              borderColor: 'transparent',  // sin borde
+              backgroundColor: context.dataset.backgroundColor
+            }
         }
       }
     };
