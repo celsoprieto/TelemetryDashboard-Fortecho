@@ -34,15 +34,6 @@
       text-align: center;  /* optional */
     }
 
-    @media (min-width: 1024px) {
-        .Navbar {
-            background-color: #fff;
-            flex-wrap: nowrap;
-            justify-content: start;
-            padding: .4rem 0;
-            border-bottom: solid .1rem #f1f1f1;
-        }
-    }
     
   .Navbar {
       position: relative;
@@ -64,6 +55,16 @@
       left: 0;
       z-index: 1030
   }
+
+   @media (min-width: 1024px) {
+        .Navbar {
+            background-color: #fff;
+            flex-wrap: nowrap;
+            justify-content: start;
+            padding: .4rem 0;
+            border-bottom: solid .1rem #f1f1f1;
+        }
+    }
 
     .controls {
       width: 100%;
