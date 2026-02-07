@@ -34,6 +34,10 @@
       text-align: center;  /* optional */
     }
 
+    .navbar-container {
+      margin-left: auto;
+      margin-right: auto;
+  }
     
   .Navbar {
       position: relative;
