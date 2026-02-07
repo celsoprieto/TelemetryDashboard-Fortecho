@@ -64,6 +64,16 @@
       flex-basis: 100%
   }
 
+  .nav-link {
+    display: block;
+    padding-top: .625rem;
+    padding-bottom: .625rem;
+    color: #6b747b;
+    text-decoration: none;
+    line-height: .875rem;
+    transition: all .2s ease
+  }
+
    @media (min-width: 1024px) {
         .Navbar {
             background-color: #fff;
@@ -75,6 +85,11 @@
 
          .Navbar-collapse {
             flex-basis: auto
+        }
+
+         .nav-link {
+            padding-right: .625rem;
+            padding-left: .625rem
         }
     }
 
