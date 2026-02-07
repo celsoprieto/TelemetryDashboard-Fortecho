@@ -66,6 +66,14 @@
         }
     }
 
+    .navbar-container {
+        max-width: 72rem
+    }
+
+    .h-16 {
+        height: 2rem;
+    }
+
     .controls {
       width: 100%;
       box-sizing: border-box;
