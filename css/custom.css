@@ -313,6 +313,11 @@
     display: none;
   }
 
+  h2{
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
   .spinner {
     width: 64px;
     height: 64px;

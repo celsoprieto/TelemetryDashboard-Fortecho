@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Telemetry Dashboard</title>
-  <link rel="stylesheet" href="css/custom.css">
+  
   <!-- <script>
   fetch('/.auth/me')
     .then(res => res.json())
@@ -16,10 +16,11 @@
   </script> -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/date-fns@2"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/date-fns@2"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
   <!-- Tailwind CSS CDN -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet"> -->
+  <link rel="stylesheet" href="css/custom.css">
   <script src="js/fortecho.js"></script>
 </head>
 <body>
@@ -33,7 +34,7 @@
         <ul class="pl-0 mt-3 mb-2 ml-auto flex flex-col list-none lg:mt-0 lg:mb-0 lg:flex-row">
       <!-- <ul class="flex flex-row items-center list-none p-0 m-0 gap-6"> -->
           <li>
-            <a class="nav-link" href="https://telemetry.celsoprieto.es/" class="text-gray-700 hover:text-teal-600 font-medium">Home</a>
+            <a class="nav-link" href="/" class="text-gray-700 hover:text-teal-600 font-medium">Home</a>
           </li>
           <li>
             <a class="nav-link" href="#" class="text-gray-700 hover:text-teal-600 font-medium">Where is Telemetry?</a>
@@ -212,8 +213,8 @@
       <div class="loading-text">Loading data…</div>
     </div>
 
-    <section class="section-class">
-      <h2 id="chartTitle"></h2>
+    <section class="section-class" >
+      <h2 id="chartTitle" class="text-xl font-semibold text-gray-800 mb-2"></h2>
       <div class="chart-container">
           <canvas id="mainChart"></canvas>
       </div>
