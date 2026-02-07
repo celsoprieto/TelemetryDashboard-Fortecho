@@ -74,6 +74,12 @@
     transition: all .2s ease
   }
 
+  .nav-link:hover,
+  .nav-link.active {
+      color: #005E5D;
+      text-decoration: none;
+  }
+
    @media (min-width: 1024px) {
         .Navbar {
             background-color: #fff;
