@@ -66,13 +66,13 @@
         }
     }
 
-    .navbar-container {
-        max-width: 72rem
+    @media (min-width: 1280px) {
+      .navbar-container {
+          max-width: 72rem
+      }
     }
 
-    .h-16 {
-        height: 2rem;
-    }
+
 
     .controls {
       width: 100%;
