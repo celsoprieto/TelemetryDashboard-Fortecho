@@ -22,30 +22,83 @@
   <!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet"> -->
   <link rel="stylesheet" href="css/custom.css">
   <script src="js/fortecho.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-  <!-- <nav class="fixed top-0 w-full bg-white shadow z-50"> -->
-  <nav class="Navbar fixed-top">
+
+  <!-- <nav class="Navbar fixed-top">
     <div class="navbar-container sm:px-4 lg:px-8 flex flex-wrap items-center justify-between lg:flex-nowrap">
-    <!-- <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> -->
-      <!-- <div class="flex items-center justify-end h-8 w-full lg:w-auto"> -->
       <div class="Navbar-collapse offcanvas-collapse lg:flex lg:flex-grow lg:items-center" id="NavbarsExampleDefault">
         <ul class="pl-0 mt-3 mb-2 ml-auto flex flex-col list-none lg:mt-0 lg:mb-0 lg:flex-row">
-      <!-- <ul class="flex flex-row items-center list-none p-0 m-0 gap-6"> -->
           <li>
-            <a class="nav-link" href="/" class="text-gray-700 hover:text-teal-600 font-medium">Home</a>
+            <a class="nav-link text-gray-700 hover:text-teal-600 font-medium" href="/" >Home</a>
           </li>
           <li>
-            <a class="nav-link" href="#" class="text-gray-700 hover:text-teal-600 font-medium">Where is Telemetry?</a>
+            <a class="nav-link text-gray-700 hover:text-teal-600 font-medium" href="#" >Where is Telemetry?</a>
           </li>
           <li>
-            <a class="nav-link" href="#" class="text-gray-700 hover:text-teal-600 font-medium">Español</a>
+            <a class="nav-link text-gray-700 hover:text-teal-600 font-medium" href="#" >Español</a>
           </li>
         </ul>
       </div>
     </div>
-  </nav>
+  </nav> -->
+
+  <nav class="fixed top-0 w-full bg-white shadow z-50">
+  <div class="navbar-container px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo / Title -->
+      <div class="text-lg font-semibold text-gray-800">
+        Telemetry Dashboard
+      </div>
+
+      <!-- Desktop menu -->
+      <ul class="hidden md:flex items-center gap-6 list-none p-0 m-0">
+        <li>
+          <a href="/" class="text-gray-700 hover:text-teal-600 font-medium">Home</a>
+        </li>
+        <li>
+          <a href="#" class="text-gray-700 hover:text-teal-600 font-medium">Where is Telemetry?</a>
+        </li>
+        <li>
+          <a href="#" class="text-gray-700 hover:text-teal-600 font-medium">Español</a>
+        </li>
+      </ul>
+
+      <!-- Mobile button -->
+      <button id="menuBtn"
+        class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-teal-600 hover:bg-gray-100 focus:outline-none"
+        aria-label="Open menu">
+        <!-- Icon -->
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="md:hidden hidden pb-4">
+      <ul class="flex flex-col gap-3 list-none p-0 m-0">
+        <li>
+          <a href="/" class="block py-2 text-gray-700 hover:text-teal-600 font-medium">Home</a>
+        </li>
+        <li>
+          <a href="#" class="block py-2 text-gray-700 hover:text-teal-600 font-medium">Where is Telemetry?</a>
+        </li>
+        <li>
+          <a href="#" class="block py-2 text-gray-700 hover:text-teal-600 font-medium">Español</a>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+</nav>
+
 
   <main class="mainclass">
     <!-- <h1 class="page-title">Telemetry Dashboard</h1> -->

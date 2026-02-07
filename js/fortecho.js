@@ -14,6 +14,14 @@
     window.addEventListener('DOMContentLoaded', async () => {
       const sensorList = document.getElementById('sensorList1');
       const buttons = sensorList.querySelectorAll('.sensor-button');
+      const btn_menu = document.getElementById("menuBtn");
+      const menu = document.getElementById("mobileMenu");
+
+       if (!btn_menu || !menu) return;
+
+        btn_menu.addEventListener("click", () => {
+          menu.classList.toggle("hidden");
+        });
 
       buttons.forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -262,7 +270,7 @@
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C)";
       datasets = [
-        makeDataset("", lastTemps, "red", "rgba(255,0,0,0.1)")
+        makeDataset("", lastTemps, "rgba(218,73,78,1)" , "rgba(218,73,78,0.1)")
       ];
       scales = { y: makeYAxis("Temperature (°C)") };
 
@@ -270,7 +278,7 @@
       labels = lastTempHumLabels;
       chartTitle = "Humidity (%)";
       datasets = [
-        makeDataset("", lastHums, "blue", "rgba(0,0,255,0.1)")
+        makeDataset("", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)")
       ];
       scales = { y: makeYAxis("Humidity (%)") };
 
@@ -278,7 +286,7 @@
       labels = lastLightLabels;
       chartTitle = "Light (lux)";
       datasets = [
-        makeDataset("", lastLights, "orange", "rgba(255,165,0,0.1)")
+        makeDataset("", lastLights, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
       ];
       scales = { y: makeYAxis("Light (lux)") };
 
@@ -287,8 +295,8 @@
       chartTitle = "Temperature (°C) & Humidity (%)";
 
       datasets = [
-        makeDataset("Temperature", lastTemps, "red", "rgba(255,0,0,0.1)", "yTemp"),
-        makeDataset("Humidity", lastHums, "blue", "rgba(0,0,255,0.1)", "yHum")
+        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
+        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum")
       ];
 
       scales = {

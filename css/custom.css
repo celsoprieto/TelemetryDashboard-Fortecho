@@ -8,6 +8,7 @@
       margin: 0;
       background: #f5f7fb;
       font-family: system-ui, sans-serif;
+      padding-top: 64px; /* space for fixed navbar */
     }
 
     main {
