@@ -37,6 +37,8 @@
           // here you can also run your logic, e.g. switch chart, etc.
           // console.log('Selected:', btn.textContent.trim());
         });
+      setFromTo()
+
       });
 
 
@@ -557,6 +559,40 @@ function applyXAxisRange() {
     // "yyyy-MM-ddTHH:mm" format required by datetime-local
     return `${year}-${month}-${day}T${hour}:${minute}`;
   }
+
+  function setFromTo() {
+    const fromInput = document.getElementById('fromInput');
+    const toInput   = document.getElementById('toInput');
+
+    if (!fromInput || !toInput) return;
+
+    // When "From" changes, update the minimum allowed for "To"
+    fromInput.addEventListener('change', () => {
+      const fromValue = fromInput.value;
+
+      if (fromValue) {
+        // Set minimum selectable date/time for "To"
+        toInput.min = fromValue;
+
+        // If current "To" is before new "From", adjust it
+        if (toInput.value && toInput.value < fromValue) {
+          toInput.value = fromValue;
+        }
+      } else {
+        // If "From" is cleared, remove restriction on "To"
+        toInput.removeAttribute('min');
+      }
+    });
+
+    // Optional: if user changes "To" directly, enforce it's not before "From"
+    toInput.addEventListener('change', () => {
+      if (fromInput.value && toInput.value < fromInput.value) {
+        // You can either reset it, or set it to fromInput.value
+        toInput.value = fromInput.value;
+      }
+    });
+  }
+
 
   function showLoading() {
     document.getElementById("loadingOverlay").classList.remove("hidden");
