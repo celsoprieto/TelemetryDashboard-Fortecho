@@ -37,7 +37,8 @@
           // here you can also run your logic, e.g. switch chart, etc.
           // console.log('Selected:', btn.textContent.trim());
         });
-      setFromTo()
+      setFromTo();
+      switchView();
 
       });
 
@@ -591,6 +592,41 @@ function applyXAxisRange() {
         toInput.value = fromInput.value;
       }
     });
+  }
+
+  function switchView() {
+    const links = document.querySelectorAll("[data-view]");
+    const views = document.querySelectorAll(".view");
+
+    function showView(viewName) {
+      views.forEach(v => v.classList.add("hidden"));
+
+      const el = document.getElementById(`view-${viewName}`);
+      if (el) el.classList.remove("hidden");
+
+      // marcar active en menú
+      links.forEach(a => a.classList.remove("text-teal-600"));
+      const activeLink = document.querySelector(`[data-view="${viewName}"]`);
+      if (activeLink) activeLink.classList.add("text-teal-600");
+    }
+
+    links.forEach(link => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const view = link.dataset.view;
+
+        // idioma (ejemplo)
+        if (view === "es") {
+          alert("Aquí cambias el idioma 😄");
+          return;
+        }
+
+        showView(view);
+      });
+    });
+
+    // Vista inicial
+    showView("telemetry");
   }
 
 

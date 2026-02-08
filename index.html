@@ -36,13 +36,16 @@
         <!-- Desktop menu -->
         <ul class="hidden md:flex items-center gap-6 list-none p-0 m-0">
           <li>
-            <a href="/" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium">Home</a>
+            <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="telemetry">Telemetry</a>
           </li>
           <li>
-            <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium">Where is Telemetry?</a>
+            <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="events">Device Events</a>
           </li>
           <li>
-            <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium">Español</a>
+            <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="alarms">Alarms</a>
+          </li>
+          <li>
+            <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="es">Español</a>
           </li>
         </ul>
 
@@ -82,7 +85,8 @@
 
   <main class="mainclass">
     <!-- <h1 class="page-title">Telemetry Dashboard</h1> -->
-
+  <!-- VIEW: TELEMETRY -->
+  <section id="view-telemetry" class="view">
     <div class="controls">
       <div class="sensor-list" id="sensorList1" >
 
@@ -252,6 +256,18 @@
           <canvas id="mainChart"></canvas>
       </div>
     </section>
+  </section>
+   <!-- VIEW: EVENTS -->
+  <section id="view-events" class="view hidden">
+    <h2 class="text-xl font-semibold mb-4">Device Events</h2>
+    <div id="eventsContainer"></div>
+  </section>
+
+  <!-- VIEW: ALARMS -->
+  <section id="view-alarms" class="view hidden">
+    <h2 class="text-xl font-semibold mb-4">Alarms</h2>
+    <div id="alarmsContainer"></div>
+  </section>
   </main>
   <footer class="footer_cp">
     <div class="content_cp">
