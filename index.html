@@ -229,24 +229,26 @@
       </button>
       </div>
       <!-- Tag + dates -->
-      <div class="time-controls">
-        <label class="control-field">
-          <span class="control-label">Tag ID:</span>
-          <select id="tagIdSelect" class="time-input"></select>
-        </label>
+<div class="time-controls flex flex-row gap-2 w-full items-end flex-nowrap">
 
-        <label class="control-field">
-          <span class="control-label">From:</span>
-          <input id="fromInput" type="datetime-local" class="time-input">
-        </label>
+  <label class="control-field flex flex-col min-w-0 flex-1">
+    <span class="control-label text-xs sm:text-sm">Tag ID:</span>
+    <select id="tagIdSelect" class="time-input w-full min-w-0"></select>
+  </label>
 
-        <label class="control-field">
-          <span class="control-label">To:</span>
-          <input id="toInput" type="datetime-local" class="time-input">
-        </label>
-      </div>
+  <label class="control-field flex flex-col min-w-0 flex-1">
+    <span class="control-label text-xs sm:text-sm">From:</span>
+    <input id="fromInput" type="datetime-local" class="time-input w-full min-w-0">
+  </label>
 
-    </div>
+  <label class="control-field flex flex-col min-w-0 flex-1">
+    <span class="control-label text-xs sm:text-sm">To:</span>
+    <input id="toInput" type="datetime-local" class="time-input w-full min-w-0">
+  </label>
+
+</div>
+
+
 
     <div id="loadingOverlay" class="loading-overlay hidden">
       <div class="spinner"></div>

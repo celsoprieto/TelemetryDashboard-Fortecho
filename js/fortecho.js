@@ -17,12 +17,32 @@
       const btn_menu = document.getElementById("menuBtn");
       const menu = document.getElementById("mobileMenu");
 
-       if (!btn_menu || !menu) return;
+      if (!btn_menu || !menu) return;
 
-        btn_menu.addEventListener("click", () => {
-          menu.classList.toggle("translate-x-full"); // oculta
-          menu.classList.toggle("translate-x-0");    // muestra
+      function openMenu() {
+        mobileMenu.classList.remove("translate-x-full");
+        mobileMenu.classList.add("translate-x-0");
+      }
+
+      function closeMenu() {
+        mobileMenu.classList.add("translate-x-full");
+        mobileMenu.classList.remove("translate-x-0");
+      }
+
+      btn_menu.addEventListener("click", () => {
+        if (mobileMenu.classList.contains("translate-x-full")) {
+          openMenu();
+        } else {
+          closeMenu();
+        }
+      });
+
+      // ✅ close menu when clicking any link inside it
+      mobileMenu.querySelectorAll("a.nav-link").forEach(link => {
+        link.addEventListener("click", () => {
+          closeMenu();
         });
+      });
 
       buttons.forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -40,7 +60,16 @@
       setFromTo();
       switchView();
 
+      document.querySelectorAll(".nav-link").forEach(link => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+
+          document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+          link.classList.add("active");
+        });
       });
+
+    });
 
 
       await loadTags();
@@ -634,10 +663,10 @@ function applyXAxisRange() {
         const view = link.dataset.view;
 
         // idioma (ejemplo)
-        if (view === "es") {
-          alert("Aquí cambias el idioma 😄");
-          return;
-        }
+        // if (view === "es") {
+        //   alert("Aquí cambias el idioma 😄");
+        //   return;
+        // }
 
         showView(view);
       });

@@ -219,10 +219,8 @@
     font-size: 1rem;
     background-color: #fff;
     box-sizing: border-box;
-  }
-
   /* optional: remove default arrow look differences (varies by browser) */
-  .time-input {
+
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
