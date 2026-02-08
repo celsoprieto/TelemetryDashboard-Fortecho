@@ -317,7 +317,24 @@
 
     // ---- update title ----
     const titleEl = document.getElementById("chartTitle");
-    if (titleEl) titleEl.textContent = chartTitle;
+    if (titleEl) {
+    titleEl.textContent = chartTitle;
+
+    // --- Set color depending on title text ---
+    if (currentMetric === "temperature") {
+        titleEl.style.color = "rgba(218,73,78,1)";   // Temperature → red
+    } else if (currentMetric === "humidity") {
+        titleEl.style.color = "rgba(53,170,223,1)";  // Humidity → blue
+    } else if (currentMetric === "light") {
+        titleEl.style.color = "rgba(220,128,21,1)";  // Default
+    } else if (currentMetric === "temp-humidity") {
+        titleEl.innerHTML = `
+          <span style="color: rgba(218,73,78,1)">Temperature (°C)</span>
+          <span style="color: black"> & </span>
+          <span style="color: rgba(53,170,223,1)">Humidity (%)</span>
+      `;  // For combined view, use blue or default color
+    }
+}
 
     // ---- destroy previous chart ----
     if (mainChart) mainChart.destroy();
@@ -437,12 +454,13 @@ function applyXAxisRange() {
       ticks: {
         autoSkip: true,
         maxTicksLimit: 12,
-        maxRotation: 90,
-        minRotation: 90,
+        maxRotation: 45,
+        minRotation: 45,
         font: {
           family: "sans-serif",
           size: 11,
-          weight: "normal"         // optional
+          weight: "normal",         // optional
+          color: "rgb(51,51,51)"
         },
         color: "rgb(51,51,51)",
         callback: (value) => formatLocalDDMMYYYY_HHMMSS(value)
