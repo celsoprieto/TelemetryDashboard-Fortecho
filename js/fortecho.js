@@ -152,14 +152,50 @@
           select.appendChild(opt);
         }
 
+        // Listener para mostrar detalles al seleccionar
+        select.addEventListener('change', () => {
+          showTagDetails(select.value);
+        });
+
         // Optionally select the first real tag
-        select.value = tags[0].tagId;
+        // Opcional: mostrar detalles del primer tag automáticamente
+        if (tags.length > 0) {
+          select.value = tags[0].tagId;
+          showTagDetails(tags[0].tagId);
+        }
 
       } catch (err) {
         console.error('Error loading tags:', err);
         alert('Error loading tag IDs (see console).');
       }
     }
+
+
+    // Función para mostrar make y model
+    function showTagDetails(tagId) {
+    const div = document.getElementById('selectedTagdetails');
+    const artistLabel = document.getElementById('artistlabel');
+    const titleLabel = document.getElementById('titlelabel');
+
+    if (!tagId || !tagsById[tagId]) {
+      // Ocultar div si no hay selección
+      div.classList.add('hidden');
+      artistLabel.textContent = '';
+      titleLabel.textContent = '';
+      return;
+    }
+
+    const tag = tagsById[tagId];
+
+    // Set Artist = make, Title = model
+    artistLabel.textContent = tag.marque || 'N/A';
+    titleLabel.textContent = tag.model || 'N/A';
+
+    // Mostrar div
+    div.classList.remove('hidden');
+  }
+
+
 
 
     
