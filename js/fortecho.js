@@ -439,7 +439,23 @@
 
         plugins: {
           legend: { display: false },
-          tooltip: makeTooltipOptions()
+          tooltip: makeTooltipOptions(),
+           zoom: {
+            zoom: {
+              wheel: {
+                enabled: true
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: "x"
+            },
+            pan: {
+              enabled: true,
+              mode: "x",
+              modifierKey: "ctrl" // Ctrl + drag
+            }
+          }
         },
 
         hover: {
@@ -449,9 +465,10 @@
 
         scales: {
           x: {
-            ...makeXAxis(),
-            min : fromDate,
-            max : toDate  
+            ...makeXAxis()
+            // ,
+            // min : fromDate,
+            // max : toDate  
             },
           ...scales
         }
