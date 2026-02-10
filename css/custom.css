@@ -301,6 +301,7 @@
     width: 100%;
     height: 420px;        /* important */
     margin: 0 auto;
+    position: relative;
   }
 
   #mainChart {
@@ -383,20 +384,40 @@
     }
   }
 
+  .section-class {
+    position: relative; /* needed for overlay positioning */
+  }
+
   .loading-overlay {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: rgba(0,0,0,0.35);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    z-index: 9999;
+    /* gap: 14px;
+    z-index: 9999; */
+    z-index: 20;
   }
 
   .loading-overlay.hidden {
     display: none;
+  }
+
+  /* Spinner */
+  .spinner {
+    border: 4px solid rgba(0,0,0,0.1);
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   h2{
@@ -404,14 +425,14 @@
     font-weight: 700;
   }
 
-  .spinner {
+  /* .spinner {
     width: 64px;
     height: 64px;
     border-radius: 50%;
     border: 6px solid rgba(255,255,255,0.25);
     border-top-color: #008786;
     animation: spin 0.9s linear infinite;
-  }
+  } */
 
   .loading-text {
     color: white;

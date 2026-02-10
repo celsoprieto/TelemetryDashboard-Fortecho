@@ -9,57 +9,54 @@
     let lastLights = [];
     let currentMetric = 'temp-humidity'; // or 'humidity'
     let tagsById = {};   // <--- stores full objects by tagId
+    let reloadTimer;
+    let isSyncingInputs = false;
 
     // Load tags on page load
-    window.addEventListener('DOMContentLoaded', async () => {
-      const sensorList = document.getElementById('sensorList1');
-      const buttons = sensorList.querySelectorAll('.sensor-button');
+    window.addEventListener("DOMContentLoaded", async () => {
+      const sensorList = document.getElementById("sensorList1");
+      const buttons = sensorList?.querySelectorAll(".sensor-button") || [];
+
       const btn_menu = document.getElementById("menuBtn");
       const menu = document.getElementById("mobileMenu");
 
-      if (!btn_menu || !menu) return;
+      const fromInput = document.getElementById("fromInput");
+      const toInput = document.getElementById("toInput");
 
-      function openMenu() {
-        mobileMenu.classList.remove("translate-x-full");
-        mobileMenu.classList.add("translate-x-0");
-      }
-
-      function closeMenu() {
-        mobileMenu.classList.add("translate-x-full");
-        mobileMenu.classList.remove("translate-x-0");
-      }
-
-      btn_menu.addEventListener("click", () => {
-        if (mobileMenu.classList.contains("translate-x-full")) {
-          openMenu();
-        } else {
-          closeMenu();
+      // ---------------- MENU ----------------
+      if (btn_menu && menu) {
+        function openMenu() {
+          menu.classList.remove("translate-x-full");
+          menu.classList.add("translate-x-0");
         }
-      });
 
-      // ✅ close menu when clicking any link inside it
-      mobileMenu.querySelectorAll("a.nav-link").forEach(link => {
-        link.addEventListener("click", () => {
-          closeMenu();
+        function closeMenu() {
+          menu.classList.add("translate-x-full");
+          menu.classList.remove("translate-x-0");
+        }
+
+        btn_menu.addEventListener("click", () => {
+          if (menu.classList.contains("translate-x-full")) openMenu();
+          else closeMenu();
         });
-      });
 
-      buttons.forEach((btn) => {
-        btn.addEventListener('click', () => {
-          // remove active from all
-          buttons.forEach((b) => b.classList.remove('active'));
-          // add active to clicked one
-          btn.classList.add('active');
+        menu.querySelectorAll("a.nav-link").forEach(link => {
+          link.addEventListener("click", closeMenu);
+        });
+      }
 
-          currentMetric = btn.dataset.metric; // "temperature" | "humidity" | "light"
+      // ---------------- SENSOR BUTTONS ----------------
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+
+          currentMetric = btn.dataset.metric;
           renderChart();
-
-          // here you can also run your logic, e.g. switch chart, etc.
-          // console.log('Selected:', btn.textContent.trim());
         });
-      setFromTo();
-      switchView();
+      });
 
+      // ---------------- NAV ACTIVE LINK ----------------
       document.querySelectorAll(".nav-link").forEach(link => {
         link.addEventListener("click", (e) => {
           e.preventDefault();
@@ -69,27 +66,48 @@
         });
       });
 
-    });
+      // ---------------- INIT DATE RANGE + VIEW ----------------
+      setFromTo();
+      switchView();
 
-
+      // ---------------- LOAD INITIAL DATA ----------------
       await loadTags();
       setLast24Hours();
       await loadData();
 
-      const tagSelect = document.getElementById('tagIdSelect');
-      tagSelect.addEventListener('change', () => {
-        // when user picks another Tag ID, reload chart data
-        loadData();
+      // ---------------- TAG CHANGE ----------------
+      const tagSelect = document.getElementById("tagIdSelect");
+      tagSelect?.addEventListener("change", loadData);
+
+      // ---------------- FROM/TO CHANGE (DEBOUNCED) ----------------
+      let reloadTimer;
+
+      function reloadDataDebounced() {
+        clearTimeout(reloadTimer);
+        reloadTimer = setTimeout(() => {
+          setFromTo();  // keeps To >= From
+          loadData();   // fetch new data
+        }, 250);
+      }
+
+      fromInput?.addEventListener("change", () => {
+        if (isSyncingInputs) return;
+        reloadDataDebounced();
       });
 
-      document.getElementById("fromInput").addEventListener("change", applyXAxisRange);
-      document.getElementById("toInput").addEventListener("change", applyXAxisRange);
-      
+      toInput?.addEventListener("change", () => {
+        if (isSyncingInputs) return;
+        reloadDataDebounced();
+      });
     });
 
+
       
 
-    
+    function reloadDataDebounced() {
+      clearTimeout(reloadTimer);
+      reloadTimer = setTimeout(() => loadData(), 250);
+    }
 
     function formatUtcToLocalLabel(utcString) {
       if (!utcString) return '';
@@ -321,6 +339,32 @@
     if (tempHumBtn)  luxBtn.disabled  = !hasData(lastLights);
   }
 
+  function syncInputsFromChart(chart) {
+    const fromInput = document.getElementById("fromInput");
+    const toInput = document.getElementById("toInput");
+    if (!fromInput || !toInput) return;
+
+    const xScale = chart.scales.x;
+    if (!xScale) return;
+
+    const min = xScale.min;
+    const max = xScale.max;
+
+    if (!min || !max) return;
+
+    isSyncingInputs = true;
+
+    fromInput.value = formatForDateTimeLocal(new Date(min));
+    toInput.value = formatForDateTimeLocal(new Date(max));
+
+    isSyncingInputs = false;
+
+    // 🔥 reload from API using new range (debounced)
+    clearTimeout(reloadTimer);
+    reloadTimer = setTimeout(() => loadData(), 300);
+  }
+
+
   function renderChart() {
     const canvas = document.getElementById("mainChart");
     if (!canvas) return;
@@ -332,14 +376,14 @@
     // ---- pick labels + datasets depending on metric ----
     let labels = [];
     let chartTitle = "";
-    let datasets = {};
+    let datasets = [];
     let scales = {};
 
     if (currentMetric === "temperature") {
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C)";
       datasets = [
-        makeDataset("", lastTemps, "rgba(218,73,78,1)" , "rgba(218,73,78,0.1)")
+        makeDataset("", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)")
       ];
       scales = { y: makeYAxis("Temperature (°C)") };
 
@@ -370,111 +414,186 @@
 
       scales = {
         yTemp: makeYAxis("Temperature (°C)", "left"),
-        yHum:  makeYAxis("Humidity (%)", "right", true)
+        yHum: makeYAxis("Humidity (%)", "right", true)
       };
     }
 
     // ---- no labels? clear chart ----
     if (!labels || labels.length === 0) {
-      if (mainChart) mainChart.destroy();
+      if (mainChart) {
+        mainChart.data.labels = [];
+        mainChart.data.datasets = [];
+        mainChart.update();
+      }
       return;
     }
 
     // ---- update title ----
     const titleEl = document.getElementById("chartTitle");
     if (titleEl) {
-    titleEl.textContent = chartTitle;
+      titleEl.textContent = chartTitle;
 
-    // --- Set color depending on title text ---
-    if (currentMetric === "temperature") {
-        titleEl.style.color = "rgba(218,73,78,1)";   // Temperature → red
-    } else if (currentMetric === "humidity") {
-        titleEl.style.color = "rgba(53,170,223,1)";  // Humidity → blue
-    } else if (currentMetric === "light") {
-        titleEl.style.color = "rgba(220,128,21,1)";  // Default
-    } else if (currentMetric === "temp-humidity") {
+      if (currentMetric === "temperature") {
+        titleEl.style.color = "rgba(218,73,78,1)";
+      } else if (currentMetric === "humidity") {
+        titleEl.style.color = "rgba(53,170,223,1)";
+      } else if (currentMetric === "light") {
+        titleEl.style.color = "rgba(220,128,21,1)";
+      } else if (currentMetric === "temp-humidity") {
         titleEl.innerHTML = `
           <span style="color: rgba(218,73,78,1)">Temperature (°C)</span>
           <span style="color: black"> & </span>
           <span style="color: rgba(53,170,223,1)">Humidity (%)</span>
-      `;  // For combined view, use blue or default color
+        `;
+      }
     }
+
+    // ---- register plugin once ----
+    if (!window._solidTooltipColorBoxRegistered) {
+      const solidTooltipColorBox = {
+        id: "solidTooltipColorBox",
+        beforeTooltipDraw(chart) {
+          const tooltip = chart.tooltip;
+          if (!tooltip) return;
+
+          tooltip.labelColors = tooltip.dataPoints.map(dp => {
+            const ds = chart.data.datasets[dp.datasetIndex];
+            const c = ds.borderColor || "#000";
+
+            return {
+              borderColor: c,
+              backgroundColor: c,
+              borderWidth: 0
+            };
+          });
+        }
+      };
+
+      Chart.register(solidTooltipColorBox);
+      window._solidTooltipColorBoxRegistered = true;
+    }
+
+    // ---- CREATE ONCE, UPDATE AFTER ----
+    if (!mainChart) {
+      mainChart = new Chart(ctx, {
+        type: "line",
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          currentMetric,
+
+          plugins: {
+            legend: { display: false },
+            tooltip: makeTooltipOptions(),
+            zoom: {
+              zoom: {
+                wheel: { enabled: true },
+                drag: {enabled: true},
+                pinch: { enabled: true },
+                mode: "x",
+                onZoomComplete({ chart }) {
+                  syncInputsFromChart(chart);
+                  startFetch({ chart });
+                }
+              },
+              pan: {
+                enabled: true,
+                mode: "x",
+                modifierKey: "ctrl",
+                onPanComplete({ chart }) {
+                  syncInputsFromChart(chart);
+                  startFetch({ chart });
+                }
+              }
+            }
+          },
+
+          hover: { mode: "index", intersect: false },
+
+          scales: {
+            x: {
+              ...makeXAxis(),
+              min: fromDate ? fromDate.getTime() : undefined,
+              max: toDate ? toDate.getTime() : undefined
+            },
+            ...scales
+          }
+        }
+      });
+
+    } else {
+      // update existing chart
+      mainChart.data.labels = labels;
+      mainChart.data.datasets = datasets;
+
+      mainChart.options.currentMetric = currentMetric;
+
+      // update axes (important for temp-humidity dual axis)
+      mainChart.options.scales = {
+        x: {
+          ...makeXAxis(),
+          min: fromDate ? fromDate.getTime() : undefined,
+          max: toDate ? toDate.getTime() : undefined
+        },
+        ...scales
+      };
+
+      mainChart.update("none"); // fast, no animation
+    }
+  }
+
+  async function fetchData(minTs, maxTs) {
+  const select = document.getElementById("tagIdSelect");
+  const tagId = select.value;
+  if (!tagId) return { temps: [], hums: [] };
+
+  const from = new Date(minTs).toISOString();
+  const to = new Date(maxTs).toISOString();
+
+  const params = new URLSearchParams({ tagId, from, to });
+  const res = await fetch(`${API_BASE}/telemetry?${params.toString()}`);
+  const data = await res.json();
+
+  const temps = [];
+  const hums = [];
+
+  for (const d of data) {
+    const s = d.sensorData;
+    if (!s) continue;
+
+    if (s.sensorTrH === 1) {
+      temps.push(s.temperatureEv ?? null);
+      hums.push(s.humidityEv ?? null);
+    }
+  }
+
+  return { temps, hums };
 }
 
-    // ---- destroy previous chart ----
-    if (mainChart) mainChart.destroy();
 
-    const solidTooltipColorBox = {
-      id: "solidTooltipColorBox",
-      beforeTooltipDraw(chart) {
-        const tooltip = chart.tooltip;
-        if (!tooltip) return;
+  let timer;
+function startFetch({ chart }) {
+  const { min, max } = chart.scales.x;
+  clearTimeout(timer);
 
-        // Force the color boxes to be solid and equal to dataset borderColor
-        tooltip.labelColors = tooltip.dataPoints.map(dp => {
-          const ds = chart.data.datasets[dp.datasetIndex];
-          const c = ds.borderColor || "#000";
+  timer = setTimeout(async () => {
+    //console.log('Fetching data between ' + min + ' and ' + max);
 
-          return {
-            borderColor: c,
-            backgroundColor: c,
-            borderWidth: 0
-          };
-        });
-      }
-    };
+    // call your API to get new data
+    const newData = await fetchData(min, max); // implement fetchData()
 
-    Chart.register(solidTooltipColorBox);
+    // Update datasets
+    if (chart.data.datasets.length > 0) {
+      chart.data.datasets[0].data = newData.temps; // example
+      if (chart.data.datasets[1]) chart.data.datasets[1].data = newData.hums; // for temp-humidity
+    }
 
-    // ---- create chart ----
-    mainChart = new Chart(ctx, {
-      type: "line",
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
+    chart.update("none"); // fast update without animation
+  }, 500);
+}
 
-        // store metric here for tooltip callback
-        currentMetric,
 
-        plugins: {
-          legend: { display: false },
-          tooltip: makeTooltipOptions(),
-           zoom: {
-            zoom: {
-              wheel: {
-                enabled: true
-              },
-              pinch: {
-                enabled: true
-              },
-              mode: "x"
-            },
-            pan: {
-              enabled: true,
-              mode: "x",
-              modifierKey: "ctrl" // Ctrl + drag
-            }
-          }
-        },
-
-        hover: {
-          mode: "index",
-          intersect: false
-        },
-
-        scales: {
-          x: {
-            ...makeXAxis()
-            // ,
-            // min : fromDate,
-            // max : toDate  
-            },
-          ...scales
-        }
-      }
-    });
-  }
 
   function getFromToDates() {
     const fromVal = document.getElementById("fromInput").value;
