@@ -501,26 +501,26 @@
           responsive: true,
           maintainAspectRatio: false,
           currentMetric,
-
           plugins: {
             legend: { display: false },
             tooltip: makeTooltipOptions(),
             zoom: {
-              zoom: {
-                wheel: { enabled: true },
-                drag: {enabled: true},
-                pinch: { enabled: true },
-                mode: "x",
-                onZoomComplete({ chart }) {
+              pan: {
+                enabled: true,
+                mode: 'x',
+                modifierKey: "ctrl",
+                onPanComplete({ chart }) {
+                  console.log('Pan done');
                   syncInputsFromChart(chart);
                   startFetch({ chart });
                 }
               },
-              pan: {
-                enabled: true,
-                mode: "x",
-                modifierKey: "ctrl",
-                onPanComplete({ chart }) {
+              zoom: {
+                wheel: { enabled: true },
+                drag: {enabled: true , backgroundColor: 'rgba(21,115,114,0.3)'},
+                pinch: { enabled: true },
+                mode: 'x',
+                onZoomComplete({ chart }) {
                   syncInputsFromChart(chart);
                   startFetch({ chart });
                 }
@@ -1335,6 +1335,7 @@ function applyXAxisRange() {
 
       const card = document.createElement("div");
       const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-red";
+      const textColorClass = tag.isSelected ? "text-custom-green" : "text-custom-red";
       card.className = `
         relative bg-white rounded-xl shadow-sm border border-gray-200 p-4
       `;
@@ -1345,7 +1346,7 @@ function applyXAxisRange() {
 
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <div class="font-semibold text-sky-600 truncate">
+            <div class="font-bold text-sky-600 truncate">
               ${escapeHtml(title)}
             </div>
 
@@ -1353,7 +1354,7 @@ function applyXAxisRange() {
               ${escapeHtml(sub1)}
             </div>
 
-            <div class="text-xs text-gray-500">
+            <div class="text-xs ${textColorClass}">
               ${escapeHtml(sub2)}
             </div>
           </div>
@@ -1375,6 +1376,7 @@ function applyXAxisRange() {
       // checkbox event listener
       const checkbox = card.querySelector(`input[type="checkbox"][data-tagid="${tag.tagId}"]`);
       const bar = card.querySelector("div.absolute");
+      const textElements = card.querySelector("div.text-xs");
 
       checkbox.addEventListener("change", () => {
         tag.isSelected = checkbox.checked;
@@ -1382,13 +1384,17 @@ function applyXAxisRange() {
         // update bar color dynamically
         bar.classList.remove("bg-custom-green", "bg-custom-red");
         bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
+        textElements.classList.remove("text-custom-green", "text-custom-red");
+        textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-red");
+
 
         // call editTag or other logic
         if (tag.isSelected) {
           //editTag(tag);
         } else {
-          console.log(`Tag ${tag.tagId} deselected`);
+          // console.log(`Tag ${tag.tagId} deselected`);
         }
+          refreshTagSelect(); 
       });
 
     });
@@ -1403,6 +1409,53 @@ function applyXAxisRange() {
       .replaceAll("'", "&#039;");
   }
 
+  function refreshTagSelect() {
+    const select = document.getElementById('tagIdSelect');
+    const currentValue = select.value; // preserve current selection
+    
+    // Clear all options except placeholder
+    select.innerHTML = '';
+    
+    // Re-add placeholder
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '-- select tag --';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    select.appendChild(placeholder);
+    
+    // Filter and add only selected tags
+    const selectedTags = Object.values(tagsById).filter(tag => tag.isSelected === true);
+    
+    if (selectedTags.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'No selected tags';
+      select.appendChild(opt);
+      return;
+    }
+    
+    for (const tag of selectedTags) {
+      const opt = document.createElement('option');
+      opt.value = tag.tagId;
+      
+      let text = `${tag.tagId} - ${tag.serialNumber || ''}`;
+      if (text.length > 50) {
+        text = text.substring(0, 47) + '...';
+      }
+      opt.textContent = text;
+      select.appendChild(opt);
+    }
+    
+    // Try to restore previous selection (if still in list)
+    if (tagsById[currentValue]?.isSelected) {
+      select.value = currentValue;
+    } else if (selectedTags.length > 0) {
+      // Select first available tag
+      select.value = selectedTags[0].tagId;
+      showTagDetails(selectedTags[0].tagId);
+    }
+  }
 
 
 
