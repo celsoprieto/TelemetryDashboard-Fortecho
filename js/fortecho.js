@@ -20,6 +20,7 @@
     window.addEventListener("DOMContentLoaded", async () => {
       const sensorList = document.getElementById("sensorList1");
       const buttons = sensorList?.querySelectorAll(".sensor-button") || [];
+      const rangeButtons = document.querySelectorAll('.range-button');
 
       const btn_menu = document.getElementById("menuBtn");
       const menu = document.getElementById("mobileMenu");
@@ -57,6 +58,20 @@
 
           currentMetric = btn.dataset.metric;
           renderChart();
+        });
+      });
+
+      rangeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+
+          rangeButtons.forEach(b => b.classList.remove("active"));
+          
+          btn.classList.add("active");
+          
+          // const metric = btn.dataset.metric;
+          // if (metric && typeof window[metric] === 'function') {
+          //   window[metric]();
+          // }
         });
       });
 
@@ -670,8 +685,11 @@ function applyXAxisRange() {
         callback: (value) => formatLocalDDMMYYYY_HHMMSS(value)
       },
         grid: {
-        tickColor: "rgb(51,51,51)",
-        tickWidth: 1
+          drawTicks: true,
+          drawBorder: true,
+          display: false,
+          tickColor: "rgb(51,51,51)",
+          tickWidth: 1
       }
     };
   }

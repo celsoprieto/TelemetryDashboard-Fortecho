@@ -258,6 +258,12 @@
     border-color: #008c8c;
   }
 
+   .range-button.active {
+    background: #008c8c;
+    color: #ffffff;
+    border-color: #008c8c;
+  }
+
   .sensor-icon {
     width: 1.5em;
     height: 1.5em;
