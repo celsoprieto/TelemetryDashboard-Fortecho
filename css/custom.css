@@ -512,6 +512,22 @@
     margin-left: 20px
 }
 
+._boards_iwq7q_23 {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    grid-gap: 20px;
+    max-height: calc(100vh - 310px);
+    overflow-y: scroll;
+    height: max-content;
+    padding-right: 10px;
+}
+
+._grid_iwq7q_17 {
+    display: grid;
+    grid-template-columns: min-content auto;
+    grid-gap: 20px
+}
+
 
 
 

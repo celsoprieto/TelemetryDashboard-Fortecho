@@ -41,6 +41,9 @@
             <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="telemetry">Telemetry</a>
           </li>
           <li>
+            <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="tags">Tags</a>
+          </li>
+          <li>
             <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="events">Device Events</a>
           </li>
           <li>
@@ -388,26 +391,14 @@
   </section>
    <!-- VIEW: EVENTS -->
   <section id="view-events" class="view hidden">
-    <!-- <h2 class="text-xl font-semibold mb-4">Device Events</h2>
-    <div id="eventsContainer"></div> -->
     <div class="w-full max-w-6xl mx-auto p-4">
       <div class="rounded-2xl border border-gray-200 bg-white shadow-sm">
-
         <!-- Header -->
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border-b border-gray-200">
           <div>
-            <h2 class="h2 text-lg font-semibold text-gray-900">IoT Hub Events</h2>
+            <h2 class="h2 text-lg font-bold">IoT Hub Events</h2>
             <!-- <p class="text-sm text-gray-500">Search, sort and paginate events</p> -->
           </div>
-
-          <!-- Search -->
-          <!-- <div class="w-full md:w-80">
-            <input id="searchInput"
-              type="text"
-              placeholder="Search..."
-              class="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-teal-500"
-            />
-          </div> -->
         </div>
 
         <!-- Table -->
@@ -440,8 +431,25 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>   
   </section>
+
+  <section id="view-tags" class="view hidden">
+    
+    <!-- Header (top) -->
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border-b border-gray-200">
+      <div>
+        <h2 class="text-lg font-bold">Tags</h2>
+      </div>
+    </div>
+
+    <!-- Grid (below) -->
+    <div class="p-4">
+      <div id="tagsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+  </section>
+
 
   <!-- VIEW: ALARMS -->
   <section id="view-alarms" class="view hidden">

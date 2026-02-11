@@ -24,9 +24,20 @@ module.exports = {
     "border",
     "transition",
     "whitespace-nowrap",
+    "grid",
+    "grid-cols-4",
+    "gap-4",
+    "grid-cols-1",
+    "grid-cols-2",
+    "md:grid-cols-2",
+    "bg-green-500",
+    "bg-red-500",
   ],
   theme: {
-    extend: {},
+    extend: {colors: {
+        "custom-green": "#157372",
+        "custom-red": "#DA494E",
+      } },
   },
   plugins: [],
 }

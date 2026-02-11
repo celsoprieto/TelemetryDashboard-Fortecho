@@ -175,6 +175,7 @@
         select.appendChild(placeholder);
 
         for (const tag of tags) {
+          tag.isSelected = true;   // 👈 new boolean default
           // save full object in memory
           tagsById[tag.tagId] = tag;
           const opt = document.createElement('option');
@@ -944,6 +945,13 @@ function applyXAxisRange() {
       if (viewName === "events") {
         await loadEvents();        // optional: load data into it
       }
+
+      if (viewName === "tags") {
+        // console.log("tagsById =", tagsById);
+        // console.log("isArray =", Array.isArray(tagsById));
+
+        renderTagsGrid(tagsById);          // optional: refresh tags list
+      }
     }
 
     links.forEach(link => {
@@ -1007,11 +1015,13 @@ function applyXAxisRange() {
 
   }
 
+
+
   
   // ==========================
   // 2) GRID CONFIG
   // ==========================
-  const columns = [
+  const columnsevents = [
     { key: "timestamp", label: "Timestamp" },
     { key: "deviceId", label: "Device" },
     { key: "eventType", label: "Event Type" },
@@ -1079,7 +1089,7 @@ function applyXAxisRange() {
     if (!q) return [...deviceeventsrawData];
 
     return deviceeventsrawData.filter(row => {
-      return columns.some(c => safeStr(row[c.key]).toLowerCase().includes(q));
+      return columnsevents.some(c => safeStr(row[c.key]).toLowerCase().includes(q));
     });
   }
 
@@ -1115,7 +1125,7 @@ function applyXAxisRange() {
   // ==========================
   function renderHead() {
     const head = document.getElementById("tableHead");
-    head.innerHTML = columns.map(col => {
+    head.innerHTML = columnsevents.map(col => {
       const isActive = state.sortKey === col.key;
       const arrow = isActive ? (state.sortDir === "asc" ? "▲" : "▼") : "";
 
@@ -1166,7 +1176,7 @@ function applyXAxisRange() {
 
     body.innerHTML = rows.map(row => `
       <tr class="hover:bg-gray-50">
-        ${columns.map(col => {
+        ${columnsevents.map(col => {
           let value = row[col.key];
 
           // format timestamp
@@ -1308,5 +1318,91 @@ function applyXAxisRange() {
       if (next && next !== p + 1) addDots();
     }
   }
+
+  function renderTagsGrid(tagsById) {
+    const grid = document.getElementById("tagsGrid");
+    if (!grid) return;
+
+    // Convert { 47730: {...}, 57714: {...} } -> [{...}, {...}]
+    const tagsArray = Object.values(tagsById || {});
+
+    grid.innerHTML = "";
+
+    tagsArray.forEach(tag => {
+      const title = `${tag.marque || "Unknown"} ${tag.model || ""}`.trim();
+      const sub1 = `Tag ID: ${tag.tagId}`;
+      const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
+
+      const card = document.createElement("div");
+      const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-red";
+      card.className = `
+        relative bg-white rounded-xl shadow-sm border border-gray-200 p-4
+      `;
+
+      card.innerHTML = `
+        <!-- left red bar -->
+        <div class="absolute left-0 top-0 h-full w-1.5 ${barClass} rounded-l-xl"></div>
+
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="font-semibold text-sky-600 truncate">
+              ${escapeHtml(title)}
+            </div>
+
+            <div class="text-sm text-sky-600 font-medium">
+              ${escapeHtml(sub1)}
+            </div>
+
+            <div class="text-xs text-gray-500">
+              ${escapeHtml(sub2)}
+            </div>
+          </div>
+
+          <!-- Checkbox -->
+          <input
+            type="checkbox"
+            class="shrink-0 p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+            title="Select"
+            data-tagid="${tag.tagId}"
+            ${tag.isSelected ? "checked" : ""}
+          />
+
+      </div>
+      `;
+       
+      grid.appendChild(card);
+
+      // checkbox event listener
+      const checkbox = card.querySelector(`input[type="checkbox"][data-tagid="${tag.tagId}"]`);
+      const bar = card.querySelector("div.absolute");
+
+      checkbox.addEventListener("change", () => {
+        tag.isSelected = checkbox.checked;
+
+        // update bar color dynamically
+        bar.classList.remove("bg-custom-green", "bg-custom-red");
+        bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
+
+        // call editTag or other logic
+        if (tag.isSelected) {
+          //editTag(tag);
+        } else {
+          console.log(`Tag ${tag.tagId} deselected`);
+        }
+      });
+
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+
 
 
