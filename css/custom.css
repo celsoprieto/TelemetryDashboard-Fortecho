@@ -230,6 +230,24 @@
       height: 80px; /* opcional: fija mismo alto */
   }
 
+  .range-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* centra verticalmente */
+      gap: 4px;
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: 1px solid #d0d7e2;
+      background: #f5f7fb;
+      color: #008c8c;              
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      width: 60px; /* opcional: fija mismo ancho que los otros botones */
+      height: 80px; /* opcional: fija mismo alto */
+  }
+
   .sensor-button:hover {
     background: #e6f5f5;
   }
@@ -246,6 +264,12 @@
   }
 
   .sensor-icon svg {
+    width: 1.5em;
+    height: 1.5em;
+  }
+
+   .range-icon svg,
+   .range-icon {
     width: 1.5em;
     height: 1.5em;
   }
@@ -423,6 +447,13 @@
   h2{
     font-size: 1.3rem;
     font-weight: 700;
+    color: #157372;
+  }
+
+  .eventscolumnheader {
+    font-size: 1.0rem;
+    font-weight: 600;
+    color: #157372;
   }
 
   /* .spinner {

@@ -11,6 +11,10 @@
     let tagsById = {};   // <--- stores full objects by tagId
     let reloadTimer;
     let isSyncingInputs = false;
+    let sitecode = 33; // hardcoded for now, can be dynamic if needed
+    let eventsGridBuilt = false;
+    let deviceIdForEvents = "watchdog_cp"; // hardcoded, adjust as needed
+    let deviceeventsrawData = [];
 
     // Load tags on page load
     window.addEventListener("DOMContentLoaded", async () => {
@@ -223,7 +227,6 @@
     try {
         const select = document.getElementById('tagIdSelect');
         const tagId = select.value;
-        const sitecode = 33; // hardcoded for now, can be dynamic if needed
         const from = document.getElementById('fromInput').value;
         const to   = document.getElementById('toInput').value;
 
@@ -383,7 +386,7 @@
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C)";
       datasets = [
-        makeDataset("", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)")
+        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)")
       ];
       scales = { y: makeYAxis("Temperature (°C)") };
 
@@ -391,7 +394,7 @@
       labels = lastTempHumLabels;
       chartTitle = "Humidity (%)";
       datasets = [
-        makeDataset("", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)")
+        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)")
       ];
       scales = { y: makeYAxis("Humidity (%)") };
 
@@ -399,7 +402,7 @@
       labels = lastLightLabels;
       chartTitle = "Light (lux)";
       datasets = [
-        makeDataset("", lastLights, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
+        makeDataset("Light", lastLights, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
       ];
       scales = { y: makeYAxis("Light (lux)") };
 
@@ -551,7 +554,7 @@
   const from = new Date(minTs).toISOString();
   const to = new Date(maxTs).toISOString();
 
-  const params = new URLSearchParams({ tagId, from, to });
+  const params = new URLSearchParams({sitecode, tagId, from, to });
   const res = await fetch(`${API_BASE}/telemetry?${params.toString()}`);
   const data = await res.json();
 
@@ -697,49 +700,88 @@ function applyXAxisRange() {
   }
 
   function makeTooltipOptions() {
+    
+    function getTooltipEl(chart) {
+      let tooltipEl = document.getElementById('chartjs-tooltip');
+      if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.id = 'chartjs-tooltip';
+        tooltipEl.style.position = 'absolute';
+        tooltipEl.style.background = '#ffffff';
+        tooltipEl.style.border = '1px solid #d0d7e2';
+        tooltipEl.style.padding = '8px';
+        tooltipEl.style.fontFamily = 'sans-serif';
+        tooltipEl.style.fontSize = '10px'; 
+        tooltipEl.style.pointerEvents = 'none';
+        tooltipEl.style.borderRadius = '4px';
+        tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+        tooltipEl.style.transition = 'all 0.1s ease';
+        tooltipEl.style.opacity = 0;
+        document.body.appendChild(tooltipEl);
+      }
+      return tooltipEl;
+    }
+
     return {
-      mode: "index",
+      enabled: false, 
+      mode: 'index',
       intersect: false,
-      enabled: true,
-      displayColors: true,
-      backgroundColor: "#ffffff",
-      borderColor: "#d0d7e2",
-      borderWidth: 1,
-      titleColor: "#0f172a",
-      bodyColor: "#0f172a",
-      padding: 8,
-      boxPadding: 8,   // <-- space between color square and text
-      bodyFont: { size: 12, family: "sans-serif", weight: "normal" },
+      external: function(context) {
+        const tooltipEl = getTooltipEl(context.chart);
+        const tooltipModel = context.tooltip;
 
-      callbacks: {
-        title: () => "",
-        label: function (context) {
-          const x = context.label;
-          const y = context.formattedValue;
 
-          let unit = "";
+        if (tooltipModel.opacity === 0) {
+          tooltipEl.style.opacity = 0;
+          return;
+        }
 
+        
+        const label = tooltipModel.dataPoints[0].label; // "11/02/2026 - 01:12:20"
+        const [datePart, timePart] = label.split(' - ');
+        const [day, month, year] = datePart.split('/').map(Number);
+        const [hour, minute, second] = timePart.split(':').map(Number);
+        const date = new Date(year, month-1, day, hour, minute, second);
+
+        const dateStr = date.toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
+        const timeStr = date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+
+        
+        let innerHtml = `<div style="font-weight: normal; margin-bottom:4px;">${dateStr} ${timeStr}</div>`;
+        tooltipModel.dataPoints.forEach(dp => {
+          const y = dp.parsed.y;
+          let unit = '';
           const metric = context.chart.options.currentMetric;
 
           if (metric === "temperature") unit = " °C";
           else if (metric === "humidity") unit = " %";
           else if (metric === "light") unit = " Lux";
           else if (metric === "temp-humidity") {
-            if (context.dataset.label === "Temperature") unit = " °C";
-            if (context.dataset.label === "Humidity") unit = " %";
+            if (dp.dataset.label === "Temperature") unit = " °C";
+            if (dp.dataset.label === "Humidity") unit = " %";
           }
 
-          return `${x} • ${y}${unit}`;
-        },
-         labelColor: function(context) {
-            return {
-              borderColor: 'transparent',  // sin borde
-              backgroundColor: context.dataset.backgroundColor
-            }
-        }
+           const color = dp.dataset.borderColor || dp.dataset.backgroundColor || '#000';
+
+          innerHtml += `
+            <div style="font-size:11px; display:flex; align-items:center; gap:4px;">
+              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${color};"></span>
+              <span>${dp.dataset.label}: <b>${y}${unit}</b></span>
+            </div>
+          `;
+        });
+
+        tooltipEl.innerHTML = innerHtml;
+
+   
+        const canvasRect = context.chart.canvas.getBoundingClientRect();
+        tooltipEl.style.opacity = 1;
+        tooltipEl.style.left = canvasRect.left + window.pageXOffset + tooltipModel.caretX + 'px';
+        tooltipEl.style.top = canvasRect.top + window.pageYOffset + tooltipModel.caretY + 'px';
       }
     };
   }
+
 
 
   function last24h() {
@@ -748,6 +790,58 @@ function applyXAxisRange() {
 
     const now = new Date();
     const past = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    toInput.value = formatForDateTimeLocal(now);
+    fromInput.value = formatForDateTimeLocal(past);
+
+    loadData();
+  }
+
+   function lastweek() {
+    const toInput = document.getElementById('toInput');
+    const fromInput = document.getElementById('fromInput');
+
+    const now = new Date();
+    const past = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    toInput.value = formatForDateTimeLocal(now);
+    fromInput.value = formatForDateTimeLocal(past);
+
+    loadData();
+  }
+
+     function lastmonth() {
+    const toInput = document.getElementById('toInput');
+    const fromInput = document.getElementById('fromInput');
+
+    const now = new Date();
+    const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    toInput.value = formatForDateTimeLocal(now);
+    fromInput.value = formatForDateTimeLocal(past);
+
+    loadData();
+  }
+
+     function last3months() {
+    const toInput = document.getElementById('toInput');
+    const fromInput = document.getElementById('fromInput');
+
+    const now = new Date();
+    const past = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+
+    toInput.value = formatForDateTimeLocal(now);
+    fromInput.value = formatForDateTimeLocal(past);
+
+    loadData();
+  }
+
+     function last6months() {
+    const toInput = document.getElementById('toInput');
+    const fromInput = document.getElementById('fromInput');
+
+    const now = new Date();
+    const past = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
 
     toInput.value = formatForDateTimeLocal(now);
     fromInput.value = formatForDateTimeLocal(past);
@@ -817,7 +911,7 @@ function applyXAxisRange() {
     const links = document.querySelectorAll("[data-view]");
     const views = document.querySelectorAll(".view");
 
-    function showView(viewName) {
+    async function showView(viewName) {
       views.forEach(v => v.classList.add("hidden"));
 
       const el = document.getElementById(`view-${viewName}`);
@@ -827,6 +921,11 @@ function applyXAxisRange() {
       links.forEach(a => a.classList.remove("text-teal-600"));
       const activeLink = document.querySelector(`[data-view="${viewName}"]`);
       if (activeLink) activeLink.classList.add("text-teal-600");
+
+      // ✅ when switching to events, create grid
+      if (viewName === "events") {
+        await loadEvents();        // optional: load data into it
+      }
     }
 
     links.forEach(link => {
@@ -856,3 +955,340 @@ function applyXAxisRange() {
   function hideLoading() {
     document.getElementById("loadingOverlay").classList.add("hidden");
   }
+
+
+  async function loadEvents() {
+    console.log("Loading events from Azure Function...");
+    try {
+      // Aquí harías la llamada a tu Azure Function para obtener los eventos
+    const params = new URLSearchParams();
+    params.set("deviceId", deviceIdForEvents);
+    // fetch(...) to your function
+    const url = `${API_BASE}/deviceevents?${params.toString()}`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const deviceevents = await res.json();
+
+    if (!Array.isArray(deviceevents) || deviceevents.length === 0) {
+      alert('No data returned for this tag/time range.');
+      return;
+    }
+
+      deviceeventsrawData = Array.isArray(deviceevents) ? deviceevents : []; // guarda los datos crudos para posibles usos futuros
+      state.page = 1;
+      render();
+
+    } catch (err) {
+        console.error(err);
+        alert("Load failed: " + err.message);
+      } finally {
+        // hideLoading(); // si quieres mostrar un loading específico para eventos, hazlo aquí
+      }
+
+  }
+
+  
+  // ==========================
+  // 2) GRID CONFIG
+  // ==========================
+  const columns = [
+    { key: "timestamp", label: "Timestamp" },
+    { key: "deviceId", label: "Device" },
+    { key: "eventType", label: "Event Type" },
+    { key: "hubName", label: "Hub" }
+    // ,
+    // { key: "id", label: "Id" },
+    // { key: "sequenceNumber", label: "Sequence" }
+  ];
+
+  //let data = [...deviceeventsrawData]; // datos crudos, sin filtrar ni paginar
+
+  let state = {
+    search: "",
+    sortKey: "timestamp",
+    sortDir: "desc",
+    page: 1,
+    pageSize: 20
+  };
+
+  // ==========================
+  // 3) HELPERS
+  // ==========================
+  function safeStr(v) {
+    if (v === null || v === undefined) return "";
+    return String(v);
+  }
+
+  function formatTimestamp(ts) {
+    if (!ts) return "";
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return ts;
+
+    // nicer display
+    return d.toLocaleString();
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      toast("Copied ✔");
+    });
+  }
+
+  function toast(msg) {
+    const el = document.createElement("div");
+    el.className =
+      "fixed bottom-5 right-5 rounded-xl bg-gray-900 text-white text-sm px-4 py-2 shadow-lg z-50 opacity-0 translate-y-2 transition-all";
+    el.textContent = msg;
+    document.body.appendChild(el);
+
+    requestAnimationFrame(() => {
+      el.classList.remove("opacity-0", "translate-y-2");
+    });
+
+    setTimeout(() => {
+      el.classList.add("opacity-0", "translate-y-2");
+      setTimeout(() => el.remove(), 250);
+    }, 1200);
+  }
+
+  // ==========================
+  // 4) FILTER + SORT + PAGINATE
+  // ==========================
+  function getFilteredData() {
+    const q = state.search.trim().toLowerCase();
+    if (!q) return [...deviceeventsrawData];
+
+    return deviceeventsrawData.filter(row => {
+      return columns.some(c => safeStr(row[c.key]).toLowerCase().includes(q));
+    });
+  }
+
+  function getSortedData(rows) {
+    const { sortKey, sortDir } = state;
+
+    return [...rows].sort((a, b) => {
+      let va = a[sortKey];
+      let vb = b[sortKey];
+
+      // sort timestamp properly
+      if (sortKey === "timestamp") {
+        va = new Date(va).getTime();
+        vb = new Date(vb).getTime();
+      } else {
+        va = safeStr(va).toLowerCase();
+        vb = safeStr(vb).toLowerCase();
+      }
+
+      if (va < vb) return sortDir === "asc" ? -1 : 1;
+      if (va > vb) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+
+  function getPagedData(rows) {
+    const start = (state.page - 1) * state.pageSize;
+    return rows.slice(start, start + state.pageSize);
+  }
+
+  // ==========================
+  // 5) RENDER
+  // ==========================
+  function renderHead() {
+    const head = document.getElementById("tableHead");
+    head.innerHTML = columns.map(col => {
+      const isActive = state.sortKey === col.key;
+      const arrow = isActive ? (state.sortDir === "asc" ? "▲" : "▼") : "";
+
+      return `
+        <th
+          data-key="${col.key}"
+          class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer select-none hover:text-gray-900"
+        >
+          <div class="flex items-center gap-2">
+            <span class="eventscolumnheader">${col.label}</span>
+            <span class="eventscolumnheader">${arrow}</span>
+          </div>
+        </th>
+      `;
+    }).join("");
+
+    // click sort
+    [...head.querySelectorAll("th")].forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.key;
+
+        if (state.sortKey === key) {
+          state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+        } else {
+          state.sortKey = key;
+          state.sortDir = "asc";
+        }
+
+        state.page = 1;
+        render();
+      });
+    });
+  }
+
+  function renderBody(rows) {
+    const body = document.getElementById("tableBody");
+
+    if (!rows.length) {
+      body.innerHTML = `
+        <tr>
+          <td colspan="${columns.length}" class="px-4 py-10 text-center text-gray-500">
+            No results found
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    body.innerHTML = rows.map(row => `
+      <tr class="hover:bg-gray-50">
+        ${columns.map(col => {
+          let value = row[col.key];
+
+          // format timestamp
+          if (col.key === "timestamp") value = formatTimestamp(value);
+
+          const rawValue = safeStr(row[col.key]);
+
+          return `
+            <td class="px-4 py-3 align-top">
+              <div class="flex items-start gap-2">
+                <span class="text-gray-800 break-all">${safeStr(value)}</span>
+             </div>
+            </td>
+          `;
+        }).join("")}
+      </tr>
+    `).join("");
+  }
+
+  function renderFooter(total, filtered) {
+    const rowsInfo = document.getElementById("rowsInfo");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    const totalPages = Math.max(1, Math.ceil(filtered / state.pageSize));
+    if (state.page > totalPages) state.page = totalPages;
+
+    // Info texto
+    const start = filtered === 0 ? 0 : (state.page - 1) * state.pageSize + 1;
+    const end = Math.min(filtered, state.page * state.pageSize);
+
+    rowsInfo.textContent = `Showing ${start} - ${end} of ${filtered} (total ${total})`;
+
+    // Prev/Next enable
+    prevBtn.disabled = state.page <= 1;
+    nextBtn.disabled = state.page >= totalPages;
+
+    prevBtn.onclick = () => {
+      state.page--;
+      render();
+    };
+
+    nextBtn.onclick = () => {
+      state.page++;
+      render();
+    };
+
+ 
+    buildPageButtons(totalPages);
+  }
+
+
+  function render() {
+    renderHead();
+
+    const filteredRows = getFilteredData();
+    const sortedRows = getSortedData(filteredRows);
+    const pagedRows = getPagedData(sortedRows);
+
+    renderBody(pagedRows);
+    renderFooter(deviceeventsrawData.length, filteredRows.length);
+  }
+
+  // ==========================
+  // 6) EVENTS
+  // ==========================
+  // document.getElementById("searchInput").addEventListener("input", (e) => {
+  //   state.search = e.target.value;
+  //   state.page = 1;
+  //   render();
+  // });
+
+  // ==========================
+  // 7) INIT
+  // ==========================
+  //render();
+
+  function buildPageButtons(totalPages) {
+    const container = document.getElementById("pageButtons");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const current = state.page;
+
+    const addBtn = (page) => {
+      const isActive = page === current;
+
+      const btn = document.createElement("button");
+      btn.textContent = page;
+
+      btn.className = `
+        inline-flex items-center justify-center
+        min-w-[38px] h-10 px-3 rounded-xl text-sm border transition
+        whitespace-nowrap
+        ${isActive
+          ? "bg-teal-600 text-white border-teal-600"
+          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"}
+        mr-1
+      `;
+
+      btn.addEventListener("click", () => {
+        state.page = page;
+        render();
+      });
+
+      container.appendChild(btn);
+    };
+
+    const addDots = () => {
+      const span = document.createElement("span");
+      span.textContent = "...";
+      span.className = "px-2 text-gray-400 select-none";
+      container.appendChild(span);
+    };
+
+
+    const pages = new Set();
+
+    pages.add(1);
+    pages.add(2);
+    pages.add(totalPages);
+    pages.add(totalPages - 1);
+    pages.add(current);
+    pages.add(current - 1);
+    pages.add(current + 1);
+
+    // limpiar inválidos
+    const finalPages = [...pages]
+      .filter(p => p >= 1 && p <= totalPages)
+      .sort((a, b) => a - b);
+
+    // render con dots
+    for (let i = 0; i < finalPages.length; i++) {
+      const p = finalPages[i];
+      addBtn(p);
+
+      const next = finalPages[i + 1];
+      if (next && next !== p + 1) addDots();
+    }
+  }
+
+
