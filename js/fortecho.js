@@ -761,7 +761,7 @@ function applyXAxisRange() {
         const [hour, minute, second] = timePart.split(':').map(Number);
         const date = new Date(year, month-1, day, hour, minute, second);
 
-        const dateStr = date.toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' });
+        const dateStr = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
         const timeStr = date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
 
         
