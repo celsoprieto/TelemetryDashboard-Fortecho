@@ -1,6 +1,6 @@
 // Replace this with your actual Function App URL:
-    //const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
-    let API_BASE = ""; // declare a variable to hold the value
+    const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
+    //let API_BASE = ""; // declare a variable to hold the value
 
     let mainChart;
     let lastTempHumLabels = [];
@@ -22,21 +22,21 @@
     // Load tags on page load
     window.addEventListener("DOMContentLoaded", async () => {
 
-      async function loadApiBase() {
-        try {
-          const res = await fetch("/api/getApiBase");
-          const data = await res.json();
-          // store it in a constant-like variable
-          API_BASE = data.apiBase;
-          console.log("API_BASE loaded:", API_BASE);
+      // async function loadApiBase() {
+      //   try {
+      //     const res = await fetch("/api/getApiBase");
+      //     const data = await res.json();
+      //     // store it in a constant-like variable
+      //     API_BASE = data.apiBase;
+      //     console.log("API_BASE loaded:", API_BASE);
 
-          // Now you can use API_BASE in other functions
-         // initApp();
-        } catch (err) {
-          console.error("Failed to load API_BASE:", err);
-        }
-      }
-      loadApiBase();
+      //     // Now you can use API_BASE in other functions
+      //    // initApp();
+      //   } catch (err) {
+      //     console.error("Failed to load API_BASE:", err);
+      //   }
+      // }
+      // loadApiBase();
       const sensorList = document.getElementById("sensorList1");
       const buttons = sensorList?.querySelectorAll(".sensor-button") || [];
       const rangeButtons = document.querySelectorAll('.range-button');
