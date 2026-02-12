@@ -202,7 +202,7 @@
         // Add a default placeholder
         const placeholder = document.createElement('option');
         placeholder.value = '';
-        placeholder.textContent = '-- select tag --';
+        placeholder.textContent = '-- Select Tag --';
         placeholder.disabled = true;
         placeholder.selected = true;
         select.appendChild(placeholder);

@@ -33,7 +33,7 @@
       <div class="flex items-center justify-between h-8">
 
         <!-- Logo / Title -->
-        <div class="text-lg font-semibold text-gray-800">
+        <div class="text-lg font-bold text-custom-green">
           CP - System Dashboard
         </div>
 
@@ -196,170 +196,130 @@
           </span>
           <span class="sensor-value">Lux</span>
         </button>
-      
-      
-      <!-- <button class="load-button" type="button" data-metric="last24h" onclick="last24h()">
-        <span class="sensor-icon">
-          <svg xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-clock">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-        </span>
-        <span class="sensor-value">24 hours</span>
-      </button> -->
 
-      <!-- <button class="load-button" type="button" data-metric="loadData" onclick="loadData()">
-        <span class="sensor-icon">
-          <svg xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-loader">
-            <line x1="12" y1="2" x2="12" y2="6"></line>
-            <line x1="12" y1="18" x2="12" y2="22"></line>
-            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-            <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-            <line x1="2" y1="12" x2="6" y2="12"></line>
-            <line x1="18" y1="12" x2="22" y2="12"></line>
-            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-            <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-          </svg>
-        </span>
-        <span class="sensor-value">Load</span>
-      </button> -->
       </div>
-      <!-- Tag + dates -->
-      <div class="time-controls flex flex-row gap-2 w-full items-end flex-nowrap">
-
-        <div>
-          <label class="control-field flex flex-col min-w-0 flex-1">
-            <span class="control-label font-sans font-bold text-xs sm:text-sm leading-5 !text-[#157372]">Tag ID:</span>
-            <select id="tagIdSelect" class="time-input w-full min-w-0"></select>
-          </label>
-        </div>
-
-        
-         <button class="range-button active" type="button" data-metric="last24h" onclick="last24h()">
-          <span class="range-icon">
-             <svg xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  stroke-width="2" 
-                  stroke-linecap="round" 
-                  stroke-linejoin="round" 
-                  class="w-5 h-5">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-          </span>
-          <span class="sensor-value">1 D</span>
-        </button>
-
-        <button class="range-button" type="button" data-metric="lastweek" onclick="lastweek()">
-          <span class="range-icon">
-             <svg xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  stroke-width="2" 
-                  stroke-linecap="round" 
-                  stroke-linejoin="round" 
-                  class="w-5 h-5">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-          </span>
-          <span class="sensor-value">1 W</span>
-        </button>
-
-        <button class="range-button" type="button" data-metric="lastmonth" onclick="lastmonth()">
-          <span class="range-icon">
-             <svg xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  stroke-width="2" 
-                  stroke-linecap="round" 
-                  stroke-linejoin="round" 
-                  class="w-5 h-5">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-          </span>
-          <span class="sensor-value">1 M</span>
-        </button>
-                 <button class="range-button" type="button" data-metric="last3months" onclick="last3months()">
-          <span class="range-icon">
+      <div class="flex flex-col md:flex-row items-center md:items-end gap-2 w-full">
+          <!-- Tag ID select -->
+          <div class="flex flex-col items-center md:items-start min-w-[150px]">
+            <label class="font-sans font-bold text-xs sm:text-sm leading-5 !text-[#157372] text-center md:text-left">
+              Tag ID:
+            </label>
+            <select id="tagIdSelect" class="time-input w-full"></select>
+          </div>
+        <!-- Tag + dates -->
+        <div class="time-controls flex flex-row flex-wrap items-end gap-2 flex-1 justify-center md:justify-start">
+          <button class="range-button active" type="button" data-metric="last24h" onclick="last24h()">
+            <span class="range-icon">
               <svg xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  stroke-width="2" 
-                  stroke-linecap="round" 
-                  stroke-linejoin="round" 
-                  class="w-5 h-5">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-          </span>
-          <span class="sensor-value">3 M</span>
-        </button>
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    stroke-width="2" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    class="w-5 h-5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </span>
+            <span class="sensor-value">1 D</span>
+          </button>
+
+          <button class="range-button" type="button" data-metric="lastweek" onclick="lastweek()">
+            <span class="range-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    stroke-width="2" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    class="w-5 h-5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </span>
+            <span class="sensor-value">1 W</span>
+          </button>
+
+          <button class="range-button" type="button" data-metric="lastmonth" onclick="lastmonth()">
+            <span class="range-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    stroke-width="2" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    class="w-5 h-5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </span>
+            <span class="sensor-value">1 M</span>
+          </button>
+                  <button class="range-button" type="button" data-metric="last3months" onclick="last3months()">
+            <span class="range-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    stroke-width="2" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    class="w-5 h-5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </span>
+            <span class="sensor-value">3 M</span>
+          </button>
 
 
 
-        <button class="range-button" type="button" data-metric="last6months" onclick="last6months()">
-          <span class="range-icon">
-             <svg xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  stroke-width="2" 
-                  stroke-linecap="round" 
-                  stroke-linejoin="round" 
-                  class="w-5 h-5">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-          </span>
-          <span class="sensor-value">6 M</span>
-        </button>
-   
+          <button class="range-button" type="button" data-metric="last6months" onclick="last6months()">
+            <span class="range-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    stroke-width="2" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round" 
+                    class="w-5 h-5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </span>
+            <span class="sensor-value">6 M</span>
+          </button>
+    
 
-        
-        <div>
-          <label class="control-field flex flex-col min-w-0 flex-1">
-            <span class="control-label font-sans font-bold text-xs sm:text-sm leading-5 !text-[#157372]">From:</span>
-            <input id="fromInput" type="datetime-local" class="time-input w-full min-w-0">
-          </label>
+          
+          <div>
+            <label class="control-field flex flex-col min-w-0 flex-1">
+              <span class="control-label font-sans font-bold text-xs sm:text-sm leading-5 !text-[#157372]">From:</span>
+              <input id="fromInput" type="datetime-local" class="time-input w-full min-w-0">
+            </label>
+          </div>
+          <div>
+            <label class="control-field flex flex-col min-w-0 flex-1">
+              <span class="control-label font-sans font-bold text-xs sm:text-sm leading-5 !text-[#157372]">To:</span>
+              <input id="toInput" type="datetime-local" class="time-input w-full min-w-0">
+            </label>
+          </div>
+
         </div>
-        <div>
-          <label class="control-field flex flex-col min-w-0 flex-1">
-            <span class="control-label font-sans font-bold text-xs sm:text-sm leading-5 !text-[#157372]">To:</span>
-            <input id="toInput" type="datetime-local" class="time-input w-full min-w-0">
-          </label>
-        </div>
-
       </div>
 
       <!-- Tag details div justo debajo -->
