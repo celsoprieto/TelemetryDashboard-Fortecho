@@ -6,6 +6,8 @@
     let lastLightLabels = []; 
     let lastTemps = [];
     let lastHums = [];
+    let lastTemps_Weather = [];
+    let lastHums_Weather = [];
     let lastLights = [];
     let currentMetric = 'temp-humidity'; // or 'humidity'
     let tagsById = {};   // <--- stores full objects by tagId
@@ -118,9 +120,23 @@
         if (isSyncingInputs) return;
         reloadDataDebounced();
       });
+
+      const opTempCheckbox = document.getElementById('opTemp');
+      const opHumCheckbox = document.getElementById('opHum');
+      opTempCheckbox.addEventListener('change', () => {
+        
+        toggleDataset("Temperature Weather", opTempCheckbox.checked);
+        
+      });
+      opHumCheckbox.addEventListener('change', () => {
+        
+        toggleDataset("Humidity Weather", opHumCheckbox.checked);
+        
+      });
+            
     });
 
-
+    
       
 
     function reloadDataDebounced() {
@@ -329,6 +345,7 @@
         lastLights = lights;
 
         updateMetricButtons();
+        await loadWeather();
 
         // default metric after loading: temperature
         //currentMetric = 'temperature';
@@ -383,6 +400,82 @@
     reloadTimer = setTimeout(() => loadData(), 300);
   }
 
+  function interpolateHourlyAtLabels(hourly, labels) {
+    const timesMs = hourly.time.map(t => new Date(t).getTime());
+    const temps = hourly.temperature_2m;
+    const hums = hourly.relative_humidity_2m;
+
+    const interpolatedTemps = [];
+    const interpolatedHums = [];
+
+    labels.forEach(labelDate => {
+      const tMs = new Date(labelDate).getTime();
+
+      // find surrounding points
+      let i = timesMs.findIndex(time => time >= tMs);
+      if (i === -1) i = timesMs.length - 1; // after last
+      if (i === 0) {
+        // before first
+        interpolatedTemps.push(Number(temps[0].toFixed(2)));
+        interpolatedHums.push(Number(hums[0].toFixed(2)));
+        return;
+      }
+
+      const t0 = timesMs[i - 1];
+      const t1 = timesMs[i];
+      const temp0 = temps[i - 1];
+      const temp1 = temps[i];
+      const hum0 = hums[i - 1];
+      const hum1 = hums[i];
+
+      const weight = (tMs - t0) / (t1 - t0);
+
+      // linear interpolation
+      const tempVal = temp0 * (1 - weight) + temp1 * weight;
+      const humVal = hum0 * (1 - weight) + hum1 * weight;
+
+      interpolatedTemps.push(Number(tempVal.toFixed(2)));
+      interpolatedHums.push(Number(humVal.toFixed(2)));
+    });
+
+    return { temps: interpolatedTemps, hums: interpolatedHums };
+  }
+
+
+  async function loadWeather() {
+    const lat = 40.4168;
+    const lon = -3.7038;
+
+    const from = document.getElementById('fromInput').value;
+    const to   = document.getElementById('toInput').value;
+
+    const start_hour = new Date(from).toISOString().slice(0, 16);; // e.g. "2026-02-04T15:30:00.000Z"
+    const end_hour   = new Date(to).toISOString().slice(0, 16);;
+
+    // const start_hour = "2026-02-01T10:00";
+    // const start_hour = "2026-02-01T18:00";
+
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone; // <-- browser timezone
+
+    const url = `https://api.open-meteo.com/v1/forecast?` +
+                `latitude=${lat}&longitude=${lon}`+
+                `&hourly=temperature_2m,relative_humidity_2m&` +
+                `start_hour=${encodeURIComponent(start_hour)}&`+
+                `end_hour=${encodeURIComponent(end_hour)}&`+
+                `timezone=${encodeURIComponent(tz)}`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    ({ temps: lastTemps_Weather, hums: lastHums_Weather } = interpolateHourlyAtLabels(data.hourly, lastTempHumLabels));
+
+    // lastTemps_Weather = temps;
+    // lastHums_Weather = hums;
+
+     console.log("Timezone used:", tz);
+    // console.log(data);
+  }
+
 
   function renderChart() {
     const canvas = document.getElementById("mainChart");
@@ -398,11 +491,18 @@
     let datasets = [];
     let scales = {};
 
+    const opTemp = document.getElementById("opTemp");
+    const opHum  = document.getElementById("opHum");
+
+    const showWeatherTemp = opTemp ? opTemp.checked : false;
+    const showWeatherHum  = opHum  ? opHum.checked  : false;
+
     if (currentMetric === "temperature") {
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C)";
       datasets = [
-        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)")
+        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)"),
+        makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", undefined, true,!showWeatherTemp)
       ];
       scales = { y: makeYAxis("Temperature (°C)") };
 
@@ -410,7 +510,8 @@
       labels = lastTempHumLabels;
       chartTitle = "Humidity (%)";
       datasets = [
-        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)")
+        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)"),
+        makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", undefined, true,!showWeatherHum)
       ];
       scales = { y: makeYAxis("Humidity (%)") };
 
@@ -428,7 +529,9 @@
 
       datasets = [
         makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
-        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum")
+        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
+        makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", "yTemp", true,!showWeatherTemp),
+        makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", "yHum", true,!showWeatherHum)
       ];
 
       scales = {
@@ -560,6 +663,8 @@
 
       mainChart.update("none"); // fast, no animation
     }
+
+    updateWeatherCheckboxes();
   }
 
   async function fetchData(minTs, maxTs) {
@@ -624,6 +729,14 @@ function startFetch({ chart }) {
     return { fromDate, toDate };
 }
 
+  function toggleDataset(label, isVisible) {
+    const ds = mainChart.data.datasets.find(d => d.label === label);
+    if (!ds) return;
+
+    ds.hidden = !isVisible;
+    mainChart.update("none");
+  }
+
 function applyXAxisRange() {
   if (!mainChart) return;
 
@@ -641,7 +754,7 @@ function applyXAxisRange() {
 
 /* ---------------- HELPERS ---------------- */
 
-  function makeDataset(label, data, borderColor, backgroundColor, yAxisID) {
+  function makeDataset(label, data, borderColor, backgroundColor, yAxisID, dashed = false,hidden = false) {
     return {
       label,
       data,
@@ -650,7 +763,10 @@ function applyXAxisRange() {
       backgroundColor,
       borderWidth: 1,
       tension: 0.3,
-      pointRadius: 2
+      pointRadius: dashed ? 0 : 2,
+      borderDash: dashed ? [6, 6] : [],
+      pointHoverRadius: dashed ? 0 : 4,
+      hidden
     };
   }
 
@@ -778,6 +894,8 @@ function applyXAxisRange() {
           else if (metric === "temp-humidity") {
             if (dp.dataset.label === "Temperature") unit = " °C";
             if (dp.dataset.label === "Humidity") unit = " %";
+            if (dp.dataset.label === "Temperature Weather") unit = " °C";
+            if (dp.dataset.label === "Humidity Weather") unit = " %";
           }
 
            const color = dp.dataset.borderColor || dp.dataset.backgroundColor || '#000';
@@ -1455,6 +1573,37 @@ function applyXAxisRange() {
       select.value = selectedTags[0].tagId;
       showTagDetails(selectedTags[0].tagId);
     }
+  }
+
+  function updateWeatherCheckboxes() {
+    const opTemp = document.getElementById("opTemp");
+    const opHum  = document.getElementById("opHum");
+    if (!opTemp || !opHum) return;
+
+    const tempAllowed = (currentMetric === "temperature" || currentMetric === "temp-humidity");
+    const humAllowed  = (currentMetric === "humidity"    || currentMetric === "temp-humidity");
+
+    // enable/disable
+    opTemp.disabled = !tempAllowed;
+    opHum.disabled  = !humAllowed;
+
+    // if disabled → uncheck + hide dataset
+    if (!tempAllowed) {
+      opTemp.checked = false;
+      toggleDataset("Temperature Weather", false);
+    }
+
+    if (!humAllowed) {
+      opHum.checked = false;
+      toggleDataset("Humidity Weather", false);
+    }
+
+    // optional: make disabled look disabled
+    opTemp.parentElement.classList.toggle("opacity-50", !tempAllowed);
+    opHum.parentElement.classList.toggle("opacity-50", !humAllowed);
+
+    opTemp.parentElement.classList.toggle("cursor-not-allowed", !tempAllowed);
+    opHum.parentElement.classList.toggle("cursor-not-allowed", !humAllowed);
   }
 
 

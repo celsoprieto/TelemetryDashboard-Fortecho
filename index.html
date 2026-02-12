@@ -392,7 +392,28 @@
       <div class="chart-container">
           <canvas id="mainChart"></canvas>
       </div>
+
+      <!-- Options Div -->
+      <div id="chartOptions" class="flex flex-row items-center justify-center space-x-4 p-2 border rounded bg-gray-50">
+       
+        <!-- Small divider / title -->
+        <div class="px-2 text-custom-green font-semibold text-sm border-l border-r border-gray-300">
+          External Weather          
+        </div>
+        <label class="inline-flex items-center">
+          <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600" id="opTemp">
+          <span class="ml-2 font-semibold text-xs text-custom-green">T</span>
+        </label>
+        <label class="inline-flex items-center">
+              <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600" id="opHum">
+              <span class="ml-2 font-semibold text-xs text-custom-green">rH</span>
+        </label>
+        
+      </div>
     </section>
+
+
+
   </section>
    <!-- VIEW: EVENTS -->
   <section id="view-events" class="view hidden">
