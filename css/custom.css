@@ -176,7 +176,7 @@
   .label-style {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-weight: bold;
-    font-size: 0.875rem;      /* 14px */
+    font-size: 1.25rem;      /* 20px */
     line-height: 1.25rem;     /* 20px */
     color: #157372;           /* teal */
     display: inline-block;
@@ -187,7 +187,7 @@
    .label-style-value  {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-weight: normal;
-    font-size: 0.875rem;      /* 14px */
+    font-size: 1.25rem;      /* 20px */
     line-height: 1.25rem;     /* 20px */
     display: inline-block;
     text-decoration: none;
