@@ -1751,11 +1751,50 @@ function makeTooltipOptions() {
         relative bg-white rounded-xl shadow-sm border border-gray-200 p-4
       `;
 
-      card.innerHTML = `
-        <!-- left red bar -->
-        <div class="absolute left-0 top-0 h-full w-1.5 ${barClass} rounded-l-xl"></div>
+      // card.innerHTML = `
+      //   <!-- left red bar -->
+      //   <div class="absolute left-0 top-0 h-full w-1.5 ${barClass} rounded-l-xl"></div>
 
-        <div class="flex items-start justify-between gap-3">
+      //   <div class="flex items-start justify-between gap-3">
+      //     <div class="min-w-0">
+      //       <div class="font-bold text-sky-600 truncate">
+      //         ${escapeHtml(title)}
+      //       </div>
+
+      //       <div class="text-sm text-sky-600 font-medium">
+      //         ${escapeHtml(sub1)}
+      //       </div>
+
+      //       <div class="text-xs ${textColorClass}">
+      //         ${escapeHtml(sub2)}
+      //       </div>
+      //     </div>
+
+      //     <!-- Checkbox -->
+      //     <input
+      //       type="checkbox"
+      //       class="shrink-0 p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+      //       title="Select"
+      //       data-tagid="${tag.tagId}"
+      //       ${tag.isSelected ? "checked" : ""}
+      //     />
+
+      // </div>
+      // `;
+
+      card.innerHTML = `
+        <!-- Absolute overlay button -->
+        <button
+          type="button"
+          class="absolute inset-0 w-full h-full cursor-pointer z-10"
+          data-tagid="${tag.tagId}"
+          title="${tag.isSelected ? 'Deselect' : 'Select'}"
+        ></button>
+
+        <!-- left red bar -->
+        <div class="absolute left-0 top-0 h-full w-1.5 ${barClass} rounded-l-xl pointer-events-none"></div>
+
+        <div class="flex items-start justify-between gap-3 pointer-events-none">
           <div class="min-w-0">
             <div class="font-bold text-sky-600 truncate">
               ${escapeHtml(title)}
@@ -1769,18 +1808,8 @@ function makeTooltipOptions() {
               ${escapeHtml(sub2)}
             </div>
           </div>
-
-          <!-- Checkbox -->
-          <input
-            type="checkbox"
-            class="shrink-0 p-2 rounded-lg hover:bg-gray-100 text-gray-600"
-            title="Select"
-            data-tagid="${tag.tagId}"
-            ${tag.isSelected ? "checked" : ""}
-          />
-
-      </div>
-      `;
+        </div>
+    `;
        
       grid.appendChild(card);
 
@@ -1789,27 +1818,46 @@ function makeTooltipOptions() {
       const bar = card.querySelector("div.absolute");
       const textElements = card.querySelector("div.text-xs");
 
-      checkbox.addEventListener("change", () => {
-        tag.isSelected = checkbox.checked;
+      // checkbox.addEventListener("change", () => {
+      //   tag.isSelected = checkbox.checked;
 
-        // update bar color dynamically
-        bar.classList.remove("bg-custom-green", "bg-custom-red");
-        bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
-        textElements.classList.remove("text-custom-green", "text-custom-red");
-        textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-red");
+      //   // update bar color dynamically
+      //   bar.classList.remove("bg-custom-green", "bg-custom-red");
+      //   bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
+      //   textElements.classList.remove("text-custom-green", "text-custom-red");
+      //   textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-red");
 
 
-        // call editTag or other logic
-        if (tag.isSelected) {
-          //editTag(tag);
-        } else {
-          // console.log(`Tag ${tag.tagId} deselected`);
-        }
-          refreshTagSelect(); 
-      });
+      //   // call editTag or other logic
+      //   if (tag.isSelected) {
+      //     //editTag(tag);
+      //   } else {
+      //     // console.log(`Tag ${tag.tagId} deselected`);
+      //   }
+      //     refreshTagSelect(); 
+      // });
+      // Add event listener after setting innerHTML
+      const button = card.querySelector('button[data-tagid]');
+      button.addEventListener('click', function() {
+      // const tagId = this.getAttribute('data-tagid');
+      // const tag = tags.find(t => t.tagId === tagId);
+      tag.isSelected = !tag.isSelected;
+      // update bar color dynamically
+      bar.classList.remove("bg-custom-green", "bg-custom-red");
+      bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
+      textElements.classList.remove("text-custom-green", "text-custom-red");
+      textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-red");
+      
+      if (tag) {
+        
+        refreshTagSelect(); // Re-render to update UI
+      }
+    });
 
     });
   }
+
+
 
   function escapeHtml(str) {
     return String(str ?? "")
