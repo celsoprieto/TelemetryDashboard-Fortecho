@@ -17,6 +17,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- <script src="https://cdn.tailwindcss.com"></script> --> 
   <!-- <script src="https://cdn.jsdelivr.net/npm/date-fns@2"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
   <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
@@ -200,7 +201,7 @@
       </div>
       <div class="flex flex-col md:flex-row items-center md:items-end gap-2 w-full">
           <!-- Tag ID select -->
-          <div class="flex flex-col items-center md:items-start min-w-[150px]">
+          <div class="flex flex-col items-center md:items-start ">
             <label class="font-sans font-bold text-xs sm:text-sm leading-5 !text-[#157372] text-center md:text-left">
               Tag ID:
             </label>
@@ -357,16 +358,16 @@
       <div id="chartOptions" class="flex flex-row items-center justify-center space-x-4 p-2 border rounded bg-gray-50">
        
         <!-- Small divider / title -->
-        <div class="px-2 text-custom-green font-semibold text-sm border-l border-r border-gray-300">
+        <div class="px-2 text-custom-green font-semibold text-sm  border-gray-300">
           External Weather          
         </div>
         <label class="inline-flex items-center">
-          <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600" id="opTemp">
-          <span class="ml-2 font-semibold text-xs text-custom-green">T</span>
+          <input type="checkbox" class="form-checkbox h-4 w-4 accent-custom-red" id="opTemp">
+          <span class="ml-2 font-semibold text-xs text-custom-red">T</span>
         </label>
         <label class="inline-flex items-center">
-              <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600" id="opHum">
-              <span class="ml-2 font-semibold text-xs text-custom-green">rH</span>
+              <input type="checkbox" class="form-checkbox h-4 w-4 accent-custom-blue" id="opHum">
+              <span class="ml-2 font-semibold text-xs text-custom-blue ">rH</span>
         </label>
         
       </div>

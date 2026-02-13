@@ -484,13 +484,30 @@
     const res = await fetch(url);
     const data = await res.json();
 
-    ({ temps: lastTemps_Weather, hums: lastHums_Weather } = interpolateHourlyAtLabels(data.hourly, lastTempHumLabels));
+    // ({ temps: lastTemps_Weather, hums: lastHums_Weather } = interpolateHourlyAtLabels(data.hourly, lastTempHumLabels));
 
-    // lastTemps_Weather = temps;
-    // lastHums_Weather = hums;
+    lastTemps_Weather = toXYPoints(data.hourly.time, data.hourly.temperature_2m);
+    lastHums_Weather = toXYPoints(data.hourly.time, data.hourly.relative_humidity_2m);
 
      console.log("Timezone used:", tz);
     // console.log(data);
+  }
+
+  function toXYPoints(timestamps, values) {
+    const out = [];
+
+    const n = Math.min(timestamps.length, values.length);
+
+    for (let i = 0; i < n; i++) {
+      const x = timestamps[i];
+      const y = values[i];
+
+      if (x == null || y == null) continue;
+
+      out.push({ x, y });
+    }
+
+    return out;
   }
 
 
@@ -514,11 +531,17 @@
     const showWeatherTemp = opTemp ? opTemp.checked : false;
     const showWeatherHum  = opHum  ? opHum.checked  : false;
 
+    const tempPoints = toXYPoints(lastTempHumLabels, lastTemps);
+    const humPoints  = toXYPoints(lastTempHumLabels, lastHums);
+    const tempWeatherPoints = toXYPoints(lastTempHumLabels, lastTemps_Weather);
+    const humWeatherPoints  = toXYPoints(lastTempHumLabels, lastHums_Weather);
+    const today = new Date();
+
     if (currentMetric === "temperature") {
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C)";
       datasets = [
-        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)"),
+        makeDataset("Temperature", tempPoints, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)"),
         makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", undefined, true,!showWeatherTemp)
       ];
       scales = { y: makeYAxis("Temperature (°C)") };
@@ -527,7 +550,7 @@
       labels = lastTempHumLabels;
       chartTitle = "Humidity (%)";
       datasets = [
-        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)"),
+        makeDataset("Humidity", humPoints, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)"),
         makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", undefined, true,!showWeatherHum)
       ];
       scales = { y: makeYAxis("Humidity (%)") };
@@ -545,8 +568,8 @@
       chartTitle = "Temperature (°C) & Humidity (%)";
 
       datasets = [
-        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
-        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
+        makeDataset("Temperature", tempPoints, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
+        makeDataset("Humidity", humPoints, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
         makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", "yTemp", true,!showWeatherTemp),
         makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", "yHum", true,!showWeatherHum)
       ];
@@ -616,7 +639,7 @@
     if (!mainChart) {
       mainChart = new Chart(ctx, {
         type: "line",
-        data: { labels, datasets },
+        data: {  datasets },
         options: {
           responsive: true,
           maintainAspectRatio: false,
@@ -632,7 +655,10 @@
                 onPanComplete({ chart }) {
                   console.log('Pan done');
                   syncInputsFromChart(chart);
-                  startFetch({ chart });
+                  // startFetch({ chart });
+                  limits: {
+                    x: { max: today.getTime() } // no permite pan más allá de hoy
+                  }
                 }
               },
               zoom: {
@@ -642,7 +668,10 @@
                 mode: 'x',
                 onZoomComplete({ chart }) {
                   syncInputsFromChart(chart);
-                  startFetch({ chart });
+                  // startFetch({ chart });
+                  limits: {
+                    x: { max: today.getTime() } // no permite pan más allá de hoy
+                  }
                 }
               }
             }
@@ -654,7 +683,7 @@
             x: {
               ...makeXAxis(),
               min: fromDate ? fromDate.getTime() : undefined,
-              max: toDate ? toDate.getTime() : undefined
+              max: Math.min(toDate ? toDate.getTime() : today.getTime(), today.getTime())
             },
             ...scales
           }
@@ -663,7 +692,7 @@
 
     } else {
       // update existing chart
-      mainChart.data.labels = labels;
+      //mainChart.data.labels = labels;
       mainChart.data.datasets = datasets;
 
       mainChart.options.currentMetric = currentMetric;
@@ -673,7 +702,7 @@
         x: {
           ...makeXAxis(),
           min: fromDate ? fromDate.getTime() : undefined,
-          max: toDate ? toDate.getTime() : undefined
+          max: Math.min(toDate ? toDate.getTime() : today.getTime(), today.getTime())
         },
         ...scales
       };
@@ -685,54 +714,117 @@
   }
 
   async function fetchData(minTs, maxTs) {
-  const select = document.getElementById("tagIdSelect");
-  const tagId = select.value;
-  if (!tagId) return { temps: [], hums: [] };
+    const select = document.getElementById("tagIdSelect");
+    const tagId = select.value;
+    if (!tagId) return { temps: [], hums: [] };
 
-  const from = new Date(minTs).toISOString();
-  const to = new Date(maxTs).toISOString();
+    const from = new Date(minTs).toISOString();
+    const to = new Date(maxTs).toISOString();
 
-  const params = new URLSearchParams({sitecode, tagId, from, to });
-  const res = await fetch(`${API_BASE}/telemetry?${params.toString()}`);
-  const data = await res.json();
+    const params = new URLSearchParams({sitecode, tagId, from, to });
+    const res = await fetch(`${API_BASE}/telemetry?${params.toString()}`);
+    const data = await res.json();
 
-  const temps = [];
-  const hums = [];
+    const temps = [];
+    const hums = [];
+   
 
-  for (const d of data) {
-    const s = d.sensorData;
-    if (!s) continue;
+    await loadWeather(); // get latest weather data for the new range
 
-    if (s.sensorTrH === 1) {
-      temps.push(s.temperatureEv ?? null);
-      hums.push(s.humidityEv ?? null);
+    for (const d of data) {
+      const s = d.sensorData;
+      if (!s) continue;
+
+      if (s.sensorTrH === 1) {
+        temps.push(s.temperatureEv ?? null);
+        hums.push(s.humidityEv ?? null);
+      }
     }
-  }
 
-  return { temps, hums };
-}
+
+
+    return { temps, hums };
+  }
 
 
   let timer;
-function startFetch({ chart }) {
-  const { min, max } = chart.scales.x;
-  clearTimeout(timer);
+// function startFetch({ chart }) {
+//   const { min, max } = chart.scales.x;
+//   clearTimeout(timer);
 
-  timer = setTimeout(async () => {
-    //console.log('Fetching data between ' + min + ' and ' + max);
+//   timer = setTimeout(async () => {
+//     //console.log('Fetching data between ' + min + ' and ' + max);
 
-    // call your API to get new data
-    const newData = await fetchData(min, max); // implement fetchData()
+//     // call your API to get new data
+//     const newData = await fetchData(min, max); // implement fetchData()
 
-    // Update datasets
-    if (chart.data.datasets.length > 0) {
-      chart.data.datasets[0].data = newData.temps; // example
-      if (chart.data.datasets[1]) chart.data.datasets[1].data = newData.hums; // for temp-humidity
-    }
+//     // Update datasets
+//     if (chart.data.datasets.length > 0) {
+//       chart.data.datasets[0].data = newData.temps; // example
+//       if (chart.data.datasets[1]) chart.data.datasets[1].data = newData.hums; // for temp-humidity
+//     }
 
-    chart.update("none"); // fast update without animation
-  }, 500);
-}
+//     chart.update("none"); // fast update without animation
+//   }, 500);
+// }
+
+  async function startFetch({ chart }) {
+    if (!chart || !chart.scales || !chart.data.datasets) return;
+
+    // Obtener rango visible del eje X
+    const { min, max } = chart.scales.x;
+    const { min: minT , max: maxT } = chart.scales.yTemp;
+    const { min: minH, max: maxH } = chart.scales.yHum;
+
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      try {
+        // Traer datos para el rango visible
+        // Implementa fetchData(min, max) según tu API
+        const newData = await fetchData(min, max);
+        // newData = {
+        //   temps: [...],
+        //   hums: [...],
+        //   tempsWeather: [...],
+        //   humsWeather: [...]
+        // }
+
+        // Actualizar datasets según label
+        chart.data.datasets.forEach(ds => {
+          switch (ds.label) {
+            case "Temperature":
+              ds.data = newData.temps;
+              break;
+            case "Humidity":
+              ds.data = newData.hums;
+              break;
+            case "Temperature Weather":
+              ds.data = lastTemps_Weather.y;
+              break;
+            case "Humidity Weather":
+              ds.data = lastHums_Weather.y;
+              break;
+          }
+        });
+
+        // Opcional: mantener límites de los ejes y para que no se vayan de rango
+        if (chart.options.scales.yTemp) {
+          chart.options.scales.yTemp.min = minT;
+          chart.options.scales.yTemp.max = maxT; // ajusta según tus datos
+        }
+        if (chart.options.scales.yHum) {
+          chart.options.scales.yHum.min = minH;
+          chart.options.scales.yHum.max = maxH; // ajusta según tus datos
+        }
+
+        // Actualizar gráfico sin animación
+        chart.update("none");
+
+      } catch (err) {
+        console.error("Error fetching chart data:", err);
+      }
+    }, 500); // retraso para evitar múltiples llamadas rápidas
+  }
 
 
 
@@ -851,7 +943,7 @@ function applyXAxisRange() {
     };
   }
 
-  function makeTooltipOptions() {
+  function makeTooltipOptions1() {
     
     function getTooltipEl(chart) {
       let tooltipEl = document.getElementById('chartjs-tooltip');
@@ -904,23 +996,46 @@ function applyXAxisRange() {
           const y = dp.parsed.y;
           let unit = '';
           const metric = context.chart.options.currentMetric;
+          const label = dp.dataset.label ;
 
           if (metric === "temperature") unit = " °C";
           else if (metric === "humidity") unit = " %";
           else if (metric === "light") unit = " Lux";
           else if (metric === "temp-humidity") {
-            if (dp.dataset.label === "Temperature") unit = " °C";
-            if (dp.dataset.label === "Humidity") unit = " %";
-            if (dp.dataset.label === "Temperature Weather") unit = " °C";
-            if (dp.dataset.label === "Humidity Weather") unit = " %";
+            if (label === "Temperature") unit = " °C";
+            if (label === "Humidity") unit = " %";
+            if (label === "Temperature Weather") unit = " °C";
+            if (label === "Humidity Weather") unit = " %";
           }
 
            const color = dp.dataset.borderColor || dp.dataset.backgroundColor || '#000';
 
+          // Decide si usar círculo o línea
+          let markerHtml = '';
+          if (label === "Temperature Weather" || label === "Humidity Weather") {
+            // línea gruesa horizontal
+            markerHtml = `<span style="
+              display:inline-block;
+              width:6px;
+              height:3px;
+              background:${color};
+              border-radius:2px;
+            "></span>`;
+          } else {
+            // círculo pequeño normal
+            markerHtml = `<span style="
+              display:inline-block;
+              width:8px;
+              height:8px;
+              border-radius:50%;
+              background:${color};
+            "></span>`;
+          }
+
           innerHtml += `
             <div style="font-size:11px; display:flex; align-items:center; gap:4px;">
-              <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${color};"></span>
-              <span>${dp.dataset.label}: <b>${y}${unit}</b></span>
+              ${markerHtml}
+              <span>${label}: <b>${y}${unit}</b></span>
             </div>
           `;
         });
@@ -935,6 +1050,128 @@ function applyXAxisRange() {
       }
     };
   }
+
+function makeTooltipOptions() {
+
+  function getTooltipEl(chart) {
+    let tooltipEl = document.getElementById('chartjs-tooltip');
+    if (!tooltipEl) {
+      tooltipEl = document.createElement('div');
+      tooltipEl.id = 'chartjs-tooltip';
+      tooltipEl.style.position = 'absolute';
+      tooltipEl.style.background = '#ffffff';
+      tooltipEl.style.border = '1px solid #d0d7e2';
+      tooltipEl.style.padding = '8px';
+      tooltipEl.style.fontFamily = 'sans-serif';
+      tooltipEl.style.fontSize = '10px';
+      tooltipEl.style.pointerEvents = 'none';
+      tooltipEl.style.borderRadius = '4px';
+      tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+      tooltipEl.style.transition = 'all 0.1s ease';
+      tooltipEl.style.opacity = 0;
+      document.body.appendChild(tooltipEl);
+    }
+    return tooltipEl;
+  }
+
+  return {
+    enabled: false,
+    mode: 'nearest',
+    intersect: false,
+    external: function(context) {
+      const tooltipEl = getTooltipEl(context.chart);
+      const tooltipModel = context.tooltip;
+      const chart = context.chart;
+
+      if (tooltipModel.opacity === 0) {
+        tooltipEl.style.opacity = 0;
+        return;
+      }
+
+      const xScale = chart.scales.x;
+      const xValue = xScale.getValueForPixel(tooltipModel.caretX);
+
+      // Formato de fecha/hora en tooltip
+      const date = new Date(xValue);
+      const dateStr = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+      const timeStr = date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+
+      let innerHtml = `<div style="font-weight: normal; margin-bottom:4px;">${dateStr} ${timeStr}</div>`;
+
+      // ---- recorrer todos los datasets ----
+      chart.data.datasets.forEach(ds => {
+        if (!ds.data || ds.data.length === 0) return;
+        if (ds.hidden) return;
+
+        let nearest = null;
+        let minDiff = Infinity;
+
+        ds.data.forEach(v => {
+          // v = {x, y}
+          const ts = new Date(v.x).getTime(); // milisegundos
+          if (ts == null) return;
+
+          const diff = Math.abs(ts - xValue);
+          if (diff < minDiff) {
+            minDiff = diff;
+            nearest = v;
+          }
+        });
+
+        if (!nearest) return;
+
+        const y = nearest.y;
+        const label = ds.label;
+        let unit = '';
+        const metric = chart.options.currentMetric;
+
+        if (metric === "temperature") unit = " °C";
+        else if (metric === "humidity") unit = " %";
+        else if (metric === "light") unit = " Lux";
+        else if (metric === "temp-humidity") {
+          if (label.includes("Temperature")) unit = " °C";
+          if (label.includes("Humidity")) unit = " %";
+        }
+
+        const color = ds.borderColor || ds.backgroundColor || '#000';
+
+        // Marcador: línea para Weather, círculo para normal
+        let markerHtml = '';
+        if (label.includes("Weather")) {
+          markerHtml = `<span style="
+            display:inline-block;
+            width:8px;
+            height:3px;
+            background:${color};
+            border-radius:2px;
+          "></span>`;
+        } else {
+          markerHtml = `<span style="
+            display:inline-block;
+            width:8px;
+            height:8px;
+            border-radius:50%;
+            background:${color};
+          "></span>`;
+        }
+
+        innerHtml += `
+          <div style="font-size:11px; display:flex; align-items:center; gap:4px;">
+            ${markerHtml} <span>${label}: <b>${y}${unit}</b></span>
+          </div>`;
+      });
+
+      tooltipEl.innerHTML = innerHtml;
+
+      // Posicionar tooltip cerca del cursor
+      const canvasRect = chart.canvas.getBoundingClientRect();
+      tooltipEl.style.opacity = 1;
+      tooltipEl.style.left = canvasRect.left + window.pageXOffset + tooltipModel.caretX + 'px';
+      tooltipEl.style.top = canvasRect.top + window.pageYOffset + tooltipModel.caretY + 'px';
+    }
+  };
+}
+
 
 
 

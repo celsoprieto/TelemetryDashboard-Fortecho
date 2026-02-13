@@ -38,6 +38,7 @@ module.exports = {
     extend: {colors: {
         "custom-green": "#157372",
         "custom-red": "#DA494E",
+        "custom-blue": "#35AADF",
       } },
   },
   plugins: [],
