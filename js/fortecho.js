@@ -1470,6 +1470,14 @@ function makeTooltipOptions() {
     pageSize: 20
   };
 
+    let stateAlarms = {
+    search: "",
+    sortKey: "document_dateUtc",
+    sortDir: "desc",
+    page: 1,
+    pageSize: 20
+  };
+
   // ==========================
   // 3) HELPERS
   // ==========================
@@ -1536,7 +1544,7 @@ function makeTooltipOptions() {
   }
 
     function getFilteredDataAlarms() {
-    const q = state.search.trim().toLowerCase();
+    const q = stateAlarms.search.trim().toLowerCase();
     if (!q) return [...alarmsrawData];
 
     return alarmsrawData.filter(row => {
@@ -1567,7 +1575,7 @@ function makeTooltipOptions() {
   }
 
     function getSortedDataAlarms(rows) {
-    const { sortKey, sortDir } = state;
+    const { sortKey, sortDir } = stateAlarms;
 
     return [...rows].sort((a, b) => {
       let va = a[sortKey];
@@ -1591,6 +1599,11 @@ function makeTooltipOptions() {
   function getPagedData(rows) {
     const start = (state.page - 1) * state.pageSize;
     return rows.slice(start, start + state.pageSize);
+  }
+
+    function getPagedDataAlarms(rows) {
+    const start = (stateAlarms.page - 1) * stateAlarms.pageSize;
+    return rows.slice(start, start + stateAlarms.pageSize);
   }
 
   // ==========================
@@ -1636,8 +1649,8 @@ function makeTooltipOptions() {
   function renderHeadAlarms() {
     const head = document.getElementById("tableAHead");
     head.innerHTML = columnalarms.map(col => {
-      const isActive = state.sortKey === col.key;
-      const arrow = isActive ? (state.sortDir === "asc" ? "▲" : "▼") : "";
+      const isActive = stateAlarms.sortKey === col.key;
+      const arrow = isActive ? (stateAlarms.sortDir === "asc" ? "▲" : "▼") : "";
 
       return `
         <th
@@ -1657,14 +1670,14 @@ function makeTooltipOptions() {
       th.addEventListener("click", () => {
         const key = th.dataset.key;
 
-        if (state.sortKey === key) {
-          state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+        if (stateAlarms.sortKey === key) {
+          stateAlarms.sortDir = stateAlarms.sortDir === "asc" ? "desc" : "asc";
         } else {
-          state.sortKey = key;
-          state.sortDir = "asc";
+          stateAlarms.sortKey = key;
+          stateAlarms.sortDir = "asc";
         }
 
-        state.page = 1;
+        stateAlarms.page = 1;
         render();
       });
     });
@@ -1720,8 +1733,13 @@ function makeTooltipOptions() {
       return;
     }
 
-    body.innerHTML = rows.map(row => `
-      <tr class="hover:bg-gray-50">
+    body.innerHTML = rows.map(row => {
+      const trClass =
+        row.event_typeId === 5
+          ? "bg-custom-red-light hover:bg-custom-red"   // 🔥 rojo suave
+          : "hover:bg-gray-50";
+      return `
+      <tr class="${trClass}">
         ${columnalarms.map(col => {
           let value = row[col.key];
 
@@ -1739,7 +1757,7 @@ function makeTooltipOptions() {
           `;
         }).join("")}
       </tr>
-    `).join("");
+    `;}).join("");
   }
 
   function renderFooter(total, filtered) {
@@ -1774,6 +1792,38 @@ function makeTooltipOptions() {
     buildPageButtons(totalPages);
   }
 
+    function renderFooterAlarms(total, filtered) {
+    const rowsAInfo = document.getElementById("rowsAInfo");
+    const prevABtn = document.getElementById("prevABtn");
+    const nextABtn = document.getElementById("nextABtn");
+
+    const totalPages = Math.max(1, Math.ceil(filtered / stateAlarms.pageSize));
+    if (stateAlarms.page > totalPages) stateAlarms.page = totalPages;
+
+    // Info texto
+    const start = filtered === 0 ? 0 : (stateAlarms.page - 1) * stateAlarms.pageSize + 1;
+    const end = Math.min(filtered, stateAlarms.page * stateAlarms.pageSize);
+
+    rowsAInfo.textContent = `Showing ${start} - ${end} of ${filtered} (total ${total})`;
+
+    // Prev/Next enable
+    prevABtn.disabled = stateAlarms.page <= 1;
+    nextABtn.disabled = stateAlarms.page >= totalPages;
+
+    prevABtn.onclick = () => {
+      stateAlarms.page--;
+      renderAlarms();
+    };
+
+    nextABtn.onclick = () => {
+      stateAlarms.page++;
+      renderAlarms();
+    };
+
+ 
+    buildPageButtonsAlarms(totalPages);
+  }
+
 
   function render() {
     renderHead();
@@ -1791,10 +1841,10 @@ function makeTooltipOptions() {
 
     const filteredRows = getFilteredDataAlarms();
     const sortedRows = getSortedDataAlarms(filteredRows);
-    const pagedRows = getPagedData(sortedRows);
+    const pagedRows = getPagedDataAlarms(sortedRows);
 
     renderBodyAlarms(pagedRows);
-    renderFooter(alarmsrawData.length, filteredRows.length);
+    renderFooterAlarms(alarmsrawData.length, filteredRows.length);
   }
 
   // ==========================
@@ -1838,6 +1888,71 @@ function makeTooltipOptions() {
       btn.addEventListener("click", () => {
         state.page = page;
         render();
+      });
+
+      container.appendChild(btn);
+    };
+
+    const addDots = () => {
+      const span = document.createElement("span");
+      span.textContent = "...";
+      span.className = "px-2 text-gray-400 select-none";
+      container.appendChild(span);
+    };
+
+
+    const pages = new Set();
+
+    pages.add(1);
+    pages.add(2);
+    pages.add(totalPages);
+    pages.add(totalPages - 1);
+    pages.add(current);
+    pages.add(current - 1);
+    pages.add(current + 1);
+
+    // limpiar inválidos
+    const finalPages = [...pages]
+      .filter(p => p >= 1 && p <= totalPages)
+      .sort((a, b) => a - b);
+
+    // render con dots
+    for (let i = 0; i < finalPages.length; i++) {
+      const p = finalPages[i];
+      addBtn(p);
+
+      const next = finalPages[i + 1];
+      if (next && next !== p + 1) addDots();
+    }
+  }
+
+  function buildPageButtonsAlarms(totalPages) {
+    const container = document.getElementById("pageAButtons");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const current = stateAlarms.page;
+
+    const addBtn = (page) => {
+      const isActive = page === current;
+
+      const btn = document.createElement("button");
+      btn.textContent = page;
+
+      btn.className = `
+        inline-flex items-center justify-center
+        min-w-[38px] h-10 px-3 rounded-xl text-sm border transition
+        whitespace-nowrap
+        ${isActive
+          ? "bg-teal-600 text-white border-teal-600"
+          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"}
+        mr-1
+      `;
+
+      btn.addEventListener("click", () => {
+        stateAlarms.page = page;
+        renderAlarms();
       });
 
       container.appendChild(btn);

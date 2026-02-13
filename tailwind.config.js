@@ -38,6 +38,7 @@ module.exports = {
     extend: {colors: {
         "custom-green": "#157372",
         "custom-red": "#DA494E",
+        "custom-red-light": "#F8C9CB",
         "custom-blue": "#35AADF",
       } },
   },
