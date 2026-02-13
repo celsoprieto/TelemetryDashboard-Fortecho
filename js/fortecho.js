@@ -466,8 +466,10 @@
     const from = document.getElementById('fromInput').value;
     const to   = document.getElementById('toInput').value;
 
-    const start_hour = new Date(from).toISOString().slice(0, 16);; // e.g. "2026-02-04T15:30:00.000Z"
-    const end_hour   = new Date(to).toISOString().slice(0, 16);;
+    // const start_hour = new Date(from).toISOString().slice(0, 16); // e.g. "2026-02-04T15:30:00.000Z"
+    // const end_hour   = new Date(to).toISOString().slice(0, 16);
+    const start_hour = toLocalISOString(from);
+    const end_hour = toLocalISOString_Rounded(to);
 
     // const start_hour = "2026-02-01T10:00";
     // const start_hour = "2026-02-01T18:00";
@@ -886,6 +888,43 @@ function applyXAxisRange() {
 
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} - ` +
           `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function toLocalISOString(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  function toLocalISOString_Rounded(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    
+    // Round up to next hour if there are any minutes
+    let hours = d.getHours();
+    const minutes = d.getMinutes();
+    
+    if (minutes > 0) {
+      hours += 1;
+      // Handle day rollover if hours becomes 24
+      if (hours === 24) {
+        const nextDay = new Date(d);
+        nextDay.setDate(nextDay.getDate() + 1);
+        nextDay.setHours(0, 0, 0, 0);
+        return `${nextDay.getFullYear()}-${String(nextDay.getMonth() + 1).padStart(2, '0')}-${String(nextDay.getDate()).padStart(2, '0')}T00:00`;
+      }
+    }
+    
+    const roundedHours = String(hours).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${roundedHours}:00`;
   }
 
  
