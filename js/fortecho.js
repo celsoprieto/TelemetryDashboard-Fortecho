@@ -18,6 +18,7 @@
     let eventsGridBuilt = false;
     let deviceIdForEvents = "watchdog_cp"; // hardcoded, adjust as needed
     let deviceeventsrawData = [];
+    let alarmsrawData = [];
 
     // Load tags on page load
     window.addEventListener("DOMContentLoaded", async () => {
@@ -1363,6 +1364,10 @@ function makeTooltipOptions() {
 
         renderTagsGrid(tagsById);          // optional: refresh tags list
       }
+
+      if (viewName === "alarms") {
+        await loadAlarms();        // optional: load data into it
+      }
     }
 
     links.forEach(link => {
@@ -1428,6 +1433,8 @@ function makeTooltipOptions() {
 
 
 
+
+
   
   // ==========================
   // 2) GRID CONFIG
@@ -1437,6 +1444,17 @@ function makeTooltipOptions() {
     { key: "deviceId", label: "Device" },
     { key: "eventType", label: "Event Type" },
     { key: "hubName", label: "Hub" }
+    // ,
+    // { key: "id", label: "Id" },
+    // { key: "sequenceNumber", label: "Sequence" }
+  ];
+
+    const columnalarms = [
+    { key: "document_dateUtc", label: "Alarm Date" },
+    { key: "event_type", label: "Alarm Type" },
+    { key: "tagId", label: "Tag ID" },
+    { key: "object_marque", label: "Artist" },
+    { key: "object_model", label: "Title" }
     // ,
     // { key: "id", label: "Id" },
     // { key: "sequenceNumber", label: "Sequence" }
@@ -1468,6 +1486,19 @@ function makeTooltipOptions() {
     // nicer display
     return d.toLocaleString();
   }
+
+  function formatTimestampAlarms(ts) {
+    if (!ts) return "";
+
+    // Convert "YYYY-MM-DD HH:mm:ss" to ISO UTC
+    const isoTs = ts.replace(" ", "T") + "Z";
+
+    const date = new Date(isoTs);
+    if (isNaN(date.getTime())) return ts;
+
+    return date.toLocaleString(); // local time
+  }
+
 
   function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
@@ -1504,6 +1535,15 @@ function makeTooltipOptions() {
     });
   }
 
+    function getFilteredDataAlarms() {
+    const q = state.search.trim().toLowerCase();
+    if (!q) return [...alarmsrawData];
+
+    return alarmsrawData.filter(row => {
+      return columnalarms.some(c => safeStr(row[c.key]).toLowerCase().includes(q));
+    });
+  }
+
   function getSortedData(rows) {
     const { sortKey, sortDir } = state;
 
@@ -1513,6 +1553,28 @@ function makeTooltipOptions() {
 
       // sort timestamp properly
       if (sortKey === "timestamp") {
+        va = new Date(va).getTime();
+        vb = new Date(vb).getTime();
+      } else {
+        va = safeStr(va).toLowerCase();
+        vb = safeStr(vb).toLowerCase();
+      }
+
+      if (va < vb) return sortDir === "asc" ? -1 : 1;
+      if (va > vb) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+
+    function getSortedDataAlarms(rows) {
+    const { sortKey, sortDir } = state;
+
+    return [...rows].sort((a, b) => {
+      let va = a[sortKey];
+      let vb = b[sortKey];
+
+      // sort timestamp properly
+      if (sortKey === "document_dateUtc") {
         va = new Date(va).getTime();
         vb = new Date(vb).getTime();
       } else {
@@ -1537,6 +1599,43 @@ function makeTooltipOptions() {
   function renderHead() {
     const head = document.getElementById("tableHead");
     head.innerHTML = columnsevents.map(col => {
+      const isActive = state.sortKey === col.key;
+      const arrow = isActive ? (state.sortDir === "asc" ? "▲" : "▼") : "";
+
+      return `
+        <th
+          data-key="${col.key}"
+          class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer select-none hover:text-gray-900"
+        >
+          <div class="flex items-center gap-2">
+            <span class="eventscolumnheader">${col.label}</span>
+            <span class="eventscolumnheader">${arrow}</span>
+          </div>
+        </th>
+      `;
+    }).join("");
+
+    // click sort
+    [...head.querySelectorAll("th")].forEach(th => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.key;
+
+        if (state.sortKey === key) {
+          state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
+        } else {
+          state.sortKey = key;
+          state.sortDir = "asc";
+        }
+
+        state.page = 1;
+        render();
+      });
+    });
+  }
+
+  function renderHeadAlarms() {
+    const head = document.getElementById("tableAHead");
+    head.innerHTML = columnalarms.map(col => {
       const isActive = state.sortKey === col.key;
       const arrow = isActive ? (state.sortDir === "asc" ? "▲" : "▼") : "";
 
@@ -1607,6 +1706,42 @@ function makeTooltipOptions() {
     `).join("");
   }
 
+    function renderBodyAlarms(rows) {
+    const body = document.getElementById("tableABody");
+
+    if (!rows.length) {
+      body.innerHTML = `
+        <tr>
+          <td colspan="${columns.length}" class="px-4 py-10 text-center text-gray-500">
+            No results found
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    body.innerHTML = rows.map(row => `
+      <tr class="hover:bg-gray-50">
+        ${columnalarms.map(col => {
+          let value = row[col.key];
+
+          // format timestamp
+          if (col.key === "document_dateUtc") value = formatTimestampAlarms(value);
+
+          const rawValue = safeStr(row[col.key]);
+
+          return `
+            <td class="px-4 py-3 align-top">
+              <div class="flex items-start gap-2">
+                <span class="text-gray-800 break-all">${safeStr(value)}</span>
+             </div>
+            </td>
+          `;
+        }).join("")}
+      </tr>
+    `).join("");
+  }
+
   function renderFooter(total, filtered) {
     const rowsInfo = document.getElementById("rowsInfo");
     const prevBtn = document.getElementById("prevBtn");
@@ -1649,6 +1784,17 @@ function makeTooltipOptions() {
 
     renderBody(pagedRows);
     renderFooter(deviceeventsrawData.length, filteredRows.length);
+  }
+
+    function renderAlarms() {
+    renderHeadAlarms();
+
+    const filteredRows = getFilteredDataAlarms();
+    const sortedRows = getSortedDataAlarms(filteredRows);
+    const pagedRows = getPagedData(sortedRows);
+
+    renderBodyAlarms(pagedRows);
+    renderFooter(alarmsrawData.length, filteredRows.length);
   }
 
   // ==========================
@@ -1751,37 +1897,6 @@ function makeTooltipOptions() {
         relative bg-white rounded-xl shadow-sm border border-gray-200 p-4
       `;
 
-      // card.innerHTML = `
-      //   <!-- left red bar -->
-      //   <div class="absolute left-0 top-0 h-full w-1.5 ${barClass} rounded-l-xl"></div>
-
-      //   <div class="flex items-start justify-between gap-3">
-      //     <div class="min-w-0">
-      //       <div class="font-bold text-sky-600 truncate">
-      //         ${escapeHtml(title)}
-      //       </div>
-
-      //       <div class="text-sm text-sky-600 font-medium">
-      //         ${escapeHtml(sub1)}
-      //       </div>
-
-      //       <div class="text-xs ${textColorClass}">
-      //         ${escapeHtml(sub2)}
-      //       </div>
-      //     </div>
-
-      //     <!-- Checkbox -->
-      //     <input
-      //       type="checkbox"
-      //       class="shrink-0 p-2 rounded-lg hover:bg-gray-100 text-gray-600"
-      //       title="Select"
-      //       data-tagid="${tag.tagId}"
-      //       ${tag.isSelected ? "checked" : ""}
-      //     />
-
-      // </div>
-      // `;
-
       card.innerHTML = `
         <!-- Absolute overlay button -->
         <button
@@ -1817,25 +1932,6 @@ function makeTooltipOptions() {
       const checkbox = card.querySelector(`input[type="checkbox"][data-tagid="${tag.tagId}"]`);
       const bar = card.querySelector("div.absolute");
       const textElements = card.querySelector("div.text-xs");
-
-      // checkbox.addEventListener("change", () => {
-      //   tag.isSelected = checkbox.checked;
-
-      //   // update bar color dynamically
-      //   bar.classList.remove("bg-custom-green", "bg-custom-red");
-      //   bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
-      //   textElements.classList.remove("text-custom-green", "text-custom-red");
-      //   textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-red");
-
-
-      //   // call editTag or other logic
-      //   if (tag.isSelected) {
-      //     //editTag(tag);
-      //   } else {
-      //     // console.log(`Tag ${tag.tagId} deselected`);
-      //   }
-      //     refreshTagSelect(); 
-      // });
       // Add event listener after setting innerHTML
       const button = card.querySelector('button[data-tagid]');
       button.addEventListener('click', function() {
@@ -1855,6 +1951,38 @@ function makeTooltipOptions() {
     });
 
     });
+  }
+
+    async function loadAlarms() {
+    //console.log("Loading events from Azure Function...");
+    try {
+      // Aquí harías la llamada a tu Azure Function para obtener los eventos
+    const params = new URLSearchParams();
+    params.set("sitecode", sitecode);
+    // fetch(...) to your function
+    const url = `${API_BASE}/alarmsbysitecode?${params.toString()}`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const alarms = await res.json();
+
+    if (!Array.isArray(alarms) || alarms.length === 0) {
+      alert('No data returned for this tag/time range.');
+      return;
+    }
+
+      alarmsrawData = Array.isArray(alarms) ? alarms : []; // guarda los datos crudos para posibles usos futuros
+      state.page = 1;
+      renderAlarms();
+
+    } catch (err) {
+        console.error(err);
+        alert("Load failed: " + err.message);
+      } finally {
+        // hideLoading(); // si quieres mostrar un loading específico para eventos, hazlo aquí
+      }
+
   }
 
 

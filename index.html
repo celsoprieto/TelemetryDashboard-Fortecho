@@ -442,9 +442,139 @@
 
   <!-- VIEW: ALARMS -->
   <section id="view-alarms" class="view hidden">
-    <h2 class="text-xl font-semibold mb-4">Alarms</h2>
-    <div id="alarmsContainer"></div>
-  </section>
+
+    <div class="sensor-list" id="EventsList" >
+
+      <button class="sensor-button active" type="button" data-metric="alarm">
+        <span class="sensor-icon">
+          <!-- Alarm -->
+          <svg xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            class="lucide lucide-siren-icon lucide-siren">
+            <path d="M7 18v-6a5 5 0 1 1 10 0v6"/>
+            <path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/>
+            <path d="M21 12h1"/>
+            <path d="M18.5 4.5 18 5"/>
+            <path d="M2 12h1"/>
+            <path d="M12 2v1"/>
+            <path d="m4.929 4.929.707.707"/>
+            <path d="M12 12v6"/>
+          </svg>
+         </span>
+      </button>
+
+      <button class="sensor-button" type="button" data-metric="temperature">
+        <span class="sensor-icon">
+          <svg xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-thermometer">
+            <path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path>
+          </svg>
+        </span>
+        <span class="sensor-value">°C</span>
+      </button>
+
+      <button class="sensor-button" type="button" data-metric="humidity">
+        <span class="sensor-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            class="lucide lucide-droplets">
+            <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"></path>
+            <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"></path>
+          </svg>
+        </span>
+        <span class="sensor-value">%</span>
+      </button>
+
+      
+
+      <button class="sensor-button" type="button" data-metric="light">
+        <span class="sensor-icon">
+          <svg xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-sun-high">
+            <circle cx="12" cy="12" r="5"></circle>
+            <path d="M12 1v2"></path>
+            <path d="M12 21v2"></path>
+            <path d="M4.22 4.22l1.42 1.42"></path>
+            <path d="M18.36 18.36l1.42 1.42"></path>
+            <path d="M1 12h2"></path>
+            <path d="M21 12h2"></path>
+            <path d="M4.22 19.78l1.42-1.42"></path>
+            <path d="M18.36 5.64l1.42-1.42"></path>
+          </svg>
+        </span>
+        <span class="sensor-value">Lux</span>
+      </button>
+
+    </div>
+
+      <div class="w-full max-w-6xl mx-auto p-4">
+        <div class="rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <!-- Header -->
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border-b border-gray-200">
+            <div>
+              <h2 class="h2 text-lg font-bold">Alarms</h2>
+              <!-- <p class="text-sm text-gray-500">Search, sort and paginate events</p> -->
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-x-auto w-full">
+            <table class="min-w-full w-full text-sm table-auto">
+              <thead class="bg-gray-50 text-gray-600">
+                <tr id="tableAHead"></tr>
+              </thead>
+              <tbody id="tableABody" class="divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+
+          <!-- Footer / Pagination -->
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border-t border-gray-200">
+            <div class="text-xs text-gray-600" id="rowsInfo"></div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <button id="prevBtn"
+                class="px-3 py-2 rounded-xl border border-gray-200 text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                Prev
+              </button>
+
+              <!-- Page buttons -->
+              <div id="pageButtons" class="flex items-center gap-3 flex-wrap mx-2"></div>
+
+              <button id="nextBtn"
+                class="px-3 py-2 rounded-xl border border-gray-200 text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>   
+    </section>
   </main>
   <footer class="footer_cp">
     <div class="content_cp">
