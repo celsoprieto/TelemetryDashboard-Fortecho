@@ -212,6 +212,7 @@
 
 
   .sensor-button,
+  .type-button,
   .load-button {
       display: flex;
       flex-direction: column;
@@ -248,17 +249,20 @@
       height: 80px; /* opcional: fija mismo alto */
   }
 
-  .sensor-button:hover {
+  .sensor-button:hover,
+  .type-button:hover{
     background: #e6f5f5;
   }
 
-  .sensor-button.active {
+  .sensor-button.active,
+   .type-button.active{
     background: #008c8c;
     color: #ffffff;
     border-color: #008c8c;
   }
 
   .sensor-button:disabled,
+   .type-button:disabled,
   .load-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -267,6 +271,7 @@
 
   /* para que no haga hover cuando está disabled */
   .sensor-button:disabled:hover,
+  .type-button:disabled:hover,
   .load-button:disabled:hover {
     background: #f5f7fb;
   }
@@ -277,12 +282,14 @@
     border-color: #008c8c;
   }
 
-  .sensor-icon {
+  .sensor-icon,
+  .type-icon {
     width: 1.5em;
     height: 1.5em;
   }
 
-  .sensor-icon svg {
+  .sensor-icon svg ,
+  .type-icon svg {
     width: 1.5em;
     height: 1.5em;
   }

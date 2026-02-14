@@ -1506,24 +1506,17 @@ function makeTooltipOptions() {
 
   function formatTimestamp(ts) {
     if (!ts) return "";
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return ts;
 
-    // nicer display
-    return d.toLocaleString();
-  }
-
-  function formatTimestampAlarms(ts) {
-    if (!ts) return "";
-
-    // Convert "YYYY-MM-DD HH:mm:ss" to ISO UTC
-    const isoTs = ts.replace(" ", "T") + "Z";
+    // If already ISO, use it directly
+    let isoTs = ts.includes("T") ? ts : ts.replace(" ", "T") + "Z";
 
     const date = new Date(isoTs);
     if (isNaN(date.getTime())) return ts;
 
-    return date.toLocaleString(); // local time
+    return date.toLocaleString();
   }
+
+
 
 
   function copyToClipboard(text) {
@@ -1760,7 +1753,7 @@ function makeTooltipOptions() {
           let value = row[col.key];
 
           // format timestamp
-          if (col.key === "document_dateUtc") value = formatTimestampAlarms(value);
+          if (col.key === "document_dateUtc") value = formatTimestamp(value);
 
           const rawValue = safeStr(row[col.key]);
 
