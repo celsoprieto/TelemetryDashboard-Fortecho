@@ -20,6 +20,23 @@
     let deviceeventsrawData = [];
     let alarmsrawData = [];
 
+      function loadScript(url) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = url;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function loadAll() {
+      await loadScript("js/fsalarms.js");
+      //console.log("fsalarms.js loaded, now you can use it");
+    }
+
+    loadAll();
+
     // Load tags on page load
     window.addEventListener("DOMContentLoaded", async () => {
 
@@ -295,7 +312,7 @@
         if (to)   params.append('to', toUtc);
 
         const url = `${API_BASE}/telemetry?${params.toString()}`;
-        console.log('Requesting:', url);
+        // console.log('Requesting:', url);
 
         const res = await fetch(url);
         if (!res.ok) {
@@ -493,7 +510,7 @@
     lastTemps_Weather = toXYPoints(data.hourly.time, data.hourly.temperature_2m);
     lastHums_Weather = toXYPoints(data.hourly.time, data.hourly.relative_humidity_2m);
 
-     console.log("Timezone used:", tz);
+    //  console.log("Timezone used:", tz);
     // console.log(data);
   }
 
@@ -1720,6 +1737,7 @@ function makeTooltipOptions() {
     `).join("");
   }
 
+
     function renderBodyAlarms(rows) {
     const body = document.getElementById("tableABody");
 
@@ -1735,10 +1753,7 @@ function makeTooltipOptions() {
     }
 
     body.innerHTML = rows.map(row => {
-      const trClass =
-        row.event_typeId === 5
-          ? "bg-custom-red-light hover:bg-custom-red"   // 🔥 rojo suave
-          : "hover:bg-gray-50";
+      const trClass = getRowClass(row.event_typeId);
       return `
       <tr class="${trClass}">
         ${columnalarms.map(col => {

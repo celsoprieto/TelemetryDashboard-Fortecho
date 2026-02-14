@@ -40,6 +40,8 @@ module.exports = {
         "custom-red": "#DA494E",
         "custom-red-light": "#F8C9CB",
         "custom-blue": "#35AADF",
+        "custom-yellow-light": "#FFF2B8", /* soft pastel yellow */
+        "custom-yellow": "#FFE066",       /* slightly stronger on hover */
       } },
   },
   plugins: [],
