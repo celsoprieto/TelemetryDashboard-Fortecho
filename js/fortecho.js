@@ -342,8 +342,8 @@
             const h = s.humidityEv;
 
             // keep temp as-is (can be < 0), ignore invalid humidity (< 0)
-            temps.push(t ?? null);
-            hums.push(h != null && h >= 0 ? h : null);
+            temps.push(t != null ? { x: localLabel, y: t } : null);
+            hums.push(h != null && h >= 0 ? { x: localLabel, y: h } : null);
           }
 
           // Light labels and values when sensorLum = 1
@@ -352,7 +352,7 @@
 
             const l = s.luxEv;
             // ignore values < 0
-            lights.push(l != null && l >= 0 ? l : null);
+            lights.push(l != null && l >= 0 ? { x: localLabel, y: l } : null);
           }
         }
 
@@ -535,18 +535,17 @@
     const showWeatherTemp = opTemp ? opTemp.checked : false;
     const showWeatherHum  = opHum  ? opHum.checked  : false;
 
-    const tempPoints = toXYPoints(lastTempHumLabels, lastTemps);
-    const humPoints  = toXYPoints(lastTempHumLabels, lastHums);
-    const lightPoints = toXYPoints(lastLightLabels, lastLights); // Add this line
-    // const tempWeatherPoints = toXYPoints(lastTempHumLabels, lastTemps_Weather);
-    // const humWeatherPoints  = toXYPoints(lastTempHumLabels, lastHums_Weather);
+    // const tempPoints = toXYPoints(lastTempHumLabels, lastTemps);
+    // const humPoints  = toXYPoints(lastTempHumLabels, lastHums);
+    // const lightPoints = toXYPoints(lastLightLabels, lastLights); // Add this line
+
     const today = new Date();
 
     if (currentMetric === "temperature") {
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C)";
       datasets = [
-        makeDataset("Temperature", tempPoints, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)"),
+        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)"),
         makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", undefined, true,!showWeatherTemp)
       ];
       scales = { y: makeYAxis("Temperature (°C)") };
@@ -555,7 +554,7 @@
       labels = lastTempHumLabels;
       chartTitle = "Humidity (%)";
       datasets = [
-        makeDataset("Humidity", humPoints, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)"),
+        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)"),
         makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", undefined, true,!showWeatherHum)
       ];
       scales = { y: makeYAxis("Humidity (%)") };
@@ -564,7 +563,7 @@
       labels = lastLightLabels;
       chartTitle = "Light (lux)";
       datasets = [
-        makeDataset("Light", lightPoints, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
+        makeDataset("Light", lastLights, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
       ];
       scales = { y: makeYAxis("Light (lux)") };
 
@@ -573,8 +572,8 @@
       chartTitle = "Temperature (°C) & Humidity (%)";
 
       datasets = [
-        makeDataset("Temperature", tempPoints, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
-        makeDataset("Humidity", humPoints, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
+        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
+        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
         makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", "yTemp", true,!showWeatherTemp),
         makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", "yHum", true,!showWeatherHum)
       ];
