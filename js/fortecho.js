@@ -73,6 +73,7 @@
       // ---------------- SENSOR BUTTONS ----------------
       buttons.forEach(btn => {
         btn.addEventListener("click", () => {
+          if (btn.disabled) return;   // 👈 IMPORTANT
           buttons.forEach(b => b.classList.remove("active"));
           btn.classList.add("active");
 
@@ -390,7 +391,7 @@
     if (tempBtn) tempBtn.disabled = !hasData(lastTemps);
     if (humBtn)  humBtn.disabled  = !hasData(lastHums);
     if (luxBtn)  luxBtn.disabled  = !hasData(lastLights);
-    if (tempHumBtn)  luxBtn.disabled  = !hasData(lastLights);
+    if (tempHumBtn)  tempHumBtn.disabled  = !hasData(lastTemps);
   }
 
   function syncInputsFromChart(chart) {
@@ -536,8 +537,9 @@
 
     const tempPoints = toXYPoints(lastTempHumLabels, lastTemps);
     const humPoints  = toXYPoints(lastTempHumLabels, lastHums);
-    const tempWeatherPoints = toXYPoints(lastTempHumLabels, lastTemps_Weather);
-    const humWeatherPoints  = toXYPoints(lastTempHumLabels, lastHums_Weather);
+    const lightPoints = toXYPoints(lastLightLabels, lastLights); // Add this line
+    // const tempWeatherPoints = toXYPoints(lastTempHumLabels, lastTemps_Weather);
+    // const humWeatherPoints  = toXYPoints(lastTempHumLabels, lastHums_Weather);
     const today = new Date();
 
     if (currentMetric === "temperature") {
@@ -562,7 +564,7 @@
       labels = lastLightLabels;
       chartTitle = "Light (lux)";
       datasets = [
-        makeDataset("Light", lastLights, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
+        makeDataset("Light", lightPoints, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
       ];
       scales = { y: makeYAxis("Light (lux)") };
 
@@ -976,7 +978,7 @@ function applyXAxisRange() {
         font: { family: "sans-serif", size: 11 },
         color: "rgb(51,51,51)"
       },
-       grid: hideGrid ? { drawOnChartArea: false } : {
+      grid: hideGrid ? { drawOnChartArea: false } : {
         tickColor: "rgb(51,51,51)",
         tickWidth: 1
       }

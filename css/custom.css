@@ -258,6 +258,19 @@
     border-color: #008c8c;
   }
 
+  .sensor-button:disabled,
+  .load-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none; 
+  }
+
+  /* para que no haga hover cuando está disabled */
+  .sensor-button:disabled:hover,
+  .load-button:disabled:hover {
+    background: #f5f7fb;
+  }
+
    .range-button.active {
     background: #008c8c;
     color: #ffffff;
