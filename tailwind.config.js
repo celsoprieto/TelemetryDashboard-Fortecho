@@ -36,12 +36,17 @@ module.exports = {
   ],
   theme: {
     extend: {colors: {
+        "custom-green-light": "#56B2AD",  /* soft pastel green */
         "custom-green": "#157372",
         "custom-red": "#DA494E",
         "custom-red-light": "#F8C9CB",
         "custom-blue": "#35AADF",
+        "custom-blue-light": "#A3C9FF",  /* soft pastel blue */
+        "custom-blue1": "#3366CC",        /* darker base blue */
         "custom-yellow-light": "#FFF2B8", /* soft pastel yellow */
         "custom-yellow": "#FFE066",       /* slightly stronger on hover */
+        "custom-orange-light": "#FFDAB3",  /* soft pastel orange */
+        "custom-orange": "#FFA64D",        /* slightly stronger on hover */
       } },
   },
   plugins: [],

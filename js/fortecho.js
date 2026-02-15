@@ -65,6 +65,9 @@
       const fromInput = document.getElementById("fromInput");
       const toInput = document.getElementById("toInput");
 
+      const alarmsList = document.getElementById("EventsList");
+      const alarmsbuttons = alarmsList?.querySelectorAll(".type-button") || [];
+
       // ---------------- MENU ----------------
       if (btn_menu && menu) {
         function openMenu() {
@@ -99,6 +102,25 @@
         });
       });
 
+      // ---------------- ALARMS BUTTONS ----------------
+      alarmsbuttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+           btn.classList.toggle("active"); // click again = removes it
+          // Aquí puedes manejar la lógica para mostrar los eventos correspondientes al tipo seleccionado
+          const metric = btn.dataset.metric;
+          const ids = metricToEventTypeIds[metric] || [];
+          stateAlarms.selectedEventTypeIds= toggleIds(stateAlarms.selectedEventTypeIds, ids);
+          if (btn.classList.contains("active")) {
+            //console.log("ENABLED", btn.dataset.metric);
+          } else {
+            //console.log("DISABLED", btn.dataset.metric);
+            
+          }
+          renderAlarms();
+        });
+      });
+
+      // ---------------- RANGE BUTTONS ----------------
       rangeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
 
@@ -1490,6 +1512,7 @@ function makeTooltipOptions() {
 
     let stateAlarms = {
     search: "",
+    selectedEventTypeIds: [5,6,7,10,11,12,13,14,15,16,17,22,23], // para filtrar por tipo de evento
     sortKey: "document_dateUtc",
     sortDir: "desc",
     page: 1,
@@ -1554,14 +1577,26 @@ function makeTooltipOptions() {
     });
   }
 
-    function getFilteredDataAlarms() {
-    const q = stateAlarms.search.trim().toLowerCase();
-    if (!q) return [...alarmsrawData];
+function getFilteredDataAlarms() {
+  const q = stateAlarms.search.trim().toLowerCase();
 
-    return alarmsrawData.filter(row => {
-      return columnalarms.some(c => safeStr(row[c.key]).toLowerCase().includes(q));
-    });
-  }
+  // example: allowed event types (put your selected ones here)
+  const allowedEventTypeIds = stateAlarms.selectedEventTypeIds; // e.g. [5, 6, 7]
+
+  return alarmsrawData.filter(row => {
+    // 1) filter by event_typeId
+    if (allowedEventTypeIds?.length) {
+      if (!allowedEventTypeIds.includes(Number(row.event_typeId))) return false;
+    }
+
+    // 2) filter by search text
+    if (!q) return true;
+
+    return columnalarms.some(c =>
+      safeStr(row[c.key]).toLowerCase().includes(q)
+    );
+  });
+}
 
   function getSortedData(rows) {
     const { sortKey, sortDir } = state;
@@ -2083,6 +2118,7 @@ function makeTooltipOptions() {
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
     const params = new URLSearchParams();
     params.set("sitecode", sitecode);
+    params.set("eventType", selectedIds.join(","));
     // fetch(...) to your function
     const url = `${API_BASE}/alarmsbysitecode?${params.toString()}`;
 
