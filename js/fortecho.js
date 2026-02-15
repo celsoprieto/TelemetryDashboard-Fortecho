@@ -110,6 +110,7 @@
           const metric = btn.dataset.metric;
           const ids = metricToEventTypeIds[metric] || [];
           stateAlarms.selectedEventTypeIds= toggleIds(stateAlarms.selectedEventTypeIds, ids);
+          stateAlarms.page = 1; // reset to first page on filter change
           if (btn.classList.contains("active")) {
             //console.log("ENABLED", btn.dataset.metric);
           } else {
@@ -675,6 +676,7 @@
       };
 
       Chart.register(solidTooltipColorBox);
+      //Chart.register(ChartAnnotation.Annotation);
       window._solidTooltipColorBoxRegistered = true;
     }
 
