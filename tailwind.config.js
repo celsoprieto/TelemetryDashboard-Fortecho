@@ -1,8 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./*.html",
-    "./js/**/*.js"
+    "./**/*.html",           // All HTML files
+    "./js/**/*.js",
+    "./src/**/*.{js,jsx}",   // If you have a src folder
+    "./components/**/*.js",  // Component folders
   ],
   safelist: [
     // Padding classes
