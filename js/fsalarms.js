@@ -14,7 +14,6 @@ function getRowClass(eventTypeId) {
     case 7:  // Offline
       return "bg-custom-yellow-light hover:bg-custom-yellow"; // 
     case 16: // Missing
-         return "bg-custom-green-light hover:bg-custom-green"; // 
     case 17: // No Tags
       return "bg-custom-blue-light hover:bg-custom-blue1"; // 
     default:
