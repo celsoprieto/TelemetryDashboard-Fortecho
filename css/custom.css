@@ -476,7 +476,7 @@
     color: #157372;
   }
 
-  .eventscolumnheader {
+  .eventscolumnheaderAlarms {
     font-size: 1.0rem;
     font-weight: 600;
     color: #ffffff;
@@ -551,6 +551,17 @@
 #loadingOverlayAlarms.hidden {
   pointer-events: none !important;
 }
+
+/* CSS fix for iOS header selection */
+#tableAHead th,
+#tableAHead th * {
+  -webkit-user-select: none; /* iOS Safari */
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  touch-action: manipulation; /* prevent accidental drag-selection */
+}
+
 
 
 

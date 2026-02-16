@@ -1682,8 +1682,8 @@ function getFilteredDataAlarms() {
           class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer  hover:text-gray-900"
         >
           <div class="flex items-center gap-2">
-            <span class="eventscolumnheader">${col.label}</span>
-            <span class="eventscolumnheader">${arrow}</span>
+            <span class="eventscolumnheaderAlarms">${col.label}</span>
+            <span class="eventscolumnheaderAlarms">${arrow}</span>
           </div>
         </th>
       `;
@@ -1728,11 +1728,11 @@ function getFilteredDataAlarms() {
       div.className = "flex items-center gap-2";
 
       const spanLabel = document.createElement('span');
-      spanLabel.className = "eventscolumnheader";
+      spanLabel.className = "eventscolumnheaderAlarms";
       spanLabel.textContent = col.label;
 
       const spanArrow = document.createElement('span');
-      spanArrow.className = "eventscolumnheader";
+      spanArrow.className = "eventscolumnheaderAlarms";
       spanArrow.textContent = arrow;
 
       div.appendChild(spanLabel);
