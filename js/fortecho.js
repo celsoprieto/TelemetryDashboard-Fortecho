@@ -19,6 +19,7 @@
     let deviceIdForEvents = "watchdog_cp"; // hardcoded, adjust as needed
     let deviceeventsrawData = [];
     let alarmsrawData = [];
+    let currentAlarmsRows = [];
 
       function loadScript(url) {
       return new Promise((resolve, reject) => {
@@ -54,6 +55,7 @@
 
       const alarmsList = document.getElementById("EventsList");
       const alarmsbuttons = alarmsList?.querySelectorAll(".type-button") || [];
+
 
       // ---------------- MENU ----------------
       if (btn_menu && menu) {
@@ -149,6 +151,8 @@
       // setLast24Hours();
       // await loadData(); // moved to switchView() to ensure it runs when telemetry view is active
       await loadAlarms(); 
+
+      
 
       // ---------------- TAG CHANGE ----------------
       const tagSelect = document.getElementById("tagIdSelect");
@@ -1404,6 +1408,42 @@ function makeTooltipOptions() {
 
       if (viewName === "alarms") {
         await loadAlarms();        // optional: load data into it
+
+        // Attach event listener after alarms view is shown
+        setTimeout(() => {
+        const alarmsTableBody = document.getElementById('tableABody');
+        console.log('tableABody found:', alarmsTableBody);
+        
+        if (alarmsTableBody) {
+          // Remove old listener if exists
+          const newTbody = alarmsTableBody.cloneNode(true);
+          alarmsTableBody.parentNode.replaceChild(newTbody, alarmsTableBody);
+          
+          // Attach new listener
+          document.getElementById('tableABody').addEventListener('click', function(e) {
+            console.log('Click detected!', e.target);
+            
+            // ✅ FIXED: Use closest() which is more reliable
+            const tr = e.target.closest('tr');
+            console.log('Found TR:', tr);
+            
+            if (tr && tr.hasAttribute('data-row-index')) {
+              const rowIndex = parseInt(tr.getAttribute('data-row-index'));
+              console.log('Row index:', rowIndex);
+              
+              const rowData = currentAlarmsRows[rowIndex];
+              console.log('Row data:', rowData);
+              
+              if (rowData) {
+                console.log('Handling click for row:', rowIndex);
+                handleAlarmRowClick(rowData, tr);
+              }
+            } else {
+              console.log('TR not found or no data-row-index attribute');
+            }
+          });
+        }
+      }, 100);
       }
 
       if (viewName === "telemetry") {
@@ -1836,6 +1876,9 @@ function getFilteredDataAlarms() {
   function renderBodyAlarms(rows) {
     const body = document.getElementById("tableABody");
 
+    // Store rows globally for event handler access
+    currentAlarmsRows = rows;
+
     if (!rows.length) {
       body.innerHTML = `
         <tr>
@@ -1847,10 +1890,10 @@ function getFilteredDataAlarms() {
       return;
     }
 
-    body.innerHTML = rows.map(row => {
+    body.innerHTML = rows.map((row, index) => {
       const trClass = getRowClass(row.event_typeId);
       return `
-      <tr class="${trClass} cursor-pointer"> 
+      <tr class="${trClass} cursor-pointer" data-row-index="${index}"> 
         ${columnalarms.map(col => {
           let value = row[col.key];
 
@@ -1869,6 +1912,24 @@ function getFilteredDataAlarms() {
         }).join("")}
       </tr>
     `;}).join("");
+      
+  }
+
+  // Add this function to handle what happens when a row is clicked
+  function handleAlarmRowClick(rowData, rowElement) {
+    // Example: Log the clicked alarm data
+    console.log('Alarm clicked:', rowData);
+    
+    // Example: Toggle row highlight
+    const allRows = document.querySelectorAll('#tableABody tr');
+    allRows.forEach(r => r.classList.remove('bg-blue-100'));
+    rowElement.classList.add('bg-blue-100');
+    
+    // Add your custom logic here:
+    // - Show a detail modal
+    // - Navigate to another page
+    // - Display additional information
+    // - etc.
   }
 
   function renderFooter(total, filtered) {
