@@ -145,8 +145,8 @@
       switchView();
 
       // ---------------- LOAD INITIAL DATA ----------------
-      await loadTags();
-      setLast24Hours();
+      // await loadTags();
+      // setLast24Hours();
       // await loadData(); // moved to switchView() to ensure it runs when telemetry view is active
       await loadAlarms(); 
 
@@ -1408,8 +1408,9 @@ function makeTooltipOptions() {
 
       if (viewName === "telemetry") {
         // al volver a telemetry, recarga datos para mostrar el gráfico actualizado
-        const { fromDate, toDate } = getFromToDates();
-        await loadData(fromDate, toDate);
+        await loadTags();
+        setLast24Hours();
+        await loadData();
       }
     }
 
@@ -1435,10 +1436,12 @@ function makeTooltipOptions() {
 
   function showLoading() {
     document.getElementById("loadingOverlay").classList.remove("hidden");
+    document.getElementById("loadingOverlayAlarms").classList.remove("hidden");
   }
 
   function hideLoading() {
     document.getElementById("loadingOverlay").classList.add("hidden");
+    document.getElementById("loadingOverlayAlarms").classList.add("hidden");
   }
 
 
@@ -1772,7 +1775,7 @@ function getFilteredDataAlarms() {
   }
 
 
-    function renderBodyAlarms(rows) {
+  function renderBodyAlarms(rows) {
     const body = document.getElementById("tableABody");
 
     if (!rows.length) {
@@ -1789,7 +1792,7 @@ function getFilteredDataAlarms() {
     body.innerHTML = rows.map(row => {
       const trClass = getRowClass(row.event_typeId);
       return `
-      <tr class="${trClass}">
+      <tr class="${trClass} cursor-pointer"> 
         ${columnalarms.map(col => {
           let value = row[col.key];
 
@@ -2121,6 +2124,7 @@ function getFilteredDataAlarms() {
     async function loadAlarms() {
     //console.log("Loading events from Azure Function...");
     try {
+      showLoading();
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
     const params = new URLSearchParams();
     params.set("sitecode", sitecode);
@@ -2146,7 +2150,7 @@ function getFilteredDataAlarms() {
         console.error(err);
         alert("Load failed: " + err.message);
       } finally {
-        // hideLoading(); // si quieres mostrar un loading específico para eventos, hazlo aquí
+         hideLoading(); 
       }
 
   }
