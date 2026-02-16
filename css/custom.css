@@ -548,6 +548,10 @@
     grid-gap: 20px
 }
 
+#loadingOverlayAlarms.hidden {
+  pointer-events: none !important;
+}
+
 
 
 

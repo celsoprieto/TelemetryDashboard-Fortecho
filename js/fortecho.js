@@ -1434,15 +1434,33 @@ function makeTooltipOptions() {
   }
 
 
-  function showLoading() {
-    document.getElementById("loadingOverlay").classList.remove("hidden");
-    document.getElementById("loadingOverlayAlarms").classList.remove("hidden");
-  }
+function showLoading() {
+  const o1 = document.getElementById("loadingOverlay");
+  const o2 = document.getElementById("loadingOverlayAlarms");
 
-  function hideLoading() {
-    document.getElementById("loadingOverlay").classList.add("hidden");
-    document.getElementById("loadingOverlayAlarms").classList.add("hidden");
+  if (o1) {
+    o1.classList.remove("hidden");
+    o1.style.pointerEvents = "auto";
   }
+  if (o2) {
+    o2.classList.remove("hidden");
+    o2.style.pointerEvents = "auto";
+  }
+}
+
+function hideLoading() {
+  const o1 = document.getElementById("loadingOverlay");
+  const o2 = document.getElementById("loadingOverlayAlarms");
+
+  if (o1) {
+    o1.classList.add("hidden");
+    o1.style.pointerEvents = "none";
+  }
+  if (o2) {
+    o2.classList.add("hidden");
+    o2.style.pointerEvents = "none";
+  }
+}
 
 
   async function loadEvents() {
