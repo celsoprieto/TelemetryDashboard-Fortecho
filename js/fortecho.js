@@ -1679,7 +1679,7 @@ function getFilteredDataAlarms() {
       return `
         <th
           data-key="${col.key}"
-          class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer select-none hover:text-gray-900"
+          class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer  hover:text-gray-900"
         >
           <div class="flex items-center gap-2">
             <span class="eventscolumnheader">${col.label}</span>
@@ -1716,7 +1716,7 @@ function getFilteredDataAlarms() {
       return `
         <th
           data-key="${col.key}"
-          class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer select-none hover:text-gray-900"
+          class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer  hover:text-gray-900"
         >
           <div class="flex items-center gap-2">
             <span class="eventscolumnheader">${col.label}</span>
