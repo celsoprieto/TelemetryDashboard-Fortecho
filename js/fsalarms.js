@@ -58,3 +58,101 @@ function toggleIds(selectedIds,idsToToggle) {
   return [...set];
 }
 
+function showAlarmDetailModal(alarmData) {
+  const modal = document.getElementById('alarmDetailModal');
+  const modalBody = document.getElementById('modalBody');
+  const modalTitle = document.getElementById('modalTitle');
+  
+  // Set modal title
+  modalTitle.textContent = `Alarm: ${alarmData.event_type || 'Details'}`;
+  
+  // Get alarm severity color
+  const severityColor = getAlarmSeverityColor(alarmData.event_typeId);
+  
+  // Build modal content
+  modalBody.innerHTML = `
+    <div class="space-y-4">
+      <!-- Severity Badge -->
+      <div class="flex items-center space-x-2">
+        <span class="text-sm font-semibold text-gray-600">Severity:</span>
+        <span class="px-3 py-1 rounded-full text-sm font-medium ${severityColor}">
+          ${getAlarmSeverityText(alarmData.event_typeId)}
+        </span>
+      </div>
+      
+      <!-- Alarm Information Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase">Alarm Date</p>
+          <p class="text-sm text-gray-900 mt-1">${formatTimestamp(alarmData.document_dateUtc)}</p>
+        </div>
+        
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase">Alarm Type</p>
+          <p class="text-sm text-gray-900 mt-1">${alarmData.event_type || 'N/A'}</p>
+        </div>
+        
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase">Tag ID</p>
+          <p class="text-sm text-gray-900 mt-1">${alarmData.tagId || 'N/A'}</p>
+        </div>
+        
+        <div>
+          <p class="text-xs font-semibold text-gray-500 uppercase">Artist</p>
+          <p class="text-sm text-gray-900 mt-1">${alarmData.object_marque || 'N/A'}</p>
+        </div>
+        
+        <div class="md:col-span-2">
+          <p class="text-xs font-semibold text-gray-500 uppercase">Title</p>
+          <p class="text-sm text-gray-900 mt-1">${alarmData.object_model || 'N/A'}</p>
+        </div>
+      </div>
+      
+      
+      <!-- Full Data (for debugging/advanced view) -->
+      <details class="mt-4">
+        <summary class="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+          Show Raw Data
+        </summary>
+        <pre class="mt-2 text-xs bg-gray-100 p-3 rounded overflow-x-auto">${JSON.stringify(alarmData, null, 2)}</pre>
+      </details>
+    </div>
+  `;
+  
+  // Show modal
+  modal.classList.remove('hidden');
+}
+
+function getAlarmSeverityColor(eventTypeId) {
+  // Customize based on your event type IDs
+  const id = Number(eventTypeId);
+  
+  if ([5, 6].includes(id)) {
+    return 'bg-red-100 text-red-800'; // Critical
+  } else if ([7, 10, 11].includes(id)) {
+    return 'bg-orange-100 text-orange-800'; // Warning
+  } else if ([12, 13, 14].includes(id)) {
+    return 'bg-yellow-100 text-yellow-800'; // Caution
+  } else {
+    return 'bg-blue-100 text-blue-800'; // Info
+  }
+}
+
+function getAlarmSeverityText(eventTypeId) {
+  const id = Number(eventTypeId);
+  
+  if ([5, 6].includes(id)) {
+    return 'CRITICAL';
+  } else if ([7, 10, 11].includes(id)) {
+    return 'WARNING';
+  } else if ([12, 13, 14].includes(id)) {
+    return 'CAUTION';
+  } else {
+    return 'INFO';
+  }
+}
+
+function closeAlarmDetailModal() {
+  const modal = document.getElementById('alarmDetailModal');
+  modal.classList.add('hidden');
+}

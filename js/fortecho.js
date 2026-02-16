@@ -191,6 +191,39 @@
         toggleDataset("Humidity Weather", opHumCheckbox.checked);
         
       });
+
+      // Modal close button handlers
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const closeModalFooterBtn = document.getElementById('closeModalFooterBtn');
+      const alarmDetailModal = document.getElementById('alarmDetailModal');
+      
+      if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeAlarmDetailModal);
+      }
+      
+      if (closeModalFooterBtn) {
+        closeModalFooterBtn.addEventListener('click', closeAlarmDetailModal);
+      }
+      
+      
+      // Close modal when clicking outside
+      if (alarmDetailModal) {
+        alarmDetailModal.addEventListener('click', (e) => {
+          if (e.target === alarmDetailModal) {
+            closeAlarmDetailModal();
+          }
+        });
+      }
+      
+      // Close modal with Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const modal = document.getElementById('alarmDetailModal');
+          if (modal && !modal.classList.contains('hidden')) {
+            closeAlarmDetailModal();
+          }
+        }
+      });
             
     });
 
@@ -1920,16 +1953,16 @@ function getFilteredDataAlarms() {
     // Example: Log the clicked alarm data
     //console.log('Alarm clicked:', rowData);
     
-    // Example: Toggle row highlight
-    const allRows = document.querySelectorAll('#tableABody tr');
-    allRows.forEach(r => r.classList.remove('bg-blue-100'));
-    rowElement.classList.add('bg-blue-100');
+    // Remove highlight from all rows
+    document.querySelectorAll('#tableABody tr[data-row-index]').forEach(r => {
+      r.classList.remove('bg-blue-100', 'border-l-4', 'border-blue-500');
+    });
     
-    // Add your custom logic here:
-    // - Show a detail modal
-    // - Navigate to another page
-    // - Display additional information
-    // - etc.
+    // Highlight clicked row
+    rowElement.classList.add('bg-blue-100', 'border-l-4', 'border-blue-500');
+    
+    // Show modal with alarm details
+    showAlarmDetailModal(rowData);
   }
 
   function renderFooter(total, filtered) {
