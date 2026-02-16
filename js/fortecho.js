@@ -697,7 +697,7 @@
                 mode: 'x',
                 modifierKey: "ctrl",
                 onPanComplete({ chart }) {
-                  console.log('Pan done');
+                  //console.log('Pan done');
                   syncInputsFromChart(chart);
                   // startFetch({ chart });
                   limits: {
@@ -1412,7 +1412,7 @@ function makeTooltipOptions() {
         // Attach event listener after alarms view is shown
         setTimeout(() => {
         const alarmsTableBody = document.getElementById('tableABody');
-        console.log('tableABody found:', alarmsTableBody);
+        //console.log('tableABody found:', alarmsTableBody);
         
         if (alarmsTableBody) {
           // Remove old listener if exists
@@ -1421,25 +1421,25 @@ function makeTooltipOptions() {
           
           // Attach new listener
           document.getElementById('tableABody').addEventListener('click', function(e) {
-            console.log('Click detected!', e.target);
+            //console.log('Click detected!', e.target);
             
             // ✅ FIXED: Use closest() which is more reliable
             const tr = e.target.closest('tr');
-            console.log('Found TR:', tr);
+            //console.log('Found TR:', tr);
             
             if (tr && tr.hasAttribute('data-row-index')) {
               const rowIndex = parseInt(tr.getAttribute('data-row-index'));
-              console.log('Row index:', rowIndex);
+              //console.log('Row index:', rowIndex);
               
               const rowData = currentAlarmsRows[rowIndex];
-              console.log('Row data:', rowData);
+              //console.log('Row data:', rowData);
               
               if (rowData) {
-                console.log('Handling click for row:', rowIndex);
+                //console.log('Handling click for row:', rowIndex);
                 handleAlarmRowClick(rowData, tr);
               }
             } else {
-              console.log('TR not found or no data-row-index attribute');
+              //console.log('TR not found or no data-row-index attribute');
             }
           });
         }
@@ -1492,7 +1492,7 @@ function hideLoading(el) {
 
 
   async function loadEvents() {
-    console.log("Loading events from Azure Function...");
+    //console.log("Loading events from Azure Function...");
     try {
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
     const params = new URLSearchParams();
@@ -1918,7 +1918,7 @@ function getFilteredDataAlarms() {
   // Add this function to handle what happens when a row is clicked
   function handleAlarmRowClick(rowData, rowElement) {
     // Example: Log the clicked alarm data
-    console.log('Alarm clicked:', rowData);
+    //console.log('Alarm clicked:', rowData);
     
     // Example: Toggle row highlight
     const allRows = document.querySelectorAll('#tableABody tr');
