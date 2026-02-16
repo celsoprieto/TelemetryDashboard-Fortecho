@@ -35,26 +35,13 @@
       //console.log("fsalarms.js loaded, now you can use it");
     }
 
-    loadAll();
+    
 
     // Load tags on page load
     window.addEventListener("DOMContentLoaded", async () => {
 
-      // async function loadApiBase() {
-      //   try {
-      //     const res = await fetch("/api/getApiBase");
-      //     const data = await res.json();
-      //     // store it in a constant-like variable
-      //     API_BASE = data.apiBase;
-      //     console.log("API_BASE loaded:", API_BASE);
+      await loadAll();
 
-      //     // Now you can use API_BASE in other functions
-      //    // initApp();
-      //   } catch (err) {
-      //     console.error("Failed to load API_BASE:", err);
-      //   }
-      // }
-      // loadApiBase();
       const sensorList = document.getElementById("sensorList1");
       const buttons = sensorList?.querySelectorAll(".sensor-button") || [];
       const rangeButtons = document.querySelectorAll('.range-button');
@@ -105,8 +92,15 @@
       // ---------------- ALARMS BUTTONS ----------------
       alarmsbuttons.forEach(btn => {
         btn.addEventListener("click", () => {
+          const isActive = btn.classList.contains("active");
+
+          // If this is the last active button, block turning it off
+          if (isActive) {
+            const activeCount = [...alarmsbuttons].filter(b => b.classList.contains("active")).length;
+            if (activeCount === 1) return; 
+          }
            btn.classList.toggle("active"); // click again = removes it
-          // Aquí puedes manejar la lógica para mostrar los eventos correspondientes al tipo seleccionado
+          
           const metric = btn.dataset.metric;
           const ids = metricToEventTypeIds[metric] || [];
           stateAlarms.selectedEventTypeIds= toggleIds(stateAlarms.selectedEventTypeIds, ids);
@@ -153,7 +147,8 @@
       // ---------------- LOAD INITIAL DATA ----------------
       await loadTags();
       setLast24Hours();
-      await loadData();
+      // await loadData(); // moved to switchView() to ensure it runs when telemetry view is active
+      await loadAlarms(); 
 
       // ---------------- TAG CHANGE ----------------
       const tagSelect = document.getElementById("tagIdSelect");
@@ -1410,6 +1405,12 @@ function makeTooltipOptions() {
       if (viewName === "alarms") {
         await loadAlarms();        // optional: load data into it
       }
+
+      if (viewName === "telemetry") {
+        // al volver a telemetry, recarga datos para mostrar el gráfico actualizado
+        const { fromDate, toDate } = getFromToDates();
+        await loadData(fromDate, toDate);
+      }
     }
 
     links.forEach(link => {
@@ -1428,7 +1429,7 @@ function makeTooltipOptions() {
     });
 
     // Vista inicial
-    showView("telemetry");
+    showView("alarms");
   }
 
 
@@ -1538,7 +1539,10 @@ function makeTooltipOptions() {
     const date = new Date(isoTs);
     if (isNaN(date.getTime())) return ts;
 
-    return date.toLocaleString();
+    const d = date.toLocaleDateString();
+    const t = date.toLocaleTimeString();
+
+    return `${d} ${t}`; 
   }
 
 
