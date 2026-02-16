@@ -5,6 +5,41 @@ module.exports = {
     "./js/**/*.js"
   ],
   safelist: [
+    // Padding classes
+    'px-4',
+    'px-6',
+    'py-4',
+    'py-1',
+    'py-2',
+    'pl-4',
+    'pr-4',
+    'pb-2',
+    'pb-3',
+    'pb-4', 
+    // Margin classes
+    'ml-4',
+    'mr-4',
+    'mt-3',
+    'mt-6',
+    'mt-8',
+    'mt-10',
+    'mb-8',  
+    // Space classes
+    'space-y-1',
+    'space-y-3',
+    'space-y-4',
+    'space-y-6',
+    'space-y-8', 
+    // Gap classes
+    'gap-4',
+    'gap-6',
+    'gap-8', 
+    // Text sizes
+    'text-sm',
+    'text-base',
+    'text-lg',
+    'text-xl',
+    'text-2xl',
     "bg-teal-600",
     "text-white",
     "border-teal-600",

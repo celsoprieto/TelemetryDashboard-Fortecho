@@ -72,52 +72,57 @@ function showAlarmDetailModal(alarmData) {
   // Build modal content
   modalBody.innerHTML = `
     <div class="space-y-4">
-      <!-- Severity Badge -->
-      <div class="flex items-center space-x-2">
-        <span class="text-sm font-semibold text-gray-600">Severity:</span>
-        <span class="px-3 py-1 rounded-full text-sm font-medium ${severityColor}">
-          ${getAlarmSeverityText(alarmData.event_typeId)}
+        <!-- Severity Badge -->
+        <div class="flex items-center gap-3 pb-3 border-b border-gray-200">
+        <span class="text-sm font-semibold text-custom-green">Severity:</span>
+        <span class="px-3 py-1 rounded-full text-sm font-semibold ${severityColor}">
+            ${getAlarmSeverityText(alarmData.event_typeId)}
         </span>
-      </div>
-      
-      <!-- Alarm Information Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
-        <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase">Alarm Date</p>
-          <p class="text-sm text-gray-900 mt-1">${formatTimestamp(alarmData.document_dateUtc)}</p>
         </div>
         
-        <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase">Alarm Type</p>
-          <p class="text-sm text-gray-900 mt-1">${alarmData.event_type || 'N/A'}</p>
+        <!-- Alarm Information Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+        <div class="space-y-1">
+            <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Alarm Date</p>
+            <p class="text-sm text-gray-900">${formatTimestamp(alarmData.document_dateUtc)}</p>
         </div>
         
-        <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase">Tag ID</p>
-          <p class="text-sm text-gray-900 mt-1">${alarmData.tagId || 'N/A'}</p>
+        <div class="space-y-1">
+            <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Alarm Type</p>
+            <p class="text-sm text-gray-900">${alarmData.event_type || 'N/A'}</p>
         </div>
         
-        <div>
-          <p class="text-xs font-semibold text-gray-500 uppercase">Artist</p>
-          <p class="text-sm text-gray-900 mt-1">${alarmData.object_marque || 'N/A'}</p>
+        <div class="space-y-1">
+            <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Tag ID</p>
+            <p class="text-sm text-gray-900">${alarmData.tagId || 'N/A'}</p>
         </div>
         
-        <div class="md:col-span-2">
-          <p class="text-xs font-semibold text-gray-500 uppercase">Title</p>
-          <p class="text-sm text-gray-900 mt-1">${alarmData.object_model || 'N/A'}</p>
+        <!-- Empty cell for spacing -->
+        <div></div>
+        
+        <div class="space-y-1">
+            <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Artist</p>
+            <p class="text-sm text-gray-900">${alarmData.object_marque || 'N/A'}</p>
         </div>
-      </div>
-      
-      
-      <!-- Full Data (for debugging/advanced view) -->
-      <details class="mt-4">
-        <summary class="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
-          Show Raw Data
+        
+        <div class="space-y-1">
+            <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Title</p>
+            <p class="text-sm text-gray-900">${alarmData.object_model || 'N/A'}</p>
+        </div>
+        </div>
+        
+        <!-- Full Data (for debugging/advanced view) -->
+        <details class="border-t border-gray-200 pt-4">
+        <summary class="cursor-pointer text-sm font-semibold text-gray-700 hover:text-custom-green transition-colors flex items-center gap-2 py-1">
+            <svg class="w-4 h-4 transform transition-transform" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            Show Raw Data
         </summary>
-        <pre class="mt-2 text-xs bg-gray-100 p-3 rounded overflow-x-auto">${JSON.stringify(alarmData, null, 2)}</pre>
-      </details>
+        <pre class="mt-3 text-xs bg-gray-100 p-3 rounded-lg overflow-x-auto font-mono border border-gray-200">${JSON.stringify(alarmData, null, 2)}</pre>
+        </details>
     </div>
-  `;
+    `;
   
   // Show modal
   modal.classList.remove('hidden');
@@ -128,13 +133,13 @@ function getAlarmSeverityColor(eventTypeId) {
   const id = Number(eventTypeId);
   
   if ([5, 6].includes(id)) {
-    return 'bg-red-100 text-red-800'; // Critical
+    return 'bg-custom-red text-red-800'; // Critical
   } else if ([7, 10, 11].includes(id)) {
-    return 'bg-orange-100 text-orange-800'; // Warning
+    return 'bg-custom-orange text-orange-800'; // Warning
   } else if ([12, 13, 14].includes(id)) {
-    return 'bg-yellow-100 text-yellow-800'; // Caution
+    return 'bg-custom-yellow text-yellow-800'; // Caution
   } else {
-    return 'bg-blue-100 text-blue-800'; // Info
+    return 'bg-custom-blue text-blue-800'; // Info
   }
 }
 
