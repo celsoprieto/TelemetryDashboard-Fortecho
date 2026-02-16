@@ -7,6 +7,15 @@ module.exports = {
     "./components/**/*.js",  // Component folders
   ],
   safelist: [
+    // Use regex patterns to match classes
+    {
+      pattern: /^w-/,
+      variants: ['sm', 'md', 'lg', 'xl', '2xl'], // Optional: include responsive variants
+    },
+    // Or be more specific
+    {
+      pattern: /^w-(0|1|2|3|4|5|6|8|10|11|12|14|16|20|24|28|32|36|40|44|45|46|48|52|56|60|64|72|80|96|auto|px|full|screen|min|max|fit)$/,
+    },
     // Padding classes
     'px-4',
     'px-6',
@@ -84,7 +93,13 @@ module.exports = {
         "custom-yellow": "#FFE066",       /* slightly stronger on hover */
         "custom-orange-light": "#FFDAB3",  /* soft pastel orange */
         "custom-orange": "#FFA64D",        /* slightly stronger on hover */
-      } },
+      } ,
+      width: {
+        '45': '11.25rem',  // 180px
+        '46': '11.5rem',   // 184px
+        '47': '11.75rem',  // 188px
+      }
+    },
   },
   plugins: [],
 }

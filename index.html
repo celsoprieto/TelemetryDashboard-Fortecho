@@ -42,6 +42,9 @@
         <!-- Desktop menu -->
         <ul class="hidden md:flex items-center gap-6 list-none p-0 m-0">
           <li>
+            <a href="#" class="nav-link active text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="alarms">Alarms</a>
+          </li>
+          <li>
             <a href="#" class="nav-link  text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="telemetry">Telemetry</a>
           </li>
           <li>
@@ -49,9 +52,6 @@
           </li>
           <li>
             <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="events">Device Events</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link active text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="alarms">Alarms</a>
           </li>
           <li>
             <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="es">Español</a>
@@ -77,6 +77,9 @@
       <div id="mobileMenu" class="fixed top-10 right-0 h-[calc(100vh-40px)] w-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50">
         <ul class="flex flex-col gap-6 mt-16 p-4">
           <li>
+            <a href="#" class="nav-link active block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="alarms">Alarms</a>
+          </li>
+          <li>
             <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="telemetry">Telemetry</a>
           </li>
           <li>
@@ -84,9 +87,6 @@
           </li>
           <li>
             <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="events">Device Events</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link active block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="alarms">Alarms</a>
           </li>
           <li>
             <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="es">Español</a>
@@ -361,17 +361,30 @@
       <div id="chartOptions" class="flex flex-row items-center justify-center space-x-4 p-2 border rounded bg-gray-50">
        
         <!-- Small divider / title -->
-        <div class="px-2 text-custom-green font-semibold text-sm  border-gray-300">
-          Outdoor Temp & Humidity         
+        <div class="flex flex-row items-center justify-center space-x-4 p-2 border rounded bg-custom-green">
+          <div class="px-2 text-white font-semibold text-sm  border-gray-300">
+            Outdoor Temp & Humidity         
+          </div>
+          <label class="inline-flex items-center">
+            <input type="checkbox" class="form-checkbox h-4 w-4 accent-custom-red" id="opTemp">
+            <span class="ml-2 font-semibold text-xs text-white">T</span>
+          </label>
+          <label class="inline-flex items-center">
+                <input type="checkbox" class="form-checkbox h-4 w-4 accent-custom-blue" id="opHum">
+                <span class="ml-2 font-semibold text-xs text-white">rH</span>
+          </label>
         </div>
-        <label class="inline-flex items-center">
-          <input type="checkbox" class="form-checkbox h-4 w-4 accent-custom-red" id="opTemp">
-          <span class="ml-2 font-semibold text-xs text-custom-red">T</span>
-        </label>
-        <label class="inline-flex items-center">
-              <input type="checkbox" class="form-checkbox h-4 w-4 accent-custom-blue" id="opHum">
-              <span class="ml-2 font-semibold text-xs text-custom-blue ">rH</span>
-        </label>
+
+        <!-- Enable/disable -->
+          <button 
+            onclick="togglePoints()" 
+            class="flex flex-row items-center justify-center space-x-4 p-2 border rounded bg-custom-green hover:bg-opacity-80 transition cursor-pointer">
+            <div class="px-2 text-white font-semibold text-sm border-gray-300">
+              Data Points        
+            </div>
+            <span class="font-semibold text-sm  text-white w-16 text-center" id="opPointsEnable">Enabled</span>
+          </button>
+
         
       </div>
     </section>

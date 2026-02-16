@@ -20,6 +20,7 @@
     let deviceeventsrawData = [];
     let alarmsrawData = [];
     let currentAlarmsRows = [];
+    let pointsVisible = true;
 
       function loadScript(url) {
       return new Promise((resolve, reject) => {
@@ -181,6 +182,7 @@
 
       const opTempCheckbox = document.getElementById('opTemp');
       const opHumCheckbox = document.getElementById('opHum');
+
       opTempCheckbox.addEventListener('change', () => {
         
         toggleDataset("Temperature Weather", opTempCheckbox.checked);
@@ -191,6 +193,7 @@
         toggleDataset("Humidity Weather", opHumCheckbox.checked);
         
       });
+
 
       // Modal close button handlers
       const closeModalBtn = document.getElementById('closeModalBtn');
@@ -949,9 +952,9 @@ function applyXAxisRange() {
       backgroundColor,
       borderWidth: 1,
       tension: 0.3,
-      pointRadius: dashed ? 0 : 2,
+      pointRadius: (!dashed && pointsVisible) ? 2 : 0,
       borderDash: dashed ? [6, 6] : [],
-      pointHoverRadius: dashed ? 0 : 4,
+      pointHoverRadius: (!dashed && pointsVisible) ? 4 : 0,
       hidden
     };
   }
@@ -1780,7 +1783,7 @@ function getFilteredDataAlarms() {
     });
   }
 
-  function renderHeadAlarms() {
+  function renderHeadAlarms1() {
     const head = document.getElementById("tableAHead");
 
     // Clear existing headers
@@ -1832,42 +1835,68 @@ function getFilteredDataAlarms() {
   }
 
 
-  // function renderHeadAlarms() {
-  //   const head = document.getElementById("tableAHead");
-  //   head.innerHTML = columnalarms.map(col => {
-  //     const isActive = stateAlarms.sortKey === col.key;
-  //     const arrow = isActive ? (stateAlarms.sortDir === "asc" ? "▲" : "▼") : "";
+ function renderHeadAlarms() {
+    const head = document.getElementById("tableAHead");
 
-  //     return `
-  //       <th
-  //         data-key="${col.key}"
-  //         class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer  hover:text-gray-900"
-  //       >
-  //         <div class="flex items-center gap-2">
-  //           <span class="eventscolumnheader">${col.label}</span>
-  //           <span class="eventscolumnheader">${arrow}</span>
-  //         </div>
-  //       </th>
-  //     `;
-  //   }).join("");
+    // Clear existing headers
+    head.innerHTML = '';
 
-  //   // click sort
-  //   [...head.querySelectorAll("th")].forEach(th => {
-  //     th.addEventListener("click", () => {
-  //       const key = th.dataset.key;
+    // Define width classes for each column
+    const widthClasses = {
+      'document_dateUtc': 'w-44 px-4',  // Alarm Date - narrow
+      'event_type': 'w-36 px-4',         // Alarm Type - narrow
+      'tagId': 'w-32 px-4',              // Tag ID - narrowest
+      'object_marque': 'w-auto px-4',    // Artist - auto width
+      'object_model': 'w-auto px-4'      // Title - auto width
+    };
 
-  //       if (stateAlarms.sortKey === key) {
-  //         stateAlarms.sortDir = stateAlarms.sortDir === "asc" ? "desc" : "asc";
-  //       } else {
-  //         stateAlarms.sortKey = key;
-  //         stateAlarms.sortDir = "asc";
-  //       }
+    // Build headers safely
+    columnalarms.forEach(col => {
+      const th = document.createElement('th');
+      th.dataset.key = col.key;
+      
+      // Get the width class for this column, with fallback
+      const widthClass = widthClasses[col.key] || 'px-4';
+      th.className = `${widthClass} py-3 text-left font-semibold whitespace-nowrap cursor-pointer select-none hover:text-gray-900`;
 
-  //       stateAlarms.page = 1;
-  //       render();
-  //     });
-  //   });
-  // }
+      // Arrow logic
+      const isActive = stateAlarms.sortKey === col.key;
+      const arrow = isActive ? (stateAlarms.sortDir === "asc" ? "▲" : "▼") : "";
+
+      // Inner content
+      const div = document.createElement('div');
+      div.className = "flex items-center gap-2";
+
+      const spanLabel = document.createElement('span');
+      spanLabel.className = "eventscolumnheaderAlarms";
+      spanLabel.textContent = col.label;
+
+      const spanArrow = document.createElement('span');
+      spanArrow.className = "eventscolumnheaderAlarms";
+      spanArrow.textContent = arrow;
+
+      div.appendChild(spanLabel);
+      div.appendChild(spanArrow);
+      th.appendChild(div);
+
+      // Click handler for sorting
+      th.addEventListener('click', () => {
+        if (stateAlarms.sortKey === col.key) {
+          stateAlarms.sortDir = stateAlarms.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          stateAlarms.sortKey = col.key;
+          stateAlarms.sortDir = 'asc';
+        }
+        stateAlarms.page = 1;
+        renderAlarms();
+      });
+
+      head.appendChild(th);
+    });
+
+    // Force iOS repaint to enforce select-none (optional but safe)
+    // head.offsetHeight;
+  }
 
   function renderBody(rows) {
     const body = document.getElementById("tableBody");
@@ -2395,6 +2424,66 @@ function getFilteredDataAlarms() {
 
     opTemp.parentElement.classList.toggle("cursor-not-allowed", !tempAllowed);
     opHum.parentElement.classList.toggle("cursor-not-allowed", !humAllowed);
+  }
+
+ function average(ctx) {
+  const values = ctx.chart.data.datasets[0].data;
+  // Extract y values from objects
+  const yValues = values.map(point => point.y);
+  return yValues.reduce((a, b) => a + b, 0) / yValues.length;
+}
+
+  const linecolor = currentMetric === "temperature" 
+    ? "rgba(218,73,78,1)" 
+    : currentMetric === "humidity" 
+    ? "rgba(53,170,223,1)" 
+    : "rgba(0,0,0,1)";  // default color
+
+  const annotation = {
+    type: 'line',
+    borderColor: linecolor,
+    borderDash: [6, 6],
+    borderDashOffset: 0,
+    borderWidth: 3,
+    label: {
+      display: true,
+      content: (ctx) => 'Average: ' + average(ctx).toFixed(2),
+      position: 'end',
+    },
+    scaleID: 'y',
+    value: (ctx) => average(ctx)
+  };
+
+ 
+
+  function togglePoints() {
+
+    const spanText = document.getElementById('opPointsEnable');
+    
+    if (pointsVisible) {
+      // Hide points
+      mainChart.data.datasets.forEach(dataset => {
+        const isDashed = dataset.borderDash && dataset.borderDash.length > 0;
+        if (!isDashed) {
+          dataset.pointRadius = 0;
+          dataset.pointHoverRadius = 0;
+        }
+      });
+      spanText.textContent = 'Disabled';
+    } else {
+      // Show points
+      mainChart.data.datasets.forEach(dataset => {
+        const isDashed = dataset.borderDash && dataset.borderDash.length > 0;
+        if (!isDashed) {
+          dataset.pointRadius = 2;
+          dataset.pointHoverRadius = 4;
+        }
+      });
+      spanText.textContent = 'Enabled';
+    }
+    
+    pointsVisible = !pointsVisible;
+    mainChart.update();
   }
 
 
