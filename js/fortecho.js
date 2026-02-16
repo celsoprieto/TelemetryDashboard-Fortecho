@@ -1709,40 +1709,92 @@ function getFilteredDataAlarms() {
 
   function renderHeadAlarms() {
     const head = document.getElementById("tableAHead");
-    head.innerHTML = columnalarms.map(col => {
+
+    // Clear existing headers
+    head.innerHTML = '';
+
+    // Build headers safely
+    columnalarms.forEach(col => {
+      const th = document.createElement('th');
+      th.dataset.key = col.key;
+      th.className = "px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer select-none hover:text-gray-900";
+
+      // Arrow logic
       const isActive = stateAlarms.sortKey === col.key;
       const arrow = isActive ? (stateAlarms.sortDir === "asc" ? "▲" : "▼") : "";
 
-      return `
-        <th
-          data-key="${col.key}"
-          class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer  hover:text-gray-900"
-        >
-          <div class="flex items-center gap-2">
-            <span class="eventscolumnheader">${col.label}</span>
-            <span class="eventscolumnheader">${arrow}</span>
-          </div>
-        </th>
-      `;
-    }).join("");
+      // Inner content
+      const div = document.createElement('div');
+      div.className = "flex items-center gap-2";
 
-    // click sort
-    [...head.querySelectorAll("th")].forEach(th => {
-      th.addEventListener("click", () => {
-        const key = th.dataset.key;
+      const spanLabel = document.createElement('span');
+      spanLabel.className = "eventscolumnheader";
+      spanLabel.textContent = col.label;
 
-        if (stateAlarms.sortKey === key) {
-          stateAlarms.sortDir = stateAlarms.sortDir === "asc" ? "desc" : "asc";
+      const spanArrow = document.createElement('span');
+      spanArrow.className = "eventscolumnheader";
+      spanArrow.textContent = arrow;
+
+      div.appendChild(spanLabel);
+      div.appendChild(spanArrow);
+      th.appendChild(div);
+
+      // Click handler for sorting
+      th.addEventListener('click', () => {
+        if (stateAlarms.sortKey === col.key) {
+          stateAlarms.sortDir = stateAlarms.sortDir === 'asc' ? 'desc' : 'asc';
         } else {
-          stateAlarms.sortKey = key;
-          stateAlarms.sortDir = "asc";
+          stateAlarms.sortKey = col.key;
+          stateAlarms.sortDir = 'asc';
         }
-
         stateAlarms.page = 1;
         render();
       });
+
+      head.appendChild(th);
     });
+
+    // Force iOS repaint to enforce select-none (optional but safe)
+    head.offsetHeight;
   }
+
+
+  // function renderHeadAlarms() {
+  //   const head = document.getElementById("tableAHead");
+  //   head.innerHTML = columnalarms.map(col => {
+  //     const isActive = stateAlarms.sortKey === col.key;
+  //     const arrow = isActive ? (stateAlarms.sortDir === "asc" ? "▲" : "▼") : "";
+
+  //     return `
+  //       <th
+  //         data-key="${col.key}"
+  //         class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer  hover:text-gray-900"
+  //       >
+  //         <div class="flex items-center gap-2">
+  //           <span class="eventscolumnheader">${col.label}</span>
+  //           <span class="eventscolumnheader">${arrow}</span>
+  //         </div>
+  //       </th>
+  //     `;
+  //   }).join("");
+
+  //   // click sort
+  //   [...head.querySelectorAll("th")].forEach(th => {
+  //     th.addEventListener("click", () => {
+  //       const key = th.dataset.key;
+
+  //       if (stateAlarms.sortKey === key) {
+  //         stateAlarms.sortDir = stateAlarms.sortDir === "asc" ? "desc" : "asc";
+  //       } else {
+  //         stateAlarms.sortKey = key;
+  //         stateAlarms.sortDir = "asc";
+  //       }
+
+  //       stateAlarms.page = 1;
+  //       render();
+  //     });
+  //   });
+  // }
 
   function renderBody(rows) {
     const body = document.getElementById("tableBody");
