@@ -1748,14 +1748,14 @@ function getFilteredDataAlarms() {
           stateAlarms.sortDir = 'asc';
         }
         stateAlarms.page = 1;
-        render();
+        renderAlarms();
       });
 
       head.appendChild(th);
     });
 
     // Force iOS repaint to enforce select-none (optional but safe)
-    head.offsetHeight;
+    // head.offsetHeight;
   }
 
 
