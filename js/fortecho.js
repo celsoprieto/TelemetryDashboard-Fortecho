@@ -308,7 +308,7 @@
 
     
     async function loadData() {
-      showLoading();
+      showLoading("loadingOverlay");
 
     try {
         const select = document.getElementById('tagIdSelect');
@@ -409,7 +409,7 @@
         console.error(err);
         alert("Load failed: " + err.message);
       } finally {
-        hideLoading();
+        hideLoading("loadingOverlay");
       }
       
     }
@@ -1434,32 +1434,20 @@ function makeTooltipOptions() {
   }
 
 
-function showLoading() {
-  const o1 = document.getElementById("loadingOverlay");
-  const o2 = document.getElementById("loadingOverlayAlarms");
+function showLoading(el) {
+  const overlay = typeof el === "string" ? document.getElementById(el) : el;
+  if (!overlay) return;
 
-  if (o1) {
-    o1.classList.remove("hidden");
-    o1.style.pointerEvents = "auto";
-  }
-  if (o2) {
-    o2.classList.remove("hidden");
-    o2.style.pointerEvents = "auto";
-  }
+  overlay.classList.remove("hidden");
+  overlay.style.pointerEvents = "auto";
 }
 
-function hideLoading() {
-  const o1 = document.getElementById("loadingOverlay");
-  const o2 = document.getElementById("loadingOverlayAlarms");
+function hideLoading(el) {
+  const overlay = typeof el === "string" ? document.getElementById(el) : el;
+  if (!overlay) return;
 
-  if (o1) {
-    o1.classList.add("hidden");
-    o1.style.pointerEvents = "none";
-  }
-  if (o2) {
-    o2.classList.add("hidden");
-    o2.style.pointerEvents = "none";
-  }
+  overlay.classList.add("hidden");
+  overlay.style.pointerEvents = "none";
 }
 
 
@@ -2142,7 +2130,7 @@ function getFilteredDataAlarms() {
     async function loadAlarms() {
     //console.log("Loading events from Azure Function...");
     try {
-      showLoading();
+      showLoading("loadingOverlayAlarms");
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
     const params = new URLSearchParams();
     params.set("sitecode", sitecode);
@@ -2168,7 +2156,7 @@ function getFilteredDataAlarms() {
         console.error(err);
         alert("Load failed: " + err.message);
       } finally {
-         hideLoading(); 
+         hideLoading("loadingOverlayAlarms"); 
       }
 
   }
