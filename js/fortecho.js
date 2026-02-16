@@ -1954,12 +1954,12 @@ function getFilteredDataAlarms() {
     //console.log('Alarm clicked:', rowData);
     
     // Remove highlight from all rows
-    document.querySelectorAll('#tableABody tr[data-row-index]').forEach(r => {
-      r.classList.remove('bg-blue-100', 'border-l-4', 'border-blue-500');
-    });
+    // document.querySelectorAll('#tableABody tr[data-row-index]').forEach(r => {
+    //   r.classList.remove('bg-blue-100', 'border-l-4', 'border-blue-500');
+    // });
     
-    // Highlight clicked row
-    rowElement.classList.add('bg-blue-100', 'border-l-4', 'border-blue-500');
+    // // Highlight clicked row
+    // rowElement.classList.add('bg-blue-100', 'border-l-4', 'border-blue-500');
     
     // Show modal with alarm details
     showAlarmDetailModal(rowData);

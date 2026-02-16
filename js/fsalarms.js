@@ -109,7 +109,28 @@ function showAlarmDetailModal(alarmData) {
             <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Title</p>
             <p class="text-sm text-gray-900">${alarmData.object_model || 'N/A'}</p>
         </div>
-        </div>
+
+        <div class="space-y-1">
+        <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Building</p>
+        <p class="text-sm text-gray-900">${alarmData.object_building || 'N/A'}</p>
+      </div>
+      
+      <div class="space-y-1">
+        <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Floor</p>
+        <p class="text-sm text-gray-900">${alarmData.object_floor || 'N/A'}</p>
+      </div>
+      
+      <div class="space-y-1">
+        <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Room</p>
+        <p class="text-sm text-gray-900">${alarmData.object_room || 'N/A'}</p>
+      </div>
+      
+      <div class="space-y-1">
+        <p class="text-xs font-bold text-custom-green uppercase tracking-wide">Zone</p>
+        <p class="text-sm text-gray-900">${alarmData.object_zone || 'N/A'}</p>
+      </div>
+
+    </div>
         
         <!-- Full Data (for debugging/advanced view) -->
         <details class="border-t border-gray-200 pt-4">
