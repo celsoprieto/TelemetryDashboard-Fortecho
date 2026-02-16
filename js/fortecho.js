@@ -1682,8 +1682,8 @@ function getFilteredDataAlarms() {
           class="px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer  hover:text-gray-900"
         >
           <div class="flex items-center gap-2">
-            <span class="eventscolumnheaderAlarms">${col.label}</span>
-            <span class="eventscolumnheaderAlarms">${arrow}</span>
+            <span class="eventscolumnheader">${col.label}</span>
+            <span class="eventscolumnheader">${arrow}</span>
           </div>
         </th>
       `;
