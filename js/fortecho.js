@@ -543,10 +543,20 @@
     const from = document.getElementById('fromInput').value;
     const to   = document.getElementById('toInput').value;
 
-    // const start_hour = new Date(from).toISOString().slice(0, 16); // e.g. "2026-02-04T15:30:00.000Z"
-    // const end_hour   = new Date(to).toISOString().slice(0, 16);
-    const start_hour = toLocalISOString(from);
-    const end_hour = toLocalISOString_Rounded(to);
+    const startDate = new Date(from);
+    const endDate   = new Date(to);
+
+    // max range = 3 months
+    const maxStart = new Date(endDate);
+    maxStart.setMonth(maxStart.getMonth() - 3);
+
+    // if selected range > 3 months → clamp start
+    if (startDate < maxStart) {
+      startDate.setTime(maxStart.getTime());
+    }
+
+    const start_hour = toLocalISOString(startDate);
+    const end_hour   = toLocalISOString_Rounded(endDate);
 
     // const start_hour = "2026-02-01T10:00";
     // const start_hour = "2026-02-01T18:00";
