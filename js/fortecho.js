@@ -742,32 +742,6 @@
       }
     }
 
-    // ---- register plugin once ----
-    if (!window._solidTooltipColorBoxRegistered) {
-      const solidTooltipColorBox = {
-        id: "solidTooltipColorBox",
-        beforeTooltipDraw(chart) {
-          const tooltip = chart.tooltip;
-          if (!tooltip) return;
-
-          tooltip.labelColors = tooltip.dataPoints.map(dp => {
-            const ds = chart.data.datasets[dp.datasetIndex];
-            const c = ds.borderColor || "#000";
-
-            return {
-              borderColor: c,
-              backgroundColor: c,
-              borderWidth: 0
-            };
-          });
-        }
-      };
-
-      Chart.register(solidTooltipColorBox);
-      //Chart.register(ChartAnnotation.Annotation);
-      window._solidTooltipColorBoxRegistered = true;
-    }
-
     // ---- CREATE ONCE, UPDATE AFTER ----
     if (!mainChart) {
       mainChart = new Chart(ctx, {
@@ -1195,114 +1169,7 @@ function applyXAxisRange() {
     };
   }
 
-  function makeTooltipOptions1() {
-    
-    function getTooltipEl(chart) {
-      let tooltipEl = document.getElementById('chartjs-tooltip');
-      if (!tooltipEl) {
-        tooltipEl = document.createElement('div');
-        tooltipEl.id = 'chartjs-tooltip';
-        tooltipEl.style.position = 'absolute';
-        tooltipEl.style.background = '#ffffff';
-        tooltipEl.style.border = '1px solid #d0d7e2';
-        tooltipEl.style.padding = '8px';
-        tooltipEl.style.fontFamily = 'sans-serif';
-        tooltipEl.style.fontSize = '10px'; 
-        tooltipEl.style.pointerEvents = 'none';
-        tooltipEl.style.borderRadius = '4px';
-        tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
-        tooltipEl.style.transition = 'all 0.1s ease';
-        tooltipEl.style.opacity = 0;
-        document.body.appendChild(tooltipEl);
-      }
-      return tooltipEl;
-    }
-
-    return {
-      enabled: false, 
-      mode: 'index',
-      intersect: false,
-      external: function(context) {
-        const tooltipEl = getTooltipEl(context.chart);
-        const tooltipModel = context.tooltip;
-
-
-        if (tooltipModel.opacity === 0) {
-          tooltipEl.style.opacity = 0;
-          return;
-        }
-
-        
-        const label = tooltipModel.dataPoints[0].label; // "11/02/2026 - 01:12:20"
-        const [datePart, timePart] = label.split(' - ');
-        const [day, month, year] = datePart.split('/').map(Number);
-        const [hour, minute, second] = timePart.split(':').map(Number);
-        const date = new Date(year, month-1, day, hour, minute, second);
-
-        const dateStr = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-        const timeStr = date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
-
-        
-        let innerHtml = `<div style="font-weight: normal; margin-bottom:4px;">${dateStr} ${timeStr}</div>`;
-        tooltipModel.dataPoints.forEach(dp => {
-          const y = dp.parsed.y;
-          let unit = '';
-          const metric = context.chart.options.currentMetric;
-          const label = dp.dataset.label ;
-
-          if (metric === "temperature") unit = " °C";
-          else if (metric === "humidity") unit = " %";
-          else if (metric === "light") unit = " Lux";
-          else if (metric === "temp-humidity") {
-            if (label === "Temperature") unit = " °C";
-            if (label === "Humidity") unit = " %";
-            if (label === "Temperature Weather") unit = " °C";
-            if (label === "Humidity Weather") unit = " %";
-          }
-
-           const color = dp.dataset.borderColor || dp.dataset.backgroundColor || '#000';
-
-          // Decide si usar círculo o línea
-          let markerHtml = '';
-          if (label === "Temperature Weather" || label === "Humidity Weather") {
-            // línea gruesa horizontal
-            markerHtml = `<span style="
-              display:inline-block;
-              width:6px;
-              height:3px;
-              background:${color};
-              border-radius:2px;
-            "></span>`;
-          } else {
-            // círculo pequeño normal
-            markerHtml = `<span style="
-              display:inline-block;
-              width:8px;
-              height:8px;
-              border-radius:50%;
-              background:${color};
-            "></span>`;
-          }
-
-          innerHtml += `
-            <div style="font-size:11px; display:flex; align-items:center; gap:4px;">
-              ${markerHtml}
-              <span>${label}: <b>${y}${unit}</b></span>
-            </div>
-          `;
-        });
-
-        tooltipEl.innerHTML = innerHtml;
-
-   
-        const canvasRect = context.chart.canvas.getBoundingClientRect();
-        tooltipEl.style.opacity = 1;
-        tooltipEl.style.left = canvasRect.left + window.pageXOffset + tooltipModel.caretX + 'px';
-        tooltipEl.style.top = canvasRect.top + window.pageYOffset + tooltipModel.caretY + 'px';
-      }
-    };
-  }
-
+  
 function makeTooltipOptions() {
 
   function getTooltipEl(chart) {
