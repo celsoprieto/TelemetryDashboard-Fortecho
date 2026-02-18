@@ -376,8 +376,8 @@
         const nowMs = Date.now();
         BUFFER_MS = 3 * days * cBUFFER_MS; // adjust buffer based on requested range
         EDGE_MS = 3 * days * cEDGE_MS;   
-        const fromUtcbuffer = fromUtcMs - BUFFER_MS;
-        let toUtcbuffer = toUtcMs + BUFFER_MS;
+        const fromUtcbuffer = fromUtcMs - (3 * BUFFER_MS);
+        let toUtcbuffer = toUtcMs + (3 * BUFFER_MS);
         // // clamp to today/now
         // if (toUtcbuffer > nowMs) toUtcbuffer = nowMs;
         loadedFromMs = new Date(fromUtcbuffer).getTime();
@@ -1050,8 +1050,8 @@
         let fetchFrom = loadedFromMs;
         let fetchTo   = loadedToMs;
 
-        if (nearLeft)  fetchFrom = viewFrom - BUFFER_MS;
-        if (nearRight) fetchTo   = viewTo   + BUFFER_MS;
+        if (nearLeft)  fetchFrom = viewFrom - (3 * BUFFER_MS);
+        if (nearRight) fetchTo   = viewTo   + (3 * BUFFER_MS);
 
         // clamp
         fetchFrom = Math.max(fetchFrom, 0);
