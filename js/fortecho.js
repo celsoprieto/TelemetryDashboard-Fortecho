@@ -644,13 +644,19 @@
   const dualAxisContinuousFollowMarker = {
     id: "dualAxisContinuousFollowMarker",
 
-    afterEvent(chart, args) {
+    afterEvent(chart, args, pluginOptions) {
       const e = args.event;
-      if (!e) return;
-
       chart.$follow = chart.$follow || {};
-      chart.$follow.x = e.x;
-      chart.$follow.y = e.y;
+
+      if (e.type === "mousemove") {
+        chart.$follow.x = e.x;
+        chart.$follow.y = e.y;
+        chart.$follow.opacity = 1; // al entrar, opacidad completa
+      }
+
+      if (e.type === "mouseout" || e.type === "mouseleave") {
+        chart.$follow.fadeOut = true; // activamos fade out
+      }
 
       chart.draw();
     },
@@ -665,7 +671,12 @@
       if (!xScale) return;
 
       const follow = chart.$follow;
-      if (!follow?.x) return;
+      
+      
+      if (!follow?.x || follow.x < chart.chartArea.left || follow.x > chart.chartArea.right
+                      || follow.y < chart.chartArea.top || follow.y > chart.chartArea.bottom) {
+        return;
+}
 
       const xValue = xScale.getValueForPixel(follow.x);
       const ctx = chart.ctx;
@@ -946,15 +957,15 @@
         }
       });
 
-      // const canvas = document.getElementById("mainChart");
+      const canvas = document.getElementById("mainChart");
 
       
-      // canvas.addEventListener("mouseleave", () => {
-      //   if (!mainChart) return;
+      canvas.addEventListener("mouseleave", () => {
+        if (!mainChart) return;
 
-      //   mainChart.$follow = {}; 
-      //   requestAnimationFrame(updateChart);      
-      // });
+        mainChart.$follow = null // reset follow state; 
+        requestAnimationFrame(updateChart);      
+      });
 
 
     } else {
