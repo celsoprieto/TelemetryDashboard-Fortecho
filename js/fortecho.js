@@ -21,6 +21,18 @@
     let alarmsrawData = [];
     let currentAlarmsRows = [];
     let pointsVisible = true;
+    let timer;
+    let loadedFromMs = null;
+    let loadedToMs = null;
+    let weatherLoadedFromMs = null;
+    let weatherLoadedToMs = null;
+    let isFetching = false;
+
+    const cBUFFER_MS = 24 * 60 * 60 * 1000; // 24h
+    const cEDGE_MS   = 60 * 60 * 1000;     // 1h (cuando te acercas al borde, recarga)
+    let BUFFER_MS = cBUFFER_MS; // 24h
+    let EDGE_MS   = cEDGE_MS;     // 1h (cuando te acercas al borde, recarga)
+    let filtereddays = 1; // default to 1 day for buffer/edge calculations
 
       function loadScript(url) {
       return new Promise((resolve, reject) => {
@@ -157,7 +169,7 @@
 
       // ---------------- TAG CHANGE ----------------
       const tagSelect = document.getElementById("tagIdSelect");
-      tagSelect?.addEventListener("change", loadData);
+      tagSelect?.addEventListener("change", () => loadData(filtereddays));
 
       // ---------------- FROM/TO CHANGE (DEBOUNCED) ----------------
       let reloadTimer;
@@ -166,7 +178,7 @@
         clearTimeout(reloadTimer);
         reloadTimer = setTimeout(() => {
           setFromTo();  // keeps To >= From
-          loadData();   // fetch new data
+          loadData(filtereddays);   // fetch new data
         }, 250);
       }
 
@@ -235,7 +247,7 @@
 
     function reloadDataDebounced() {
       clearTimeout(reloadTimer);
-      reloadTimer = setTimeout(() => loadData(), 250);
+      reloadTimer = setTimeout(() => loadData(1), 250);
     }
 
     function formatUtcToLocalLabel(utcString) {
@@ -347,7 +359,7 @@
 
 
     
-    async function loadData() {
+    async function loadData(days) {
       showLoading("loadingOverlay");
 
     try {
@@ -356,8 +368,26 @@
         const from = document.getElementById('fromInput').value;
         const to   = document.getElementById('toInput').value;
 
-        const fromUtc = new Date(from).toISOString(); // e.g. "2026-02-04T15:30:00.000Z"
-        const toUtc   = new Date(to).toISOString();
+        const fromUtcMs = new Date(from).getTime();
+        const toUtcMs   = new Date(to).getTime();
+       
+        filtereddays = days || filtereddays; // use provided days or fallback to existing value
+       
+        const nowMs = Date.now();
+        BUFFER_MS = 3 * days * cBUFFER_MS; // adjust buffer based on requested range
+        EDGE_MS = 3 * days * cEDGE_MS;   
+        const fromUtcbuffer = fromUtcMs - BUFFER_MS;
+        let toUtcbuffer = toUtcMs + BUFFER_MS;
+        // // clamp to today/now
+        // if (toUtcbuffer > nowMs) toUtcbuffer = nowMs;
+        loadedFromMs = new Date(fromUtcbuffer).getTime();
+        loadedToMs   = new Date(toUtcbuffer).getTime();
+        weatherLoadedFromMs = loadedFromMs;
+        weatherLoadedToMs = loadedToMs;
+
+        const fromUtcIso = new Date(fromUtcbuffer).toISOString();
+        const toUtcIso   = new Date(toUtcbuffer).toISOString();
+
 
         if (!tagId) {
           alert('Please select a tagId');
@@ -366,8 +396,8 @@
 
         const params = new URLSearchParams({ sitecode });
         if (tagId) params.append('tagId', tagId);
-        if (from) params.append('from', fromUtc);
-        if (to)   params.append('to', toUtc);
+        if (from) params.append('from', fromUtcIso);
+        if (to)   params.append('to', toUtcIso);
 
         const url = `${API_BASE}/telemetry?${params.toString()}`;
         // console.log('Requesting:', url);
@@ -439,7 +469,7 @@
         lastLights = lights;
 
         updateMetricButtons();
-        await loadWeather();
+        await loadWeather(weatherLoadedFromMs, weatherLoadedToMs);
 
         // default metric after loading: temperature
         //currentMetric = 'temperature';
@@ -477,10 +507,14 @@
     const xScale = chart.scales.x;
     if (!xScale) return;
 
-    const min = xScale.min;
-    const max = xScale.max;
+    let min = xScale.min;
+    let max = xScale.max;
 
     if (!min || !max) return;
+
+    // ✅ clamp max to now
+    const nowMs = Date.now();
+    if (max > nowMs) max = nowMs;
 
     isSyncingInputs = true;
 
@@ -489,9 +523,9 @@
 
     isSyncingInputs = false;
 
-    // 🔥 reload from API using new range (debounced)
-    clearTimeout(reloadTimer);
-    reloadTimer = setTimeout(() => loadData(), 300);
+    // // 🔥 reload from API using new range (debounced)
+    // clearTimeout(reloadTimer);
+    // reloadTimer = setTimeout(() => loadData(), 300);
   }
 
   function interpolateHourlyAtLabels(hourly, labels) {
@@ -536,50 +570,39 @@
   }
 
 
-  async function loadWeather() {
+  async function loadWeather(fromMs, toMs) {
     const lat = 40.4168;
     const lon = -3.7038;
 
-    const from = document.getElementById('fromInput').value;
-    const to   = document.getElementById('toInput').value;
-
-    const startDate = new Date(from);
-    const endDate   = new Date(to);
+    let startDate = new Date(fromMs);
+    const endDate = new Date(toMs);
 
     // max range = 3 months
     const maxStart = new Date(endDate);
     maxStart.setMonth(maxStart.getMonth() - 3);
-
-    // if selected range > 3 months → clamp start
-    if (startDate < maxStart) {
-      startDate.setTime(maxStart.getTime());
-    }
+    if (startDate < maxStart) startDate = maxStart;
 
     const start_hour = toLocalISOString(startDate);
     const end_hour   = toLocalISOString_Rounded(endDate);
 
-    // const start_hour = "2026-02-01T10:00";
-    // const start_hour = "2026-02-01T18:00";
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone; // <-- browser timezone
-
-    const url = `https://api.open-meteo.com/v1/forecast?` +
-                `latitude=${lat}&longitude=${lon}`+
-                `&hourly=temperature_2m,relative_humidity_2m&` +
-                `start_hour=${encodeURIComponent(start_hour)}&`+
-                `end_hour=${encodeURIComponent(end_hour)}&`+
-                `timezone=${encodeURIComponent(tz)}`;
+    const url =
+      `https://api.open-meteo.com/v1/forecast?` +
+      `latitude=${lat}&longitude=${lon}` +
+      `&hourly=temperature_2m,relative_humidity_2m&` +
+      `start_hour=${encodeURIComponent(start_hour)}&` +
+      `end_hour=${encodeURIComponent(end_hour)}&` +
+      `timezone=${encodeURIComponent(tz)}`;
 
     const res = await fetch(url);
     const data = await res.json();
 
-    // ({ temps: lastTemps_Weather, hums: lastHums_Weather } = interpolateHourlyAtLabels(data.hourly, lastTempHumLabels));
-
     lastTemps_Weather = toXYPoints(data.hourly.time, data.hourly.temperature_2m);
-    lastHums_Weather = toXYPoints(data.hourly.time, data.hourly.relative_humidity_2m);
+    lastHums_Weather  = toXYPoints(data.hourly.time, data.hourly.relative_humidity_2m);
 
-    //  console.log("Timezone used:", tz);
-    // console.log(data);
+    weatherLoadedFromMs = startDate.getTime();
+    weatherLoadedToMs   = endDate.getTime();
   }
 
   function toXYPoints(timestamps, values) {
@@ -625,6 +648,7 @@
     // const lightPoints = toXYPoints(lastLightLabels, lastLights); // Add this line
 
     const today = new Date();
+    const todayMs = Date.now();
 
     if (currentMetric === "temperature") {
       labels = lastTempHumLabels;
@@ -738,6 +762,12 @@
             legend: { display: false },
             tooltip: makeTooltipOptions(),
             zoom: {
+               // ✅ Hard limits for the X axis
+              limits: {
+                x: {
+                  max: todayMs  // never beyond now
+                }
+              },
               pan: {
                 enabled: true,
                 mode: 'x',
@@ -745,10 +775,7 @@
                 onPanComplete({ chart }) {
                   //console.log('Pan done');
                   syncInputsFromChart(chart);
-                  // startFetch({ chart });
-                  limits: {
-                    x: { max: today.getTime() } // no permite pan más allá de hoy
-                  }
+                  maybeFetchMore(chart);
                 }
               },
               zoom: {
@@ -758,10 +785,7 @@
                 mode: 'x',
                 onZoomComplete({ chart }) {
                   syncInputsFromChart(chart);
-                  // startFetch({ chart });
-                  limits: {
-                    x: { max: today.getTime() } // no permite pan más allá de hoy
-                  }
+                  maybeFetchMore(chart);
                 }
               }
             }
@@ -773,7 +797,7 @@
             x: {
               ...makeXAxis(),
               min: fromDate ? fromDate.getTime() : undefined,
-              max: Math.min(toDate ? toDate.getTime() : today.getTime(), today.getTime())
+              max: Math.min(toDate ? toDate.getTime() : todayMs, todayMs)
             },
             ...scales
           }
@@ -792,131 +816,292 @@
         x: {
           ...makeXAxis(),
           min: fromDate ? fromDate.getTime() : undefined,
-          max: Math.min(toDate ? toDate.getTime() : today.getTime(), today.getTime())
+          max: Math.min(toDate ? toDate.getTime() : todayMs, todayMs),
+          offset: false
         },
         ...scales
       };
+      needsUpdate = true;
+      requestAnimationFrame(updateChart);
 
-      mainChart.update("none"); // fast, no animation
+      // mainChart.update("none"); // fast, no animation
     }
 
     updateWeatherCheckboxes();
   }
 
-  async function fetchData(minTs, maxTs) {
-    const select = document.getElementById("tagIdSelect");
-    const tagId = select.value;
-    if (!tagId) return { temps: [], hums: [] };
+  // async function fetchData(minTs, maxTs) {
+  //   const select = document.getElementById("tagIdSelect");
+  //   const tagId = select.value;
+  //   if (!tagId) return { temps: [], hums: [] };
 
-    const from = new Date(minTs).toISOString();
-    const to = new Date(maxTs).toISOString();
+  //   const from = new Date(minTs).toISOString();
+  //   const to = new Date(maxTs).toISOString();
 
-    const params = new URLSearchParams({sitecode, tagId, from, to });
-    const res = await fetch(`${API_BASE}/telemetry?${params.toString()}`);
-    const data = await res.json();
+  //   const params = new URLSearchParams({sitecode, tagId, from, to });
+  //   const res = await fetch(`${API_BASE}/telemetry?${params.toString()}`);
+  //   const data = await res.json();
 
-    const temps = [];
-    const hums = [];
+  //   const temps = [];
+  //   const hums = [];
+  //   const tempsWeather = [];
+  //   const humsWeather = [];
+    
    
 
-    await loadWeather(); // get latest weather data for the new range
+  //   await loadWeather(); // get latest weather data for the new range
+
+  //   for (const d of data) {
+  //     const s = d.sensorData;
+  //     if (!s) continue;
+
+  //     if (s.sensorTrH === 1) {
+  //       temps.push(s.temperatureEv ?? null);
+  //       hums.push(s.humidityEv ?? null);
+  //     }
+  //   }
+
+
+
+  //   return { temps, hums };
+  // }
+
+
+  // async function startFetch({ chart }) {
+  //   if (!chart || !chart.scales || !chart.data.datasets) return;
+
+  //   // Obtener rango visible del eje X
+  //   const { min, max } = chart.scales.x;
+  //   const { min: minT , max: maxT } = chart.scales.yTemp;
+  //   const { min: minH, max: maxH } = chart.scales.yHum;
+
+  //   clearTimeout(timer);
+  //   timer = setTimeout(async () => {
+  //     try {
+  //       // Traer datos para el rango visible
+  //       // Implementa fetchData(min, max) según tu API
+  //       const newData = await fetchData(min, max);
+  //       // newData = {
+  //       //   temps: [...],
+  //       //   hums: [...],
+  //       //   tempsWeather: [...],
+  //       //   humsWeather: [...]
+  //       // }
+
+  //       // Actualizar datasets según label
+  //       chart.data.datasets.forEach(ds => {
+  //         switch (ds.label) {
+  //           case "Temperature":
+  //             ds.data = newData.temps;
+  //             break;
+  //           case "Humidity":
+  //             ds.data = newData.hums;
+  //             break;
+  //           case "Temperature Weather":
+  //             ds.data = lastTemps_Weather.y;
+  //             break;
+  //           case "Humidity Weather":
+  //             ds.data = lastHums_Weather.y;
+  //             break;
+  //         }
+  //       });
+
+  //       // Opcional: mantener límites de los ejes y para que no se vayan de rango
+  //       if (chart.options.scales.yTemp) {
+  //         chart.options.scales.yTemp.min = minT;
+  //         chart.options.scales.yTemp.max = maxT; // ajusta según tus datos
+  //       }
+  //       if (chart.options.scales.yHum) {
+  //         chart.options.scales.yHum.min = minH;
+  //         chart.options.scales.yHum.max = maxH; // ajusta según tus datos
+  //       }
+
+  //       // Actualizar gráfico sin animación
+  //       chart.update("none");
+
+  //     } catch (err) {
+  //       console.error("Error fetching chart data:", err);
+  //     }
+  //   }, 500); // retraso para evitar múltiples llamadas rápidas
+  // }
+
+  async function fetchData(fromMs, toMs) {
+    const select = document.getElementById("tagIdSelect");
+    const tagId = select.value;
+    if (!tagId) return { temps: [], hums: [], lights: [] };
+
+    const from = new Date(fromMs).toISOString();
+    const to   = new Date(toMs).toISOString();
+
+    const params = new URLSearchParams({ sitecode, tagId, from, to });
+
+    const res = await fetch(`${API_BASE}/telemetry?${params.toString()}`);
+    if (!res.ok) throw new Error(await res.text());
+
+    const data = await res.json();
+
+    await loadWeather(weatherLoadedFromMs, weatherLoadedToMs); // ensure we have weather data for the new range
+
+    const temps = [];
+    const hums  = [];
+    const lights = [];
 
     for (const d of data) {
       const s = d.sensorData;
-      if (!s) continue;
+      if (!s?.eventDateUtc) continue;
+
+      const x = s.eventDateUtc;
 
       if (s.sensorTrH === 1) {
-        temps.push(s.temperatureEv ?? null);
-        hums.push(s.humidityEv ?? null);
+        const t = s.temperatureEv;
+        const h = s.humidityEv;
+
+        if (t != null) temps.push({ x, y: t });
+        if (h != null && h >= 0) hums.push({ x, y: h });
+      }
+
+      if (s.sensorLum === 1) {
+        const l = s.luxEv;
+        if (l != null && l >= 0) lights.push({ x, y: l });
       }
     }
 
+    return { temps, hums, lights };
+  }
 
+  function prependUnique(baseArr, newArr) {
+    if (!newArr.length) return;
 
-    return { temps, hums };
+    const firstBaseX = baseArr.length ? baseArr[0].x : null;
+
+    for (let i = newArr.length - 1; i >= 0; i--) {
+      const p = newArr[i];
+      if (firstBaseX && p.x >= firstBaseX) continue;
+      baseArr.unshift(p);
+    }
+  }
+
+  function appendUnique(baseArr, newArr) {
+    if (!newArr.length) return;
+
+    const lastBaseX = baseArr.length ? baseArr[baseArr.length - 1].x : null;
+
+    for (let i = 0; i < newArr.length; i++) {
+      const p = newArr[i];
+      if (lastBaseX && p.x <= lastBaseX) continue;
+      baseArr.push(p);
+    }
+  }
+
+  async function ensureWeather(fromMs, toMs) {
+    if (!weatherLoadedFromMs || !weatherLoadedToMs) {
+      await loadWeather(fromMs, toMs);
+      return;
+    }
+
+    const needLeft  = fromMs < weatherLoadedFromMs;
+    const needRight = toMs   > weatherLoadedToMs;
+
+    if (needLeft || needRight) {
+      await loadWeather(fromMs, toMs);
+    }
   }
 
 
-  let timer;
-// function startFetch({ chart }) {
-//   const { min, max } = chart.scales.x;
-//   clearTimeout(timer);
 
-//   timer = setTimeout(async () => {
-//     //console.log('Fetching data between ' + min + ' and ' + max);
+  function maybeFetchMore(chart) {
+    if (!chart?.scales?.x) return;
+    if (isFetching) return;
 
-//     // call your API to get new data
-//     const newData = await fetchData(min, max); // implement fetchData()
+    if (!loadedFromMs || !loadedToMs) return;
 
-//     // Update datasets
-//     if (chart.data.datasets.length > 0) {
-//       chart.data.datasets[0].data = newData.temps; // example
-//       if (chart.data.datasets[1]) chart.data.datasets[1].data = newData.hums; // for temp-humidity
-//     }
+    const viewFrom = chart.scales.x.min;
+    const viewTo   = chart.scales.x.max;
 
-//     chart.update("none"); // fast update without animation
-//   }, 500);
-// }
+    const nearLeft  = viewFrom < loadedFromMs + EDGE_MS;
+    const nearRight = viewTo + 1 >= loadedToMs - EDGE_MS;  // small fudge factor
 
-  async function startFetch({ chart }) {
-    if (!chart || !chart.scales || !chart.data.datasets) return;
 
-    // Obtener rango visible del eje X
-    const { min, max } = chart.scales.x;
-    const { min: minT , max: maxT } = chart.scales.yTemp;
-    const { min: minH, max: maxH } = chart.scales.yHum;
+    if (!nearLeft && !nearRight) return;
+
+    // console.log("Near edge check:", {
+    //   viewFrom: new Date(viewFrom).toISOString(),
+    //   viewTo: new Date(viewTo).toISOString(),
+    //   loadedFrom: new Date(loadedFromMs).toISOString(),
+    //   loadedTo: new Date(loadedToMs).toISOString(),
+    //   EDGE_MS,
+    //   nearLeft,
+    //   nearRight
+    // });
 
     clearTimeout(timer);
     timer = setTimeout(async () => {
       try {
-        // Traer datos para el rango visible
-        // Implementa fetchData(min, max) según tu API
-        const newData = await fetchData(min, max);
-        // newData = {
-        //   temps: [...],
-        //   hums: [...],
-        //   tempsWeather: [...],
-        //   humsWeather: [...]
-        // }
+        isFetching = true;
 
-        // Actualizar datasets según label
+        // 🔥 calculamos nuevo rango con buffer
+        let fetchFrom = loadedFromMs;
+        let fetchTo   = loadedToMs;
+
+        if (nearLeft)  fetchFrom = viewFrom - BUFFER_MS;
+        if (nearRight) fetchTo   = viewTo   + BUFFER_MS;
+
+        // clamp
+        fetchFrom = Math.max(fetchFrom, 0);
+        fetchTo   = Math.min(fetchTo, Date.now());
+
+        // si no amplía rango, no hagas nada
+        if (fetchFrom >= loadedFromMs && fetchTo <= loadedToMs) return;
+
+        const newData = await fetchData(fetchFrom, fetchTo);
+        //  load weather for same range
+        await ensureWeather(fetchFrom, fetchTo);
+
+        //  MERGE (solo añadimos lo que falta)
+        if (fetchFrom < loadedFromMs) {
+          prependUnique(lastTemps, newData.temps);
+          prependUnique(lastHums, newData.hums);
+          prependUnique(lastLights, newData.lights);
+          loadedFromMs = fetchFrom;
+        }
+
+        if (fetchTo > loadedToMs) {
+          appendUnique(lastTemps, newData.temps);
+          appendUnique(lastHums, newData.hums);
+          appendUnique(lastLights, newData.lights);
+          loadedToMs = fetchTo;
+        }
+
+        // 🔥 NO recrees chart. Solo update datasets.
         chart.data.datasets.forEach(ds => {
-          switch (ds.label) {
-            case "Temperature":
-              ds.data = newData.temps;
-              break;
-            case "Humidity":
-              ds.data = newData.hums;
-              break;
-            case "Temperature Weather":
-              ds.data = lastTemps_Weather.y;
-              break;
-            case "Humidity Weather":
-              ds.data = lastHums_Weather.y;
-              break;
-          }
+          if (ds.label === "Temperature") ds.data = lastTemps;
+          if (ds.label === "Humidity") ds.data = lastHums;
+          if (ds.label === "Light") ds.data = lastLights;
+          if (ds.label === "Temperature Weather") ds.data = lastTemps_Weather;
+          if (ds.label === "Humidity Weather") ds.data = lastHums_Weather;
         });
 
-        // Opcional: mantener límites de los ejes y para que no se vayan de rango
-        if (chart.options.scales.yTemp) {
-          chart.options.scales.yTemp.min = minT;
-          chart.options.scales.yTemp.max = maxT; // ajusta según tus datos
-        }
-        if (chart.options.scales.yHum) {
-          chart.options.scales.yHum.min = minH;
-          chart.options.scales.yHum.max = maxH; // ajusta según tus datos
-        }
+        needsUpdate = true;
+        requestAnimationFrame(updateChart);
 
-        // Actualizar gráfico sin animación
-        chart.update("none");
+        // chart.update("none");
 
-      } catch (err) {
-        console.error("Error fetching chart data:", err);
+      } catch (e) {
+        console.error("FetchMore failed:", e);
+      } finally {
+        isFetching = false;
       }
-    }, 500); // retraso para evitar múltiples llamadas rápidas
+    }, 350);
   }
 
 
+
+  let needsUpdate = false;
+  function updateChart() {
+    if (!needsUpdate) return;
+    needsUpdate = false;
+    mainChart.update('none'); // Efficient update
+  }
 
   function getFromToDates() {
     const fromVal = document.getElementById("fromInput").value;
@@ -933,7 +1118,8 @@
     if (!ds) return;
 
     ds.hidden = !isVisible;
-    mainChart.update("none");
+    needsUpdate = true;
+    requestAnimationFrame(updateChart);
   }
 
 function applyXAxisRange() {
@@ -1053,6 +1239,7 @@ function applyXAxisRange() {
     return {
       type: "linear",
       position,
+      beginAtZero: true,
       title: {
         display: true,
         text: title,
@@ -1312,7 +1499,7 @@ function makeTooltipOptions() {
     toInput.value = formatForDateTimeLocal(now);
     fromInput.value = formatForDateTimeLocal(past);
 
-    loadData();
+    loadData(1);
   }
 
    function lastweek() {
@@ -1325,7 +1512,7 @@ function makeTooltipOptions() {
     toInput.value = formatForDateTimeLocal(now);
     fromInput.value = formatForDateTimeLocal(past);
 
-    loadData();
+    loadData(7);
   }
 
      function lastmonth() {
@@ -1338,7 +1525,7 @@ function makeTooltipOptions() {
     toInput.value = formatForDateTimeLocal(now);
     fromInput.value = formatForDateTimeLocal(past);
 
-    loadData();
+    loadData(30);
   }
 
      function last3months() {
@@ -1351,7 +1538,7 @@ function makeTooltipOptions() {
     toInput.value = formatForDateTimeLocal(now);
     fromInput.value = formatForDateTimeLocal(past);
 
-    loadData();
+    loadData(90);
   }
 
      function last6months() {
@@ -1364,7 +1551,7 @@ function makeTooltipOptions() {
     toInput.value = formatForDateTimeLocal(now);
     fromInput.value = formatForDateTimeLocal(past);
 
-    loadData();
+    loadData(180);
   }
 
   function setLast24Hours() {
@@ -1496,7 +1683,7 @@ function makeTooltipOptions() {
         // al volver a telemetry, recarga datos para mostrar el gráfico actualizado
         await loadTags();
         setLast24Hours();
-        await loadData();
+        await loadData(1);
       }
     }
 
