@@ -160,7 +160,7 @@
       switchView();
 
       // ---------------- LOAD INITIAL DATA ----------------
-      // await loadTags();
+       await loadTags();
       // setLast24Hours();
       // await loadData(); // moved to switchView() to ensure it runs when telemetry view is active
       await loadAlarms(); 
@@ -1486,7 +1486,7 @@ function makeTooltipOptions() {
 
       if (viewName === "telemetry") {
         // al volver a telemetry, recarga datos para mostrar el gráfico actualizado
-        await loadTags();
+        //await loadTags();
         setLast24Hours();
         await loadData(1);
       }
@@ -2279,20 +2279,20 @@ function getFilteredDataAlarms() {
       // Add event listener after setting innerHTML
       const button = card.querySelector('button[data-tagid]');
       button.addEventListener('click', function() {
-      // const tagId = this.getAttribute('data-tagid');
-      // const tag = tags.find(t => t.tagId === tagId);
-      tag.isSelected = !tag.isSelected;
-      // update bar color dynamically
-      bar.classList.remove("bg-custom-green", "bg-custom-red");
-      bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
-      textElements.classList.remove("text-custom-green", "text-custom-red");
-      textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-red");
-      
-      if (tag) {
+        // const tagId = this.getAttribute('data-tagid');
+        // const tag = tags.find(t => t.tagId === tagId);
+        tag.isSelected = !tag.isSelected;
+        // update bar color dynamically
+        bar.classList.remove("bg-custom-green", "bg-custom-red");
+        bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
+        textElements.classList.remove("text-custom-green", "text-custom-red");
+        textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-red");
         
-        refreshTagSelect(); // Re-render to update UI
-      }
-    });
+        if (tag) {
+          
+          refreshTagSelect(); // Re-render to update UI
+        }
+      });
 
     });
   }
