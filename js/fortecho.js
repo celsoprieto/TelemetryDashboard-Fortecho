@@ -785,7 +785,7 @@
                 }
               },
               zoom: {
-                wheel: { enabled: true },
+                wheel: { enabled: true ,speed: 0.01},
                 drag: {enabled: true , backgroundColor: 'rgba(21,115,114,0.3)'},
                 pinch: { enabled: true },
                 mode: 'x',
@@ -1220,8 +1220,8 @@ function applyXAxisRange() {
       ticks: {
         autoSkip: true,
         maxTicksLimit: 12,
-        maxRotation: 45,
-        minRotation: 45,
+        maxRotation: 60,
+        minRotation: 60,
         font: {
           family: "sans-serif",
           size: 11,
@@ -1257,7 +1257,7 @@ function applyXAxisRange() {
       },
       ticks: {
         font: { family: "sans-serif", size: 11 },
-        color: "rgb(51,51,51)"
+        color: "rgb(51,51,51)",
       },
       grid: hideGrid ? { drawOnChartArea: false } : {
         tickColor: "rgb(51,51,51)",
