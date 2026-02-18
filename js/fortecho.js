@@ -759,6 +759,10 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            autoPadding: false, // evita recalcular márgenes
+            padding: { left: 10, right: 10, top: 10, bottom: 10 }
+          },
           currentMetric,
           plugins: {
             legend: { display: false },
@@ -798,6 +802,7 @@
           scales: {
             x: {
               ...makeXAxis(),
+              offset: false,
               min: fromDate ? fromDate.getTime() : undefined,
               max: Math.min(toDate ? toDate.getTime() : todayMs, todayMs)
             },
@@ -1153,7 +1158,8 @@ function applyXAxisRange() {
       pointRadius: (!dashed && pointsVisible) ? 2 : 0,
       borderDash: dashed ? [6, 6] : [],
       pointHoverRadius: (!dashed && pointsVisible) ? 4 : 0,
-      hidden
+      hidden,
+      categoryPercentage: 1.0,
     };
   }
 
@@ -1228,7 +1234,8 @@ function applyXAxisRange() {
         grid: {
           drawTicks: true,
           drawBorder: true,
-          display: false,
+          display: true,
+          color: "transparent",
           tickColor: "rgb(51,51,51)",
           tickWidth: 1
       }
