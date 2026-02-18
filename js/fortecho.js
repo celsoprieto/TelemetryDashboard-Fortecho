@@ -1248,7 +1248,7 @@ function applyXAxisRange() {
     return {
       type: "linear",
       position,
-      beginAtZero: true,
+      beginAtZero: false,
       title: {
         display: true,
         text: title,
