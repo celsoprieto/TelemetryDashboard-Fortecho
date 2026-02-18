@@ -641,6 +641,138 @@
     return out;
   }
 
+  const dualAxisContinuousFollowMarker = {
+    id: "dualAxisContinuousFollowMarker",
+
+    afterEvent(chart, args) {
+      const e = args.event;
+      if (!e) return;
+
+      chart.$follow = chart.$follow || {};
+      chart.$follow.x = e.x;
+      chart.$follow.y = e.y;
+
+      chart.draw();
+    },
+
+    afterDatasetsDraw(chart, args, pluginOptions) {
+      
+      const opt = pluginOptions || {};
+
+      if (opt.pointsVisible) return;
+
+      const xScale = chart.scales.x;
+      if (!xScale) return;
+
+      const follow = chart.$follow;
+      if (!follow?.x) return;
+
+      const xValue = xScale.getValueForPixel(follow.x);
+      const ctx = chart.ctx;
+      const area = chart.chartArea;
+
+      function drawForDataset(datasetIndex, color) {
+        const meta = chart.getDatasetMeta(datasetIndex);
+        if (!meta || meta.hidden) return;
+
+        const yScale = chart.scales[meta.yAxisID || "y"];
+        if (!yScale) return;
+
+        const ds = chart.data.datasets[datasetIndex];
+        const data = ds?.data;
+        if (!data || data.length < 2) return;
+
+        // --- find segment ---
+        let i = -1;
+        for (let k = 0; k < data.length - 1; k++) {
+          const x0 = new Date(data[k].x).getTime();
+          const x1 = new Date(data[k + 1].x).getTime();
+
+          if (xValue >= x0 && xValue <= x1) {
+            i = k;
+            break;
+          }
+        }
+
+        // clamp
+        if (i === -1) {
+          if (xValue < new Date(data[0].x).getTime()) i = 0;
+          else i = data.length - 2;
+        }
+
+        const p0 = data[i];
+        const p1 = data[i + 1];
+
+        const x0 = new Date(p0.x).getTime();
+        const y0 = p0.y;
+        const x1 = new Date(p1.x).getTime();
+        const y1 = p1.y;
+
+        const t = (x1 - x0) === 0 ? 0 : (xValue - x0) / (x1 - x0);
+        const yValue = y0 + t * (y1 - y0);
+
+        const px = xScale.getPixelForValue(xValue);
+        const py = yScale.getPixelForValue(yValue);
+
+        if (px < area.left || px > area.right || py < area.top || py > area.bottom) return;
+
+        // --- styles ---
+        const radius = opt.radius ?? 5;
+        const strokeWidth = opt.strokeWidth ?? 2;
+
+        const glowBlur = opt.glowBlur ?? 18;
+        const glowAlpha = opt.glowAlpha ?? 0.55;
+
+        ctx.save();
+
+        // --- glow ---
+        ctx.globalAlpha = glowAlpha;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = glowBlur;
+        ctx.fillStyle = color;
+
+        ctx.beginPath();
+        ctx.arc(px, py, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- core dot ---
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(px, py, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // --- white border ---
+        ctx.lineWidth = strokeWidth;
+        ctx.strokeStyle = "rgba(255,255,255,0.95)";
+        ctx.beginPath();
+        ctx.arc(px, py, radius + 0.5, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+        // --- Decide single / dual ---
+      if (chart.options.currentMetric === "temp-humidity") {
+        drawForDataset(opt.tempDatasetIndex ?? 0, opt.tempColor ?? "rgba(218,73,78,1)");
+        drawForDataset(opt.humDatasetIndex ?? 1, opt.humColor ?? "rgba(53,170,223,1)");
+      } else if (chart.options.currentMetric === "temperature") {
+        drawForDataset(opt.datasetIndex ?? 0, opt.tempColor ?? "rgba(218,73,78,1)");
+      } else if (chart.options.currentMetric === "humidity") {
+        drawForDataset(opt.datasetIndex ?? 0, opt.humColor ?? "rgba(53,170,223,1)");   
+      }else if (chart.options.currentMetric === "light") {
+        drawForDataset(opt.datasetIndex ?? 0, opt.lightColor ?? "rgba(255, 206, 86, 1)");
+      }
+      
+      
+    }
+  };
+
+  Chart.register(dualAxisContinuousFollowMarker);
+
+
 
   function renderChart() {
     const canvas = document.getElementById("mainChart");
@@ -756,6 +888,15 @@
           },
           currentMetric,
           plugins: {
+            dualAxisContinuousFollowMarker: {
+              pointsVisible: pointsVisible,
+              tempDatasetIndex: 0,
+              humDatasetIndex: 1,
+              radius: 6,
+              shape: "circle", // o "square"
+              tempColor: "rgba(218,73,78,1)",
+              humColor: "rgba(53,170,223,1)"
+            },
             annotation: {
               annotations: getAnnotations()
             },
@@ -805,6 +946,17 @@
         }
       });
 
+      // const canvas = document.getElementById("mainChart");
+
+      
+      // canvas.addEventListener("mouseleave", () => {
+      //   if (!mainChart) return;
+
+      //   mainChart.$follow = {}; 
+      //   requestAnimationFrame(updateChart);      
+      // });
+
+
     } else {
       // update existing chart
       //mainChart.data.labels = labels;
@@ -813,6 +965,7 @@
 
 
       mainChart.options.currentMetric = currentMetric;
+      mainChart.options.plugins.dualAxisContinuousFollowMarker.pointsVisible = pointsVisible;
 
       // update axes (important for temp-humidity dual axis)
       mainChart.options.scales = {
@@ -2593,6 +2746,7 @@ function getFilteredDataAlarms() {
     }
     
     pointsVisible = !pointsVisible;
+    mainChart.options.plugins.dualAxisContinuousFollowMarker.pointsVisible = pointsVisible;
     mainChart.update();
   }
 
