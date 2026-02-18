@@ -384,6 +384,8 @@
         loadedToMs   = new Date(toUtcbuffer).getTime();
         weatherLoadedFromMs = loadedFromMs;
         weatherLoadedToMs = loadedToMs;
+        // clamp to today/now
+        if (weatherLoadedToMs > nowMs) weatherLoadedToMs = nowMs;
 
         const fromUtcIso = new Date(fromUtcbuffer).toISOString();
         const toUtcIso   = new Date(toUtcbuffer).toISOString();
