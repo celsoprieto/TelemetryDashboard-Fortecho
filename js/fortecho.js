@@ -206,6 +206,23 @@
         
       });
 
+      // Lista de checkboxes y su correspondiente acción
+      const averageCheckboxes = [
+        document.getElementById('avTemp'),
+        document.getElementById('avHum'),
+        document.getElementById('avLight')
+      ];
+
+
+    averageCheckboxes.forEach(checkbox => {
+      if (!checkbox) return; 
+
+      checkbox.addEventListener('change', () => {
+        if (!mainChart) return; 
+        mainChart.options.plugins.annotation.annotations = getAnnotations();
+        mainChart.update(); // update without animation for instant feedback
+      });
+    });
 
       // Modal close button handlers
       const closeModalBtn = document.getElementById('closeModalBtn');
@@ -656,7 +673,7 @@
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C)";
       datasets = [
-        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)"),
+        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "y"),
         makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", undefined, true,!showWeatherTemp)
       ];
       scales = { y: makeYAxis("Temperature (°C)") };
@@ -665,7 +682,7 @@
       labels = lastTempHumLabels;
       chartTitle = "Humidity (%)";
       datasets = [
-        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)"),
+        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "y"),
         makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", undefined, true,!showWeatherHum)
       ];
       scales = { y: makeYAxis("Humidity (%)") };
@@ -765,6 +782,9 @@
           },
           currentMetric,
           plugins: {
+            annotation: {
+              annotations: getAnnotations()
+            },
             legend: { display: false },
             tooltip: makeTooltipOptions(),
             zoom: {
@@ -815,6 +835,8 @@
       // update existing chart
       //mainChart.data.labels = labels;
       mainChart.data.datasets = datasets;
+      mainChart.options.plugins.annotation.annotations = getAnnotations();
+
 
       mainChart.options.currentMetric = currentMetric;
 
@@ -837,100 +859,6 @@
     updateWeatherCheckboxes();
   }
 
-  // async function fetchData(minTs, maxTs) {
-  //   const select = document.getElementById("tagIdSelect");
-  //   const tagId = select.value;
-  //   if (!tagId) return { temps: [], hums: [] };
-
-  //   const from = new Date(minTs).toISOString();
-  //   const to = new Date(maxTs).toISOString();
-
-  //   const params = new URLSearchParams({sitecode, tagId, from, to });
-  //   const res = await fetch(`${API_BASE}/telemetry?${params.toString()}`);
-  //   const data = await res.json();
-
-  //   const temps = [];
-  //   const hums = [];
-  //   const tempsWeather = [];
-  //   const humsWeather = [];
-    
-   
-
-  //   await loadWeather(); // get latest weather data for the new range
-
-  //   for (const d of data) {
-  //     const s = d.sensorData;
-  //     if (!s) continue;
-
-  //     if (s.sensorTrH === 1) {
-  //       temps.push(s.temperatureEv ?? null);
-  //       hums.push(s.humidityEv ?? null);
-  //     }
-  //   }
-
-
-
-  //   return { temps, hums };
-  // }
-
-
-  // async function startFetch({ chart }) {
-  //   if (!chart || !chart.scales || !chart.data.datasets) return;
-
-  //   // Obtener rango visible del eje X
-  //   const { min, max } = chart.scales.x;
-  //   const { min: minT , max: maxT } = chart.scales.yTemp;
-  //   const { min: minH, max: maxH } = chart.scales.yHum;
-
-  //   clearTimeout(timer);
-  //   timer = setTimeout(async () => {
-  //     try {
-  //       // Traer datos para el rango visible
-  //       // Implementa fetchData(min, max) según tu API
-  //       const newData = await fetchData(min, max);
-  //       // newData = {
-  //       //   temps: [...],
-  //       //   hums: [...],
-  //       //   tempsWeather: [...],
-  //       //   humsWeather: [...]
-  //       // }
-
-  //       // Actualizar datasets según label
-  //       chart.data.datasets.forEach(ds => {
-  //         switch (ds.label) {
-  //           case "Temperature":
-  //             ds.data = newData.temps;
-  //             break;
-  //           case "Humidity":
-  //             ds.data = newData.hums;
-  //             break;
-  //           case "Temperature Weather":
-  //             ds.data = lastTemps_Weather.y;
-  //             break;
-  //           case "Humidity Weather":
-  //             ds.data = lastHums_Weather.y;
-  //             break;
-  //         }
-  //       });
-
-  //       // Opcional: mantener límites de los ejes y para que no se vayan de rango
-  //       if (chart.options.scales.yTemp) {
-  //         chart.options.scales.yTemp.min = minT;
-  //         chart.options.scales.yTemp.max = maxT; // ajusta según tus datos
-  //       }
-  //       if (chart.options.scales.yHum) {
-  //         chart.options.scales.yHum.min = minH;
-  //         chart.options.scales.yHum.max = maxH; // ajusta según tus datos
-  //       }
-
-  //       // Actualizar gráfico sin animación
-  //       chart.update("none");
-
-  //     } catch (err) {
-  //       console.error("Error fetching chart data:", err);
-  //     }
-  //   }, 500); // retraso para evitar múltiples llamadas rápidas
-  // }
 
   async function fetchData(fromMs, toMs) {
     const select = document.getElementById("tagIdSelect");
@@ -1129,6 +1057,7 @@
     requestAnimationFrame(updateChart);
   }
 
+ 
 function applyXAxisRange() {
   if (!mainChart) return;
 
@@ -1700,13 +1629,6 @@ function makeTooltipOptions() {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         const view = link.dataset.view;
-
-        // idioma (ejemplo)
-        // if (view === "es") {
-        //   alert("Aquí cambias el idioma 😄");
-        //   return;
-        // }
-
         showView(view);
       });
     });
@@ -2604,14 +2526,22 @@ function getFilteredDataAlarms() {
   function updateWeatherCheckboxes() {
     const opTemp = document.getElementById("opTemp");
     const opHum  = document.getElementById("opHum");
+    const avgTemp = document.getElementById("avTemp");
+    const avgHum  = document.getElementById("avHum");
+    const avLight  = document.getElementById("avLight");
+
     if (!opTemp || !opHum) return;
 
     const tempAllowed = (currentMetric === "temperature" || currentMetric === "temp-humidity");
     const humAllowed  = (currentMetric === "humidity"    || currentMetric === "temp-humidity");
+    const lightAllowed  = (currentMetric === "light");
 
     // enable/disable
     opTemp.disabled = !tempAllowed;
     opHum.disabled  = !humAllowed;
+    avgTemp.disabled = !tempAllowed;
+    avgHum.disabled  = !humAllowed;
+    avLight.disabled  = !lightAllowed;
 
     // if disabled → uncheck + hide dataset
     if (!tempAllowed) {
@@ -2632,12 +2562,31 @@ function getFilteredDataAlarms() {
     opHum.parentElement.classList.toggle("cursor-not-allowed", !humAllowed);
   }
 
- function average(ctx) {
-  const values = ctx.chart.data.datasets[0].data;
-  // Extract y values from objects
-  const yValues = values.map(point => point.y);
+  function average(ctx, datasetIndex = 0) {
+
+  const chart = ctx.chart;
+  const ds = chart.data.datasets[datasetIndex];
+  if (!ds?.data?.length) return 0;
+
+  const xScale = chart.scales.x;
+  const from = xScale.min; // número en ms
+  const to = xScale.max;
+
+  const yValues = ds.data
+    .filter(p => p && typeof p === "object" && typeof p.y === "number")
+    .filter(p => {
+      const xMs = new Date(p.x).getTime(); // <--- convierte string a timestamp
+      return xMs >= from && xMs <= to;
+    })
+    .map(p => p.y);
+
+  if (!yValues.length) return 0;
+
   return yValues.reduce((a, b) => a + b, 0) / yValues.length;
 }
+
+
+
 
   const linecolor = currentMetric === "temperature" 
     ? "rgba(218,73,78,1)" 
@@ -2645,24 +2594,112 @@ function getFilteredDataAlarms() {
     ? "rgba(53,170,223,1)" 
     : "rgba(0,0,0,1)";  // default color
 
-  const annotation = {
-    type: 'line',
-    borderColor: linecolor,
-    borderDash: [6, 6],
-    borderDashOffset: 0,
-    borderWidth: 3,
-    label: {
-      display: true,
-      content: (ctx) => 'Average: ' + average(ctx).toFixed(2),
-      position: 'end',
-    },
-    scaleID: 'y',
-    value: (ctx) => average(ctx)
-  };
+    function getAnnotations() {
+      const showTemp  = document.getElementById("avTemp")?.checked ?? false;
+      const showHum   = document.getElementById("avHum")?.checked ?? false;
+      const showLight = document.getElementById("avLight")?.checked ?? false;
 
+      // const showTemp  = true;
+      // const showHum   = true;
+      // const showLight = true;
+
+      const annotations = {};
+
+      if (currentMetric === "temperature" && showTemp) {
+        annotations.avgTemp = {
+          type: "line",
+          borderColor: " #157372",
+          borderDash: [1,4],
+          borderWidth: 2,
+          yScaleID: "y",
+          yMin: (ctx) => average(ctx, 0),
+          yMax: (ctx) => average(ctx, 0),
+          label: {
+            display: true,
+            content: (ctx) => "Avg T: " + average(ctx, 0).toFixed(1) + " °C",
+            position: "end",
+            backgroundColor: "rgba(218,73,78,1)",
+          }
+        };
+      }
+
+      if (currentMetric === "humidity" && showHum) {
+        annotations.avgHum = {
+          type: "line",
+          borderColor: " #157372",
+          borderDash: [1,4],
+          borderWidth: 2,
+          yScaleID: "y",
+          yMin: (ctx) => average(ctx, 0),
+          yMax: (ctx) => average(ctx, 0),
+          label: {
+            display: true,
+            content: (ctx) => "Avg H: " + average(ctx, 0).toFixed(1) + " %",
+            position: "end",
+            backgroundColor: "#35AADF", 
+          }
+        };
+      }
+
+      if (currentMetric === "light" && showLight) {
+        annotations.avgLight = {
+          type: "line",
+          borderColor: " #157372",
+          borderDash: [1,4],
+          borderWidth: 2,
+          yScaleID: "y",
+          yMin: (ctx) => average(ctx, 0),
+          yMax: (ctx) => average(ctx, 0),
+          label: {
+            display: true,
+            content: (ctx) => "Avg Lx: " + average(ctx, 0).toFixed(1) + " lx",
+            position: "end",
+            backgroundColor:"rgba(220,128,21,1)",
+          }
+        };
+      }
+
+      if (currentMetric === "temp-humidity") {
+        if (showTemp) {
+          annotations.avgTemp = {
+            type: "line",
+            borderColor: " #157372",
+            borderDash: [1,4],
+            borderWidth: 2,
+            yScaleID: "yTemp",
+            yMin: (ctx) => average(ctx, 0),
+            yMax: (ctx) => average(ctx, 0),
+            label: {
+              display: true,
+              content: (ctx) => "Avg T: " + average(ctx, 0).toFixed(1) + " °C",
+              position: "start",
+              backgroundColor: "rgba(218,73,78,1)",
+            }
+          };
+        }
+        if (showHum) {
+          annotations.avgHum = {
+            type: "line",
+            borderColor: " #157372",
+            borderDash: [1,4],
+            borderWidth: 2,
+            yScaleID: "yHum",
+            yMin: (ctx) => average(ctx, 1),
+            yMax: (ctx) => average(ctx, 1),
+            label: {
+              display: true,
+              content: (ctx) => "Avg H: " + average(ctx, 1).toFixed(1) + " %",
+              position: "end",
+              backgroundColor: "#35AADF", 
+            }
+          };
+        }
+      }
+
+      return annotations;
+    }
  
-
-  function togglePoints() {
+   function togglePoints() {
 
     const spanText = document.getElementById('opPointsEnable');
     
