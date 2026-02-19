@@ -79,6 +79,8 @@ module.exports = {
     "bg-green-500",
     "bg-red-500",
     "text-blue-600",
+    "flex-end",
+    "self-end",
   ],
   theme: {
     extend: {colors: {
