@@ -1443,10 +1443,60 @@ function makeTooltipOptions() {
 
       // Posicionar tooltip cerca del cursor
       const canvasRect = chart.canvas.getBoundingClientRect();
+
+      const tooltipWidth  = tooltipEl.offsetWidth;
+      const tooltipHeight = tooltipEl.offsetHeight;
+
+      const padding = 10;
+      const offsetX = 14;
+      const offsetY = 0;
+
+      let x;
+      let y =
+        canvasRect.top +
+        window.pageYOffset +
+        tooltipModel.caretY -
+        tooltipHeight / 2;
+
+      // ¿hay espacio a la derecha?
+      const spaceRight =
+        canvasRect.left +
+        window.pageXOffset +
+        canvasRect.width -
+        (canvasRect.left + window.pageXOffset + tooltipModel.caretX);
+
+      // si no hay espacio, lo ponemos a la izquierda
+      if (spaceRight < tooltipWidth + offsetX) {
+        x =
+          canvasRect.left +
+          window.pageXOffset +
+          tooltipModel.caretX -
+          tooltipWidth -
+          offsetX;
+      } else {
+        x =
+          canvasRect.left +
+          window.pageXOffset +
+          tooltipModel.caretX +
+          offsetX;
+      }
+
+      // límites verticales (para que no se salga arriba/abajo)
+      const minY = canvasRect.top + window.pageYOffset + padding;
+      const maxY =
+        canvasRect.top +
+        window.pageYOffset +
+        canvasRect.height -
+        tooltipHeight -
+        padding;
+
+      y = Math.max(minY, Math.min(y, maxY));
+
       tooltipEl.style.opacity = 1;
-      tooltipEl.style.left = canvasRect.left + window.pageXOffset + tooltipModel.caretX + 'px';
-      tooltipEl.style.top = canvasRect.top + window.pageYOffset + tooltipModel.caretY + 'px';
-    }
+      tooltipEl.style.left = x + "px";
+      tooltipEl.style.top = y + "px";
+
+          }
   };
 }
 
