@@ -2622,20 +2622,32 @@ function getFilteredDataAlarms() {
     // if disabled → uncheck + hide dataset
     if (!tempAllowed) {
       opTemp.checked = false;
+      avgTemp.checked = false;
       toggleDataset("Temperature Weather", false);
     }
 
     if (!humAllowed) {
       opHum.checked = false;
+      avgHum.checked = false;
       toggleDataset("Humidity Weather", false);
+    }
+
+    if (!lightAllowed) {    
+      avLight.checked = false;
     }
 
     // optional: make disabled look disabled
     opTemp.parentElement.classList.toggle("opacity-50", !tempAllowed);
     opHum.parentElement.classList.toggle("opacity-50", !humAllowed);
+    avgTemp.parentElement.classList.toggle("opacity-50", !tempAllowed);
+    avgHum.parentElement.classList.toggle("opacity-50", !humAllowed);
+    avLight.parentElement.classList.toggle("opacity-50", !lightAllowed);
 
     opTemp.parentElement.classList.toggle("cursor-not-allowed", !tempAllowed);
     opHum.parentElement.classList.toggle("cursor-not-allowed", !humAllowed);
+    avgTemp.parentElement.classList.toggle("cursor-not-allowed", !tempAllowed);
+    avgHum.parentElement.classList.toggle("cursor-not-allowed", !humAllowed);
+    avLight.parentElement.classList.toggle("cursor-not-allowed", !lightAllowed);
   }
 
   function average(ctx, datasetIndex = 0) {
