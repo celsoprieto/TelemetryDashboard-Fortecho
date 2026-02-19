@@ -291,8 +291,8 @@
         const res = await fetch(`${API_BASE}/tags`);
         if (!res.ok) {
           const text = await res.text();
-          console.error('Error fetching tags:', text);
-          alert('Error loading tag IDs: ' + text);
+          console.error('Error fetching devices:', text);
+          alert('Error loading device IDs: ' + text);
           return;
         }
 
@@ -342,8 +342,8 @@
         }
 
       } catch (err) {
-        console.error('Error loading tags:', err);
-        alert('Error loading tag IDs (see console).');
+        console.error('Error loading devices:', err);
+        alert('Error loading device IDs (see console).');
       }
     }
 
@@ -1319,9 +1319,11 @@ function applyXAxisRange() {
         font: { family: "sans-serif", size: 11 },
         color: "rgb(51,51,51)",
       },
-      grid: hideGrid ? { drawOnChartArea: false } : {
+      grid: hideGrid ? { drawOnChartArea: false, border: { display: false }, drawTicks: true } : {
         tickColor: "rgb(51,51,51)",
-        tickWidth: 1
+        tickWidth: 1,
+        drawBorder: false,
+        drawTicks: true,
       }
     };
   }
@@ -1732,7 +1734,7 @@ function hideLoading(el) {
     const columnalarms = [
     { key: "document_dateUtc", label: "Alarm Date" },
     { key: "event_type", label: "Alarm Type" },
-    { key: "tagId", label: "Tag ID" },
+    { key: "tagId", label: "Device ID" },
     { key: "object_marque", label: "Artist" },
     { key: "object_model", label: "Title" }
     // ,
@@ -2388,7 +2390,7 @@ function getFilteredDataAlarms() {
 
     tagsArray.forEach(tag => {
       const title = `${tag.marque || "Unknown"} ${tag.model || ""}`.trim();
-      const sub1 = `Tag ID: ${tag.tagId}`;
+      const sub1 = `Device ID: ${tag.tagId}`;
       const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
 
       const card = document.createElement("div");
