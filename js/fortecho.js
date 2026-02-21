@@ -2546,8 +2546,10 @@ function getFilteredDataAlarms() {
       // Add event listener after setting innerHTML
       const button = card.querySelector('button[data-tagid]');
       button.addEventListener('click', function() {
-        // const tagId = this.getAttribute('data-tagid');
-        // const tag = tags.find(t => t.tagId === tagId);
+        const selectedCount = tagsArray.filter(t => t.isSelected).length;
+        if (tag.isSelected && selectedCount === 1) {
+          return; 
+        }
         tag.isSelected = !tag.isSelected;
         // update bar color dynamically
         bar.classList.remove("bg-custom-green", "bg-custom-red");
@@ -2655,6 +2657,8 @@ function getFilteredDataAlarms() {
       select.value = selectedTags[0].tagId;
       showTagDetails(selectedTags[0].tagId);
     }
+
+    loadData(filtereddays); 
   }
 
   function updateWeatherCheckboxes() {
