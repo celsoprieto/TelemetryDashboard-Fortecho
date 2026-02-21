@@ -2512,7 +2512,7 @@ function getFilteredDataAlarms() {
         <!-- Absolute overlay button -->
         <button
           type="button"
-          class="absolute inset-0 w-full h-full cursor-pointer z-10"
+          class="absolute inset-0 w-full h-full cursor-pointer z-10 rounded-md"
           data-tagid="${tag.tagId}"
           title="${tag.isSelected ? 'Deselect' : 'Select'}"
         ></button>
