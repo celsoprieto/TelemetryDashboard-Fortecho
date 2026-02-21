@@ -182,3 +182,5 @@ function closeAlarmDetailModal() {
   const modal = document.getElementById('alarmDetailModal');
   modal.classList.add('hidden');
 }
+
+

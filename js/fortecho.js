@@ -918,6 +918,7 @@ const dualAxisContinuousFollowMarker = {
                 mode: 'x',
                 modifierKey: "ctrl",
                 onPanComplete({ chart }) {
+                  chart.$isInteracting = false;
                   //console.log('Pan done');
                   syncInputsFromChart(chart);
                   maybeFetchMore(chart);
@@ -928,7 +929,11 @@ const dualAxisContinuousFollowMarker = {
                 drag: {enabled: true , backgroundColor: 'rgba(21,115,114,0.3)'},
                 pinch: { enabled: true },
                 mode: 'x',
+                onZoomStart({ chart }) {
+                  chart.$wheelZooming = true;
+                },
                 onZoomComplete({ chart }) {
+                   chart.$wheelZooming = false;
                   syncInputsFromChart(chart);
                   maybeFetchMore(chart);
                 }
@@ -1360,6 +1365,16 @@ function makeTooltipOptions() {
       const tooltipEl = getTooltipEl(context.chart);
       const tooltipModel = context.tooltip;
       const chart = context.chart;
+      const e = chart._lastEvent;
+      const isMouseDown = e?.native?.buttons === 1;
+      const isWheelZoom = chart.$wheelZooming === true;
+      
+      //console.log("Tooltip event:", e?.type, "MouseDown:", isMouseDown, "WheelZoom:", isWheelZoom);
+
+      if (isMouseDown || isWheelZoom) {
+        tooltipEl.style.opacity = 0;
+        return;
+      }
 
       if (tooltipModel.opacity === 0) {
         tooltipEl.style.opacity = 0;

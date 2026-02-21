@@ -81,6 +81,13 @@ module.exports = {
     "text-blue-600",
     "flex-end",
     "self-end",
+    "absolute",
+    "top-2",
+    "right-2",
+    "left-3",
+    "top-1/2",
+    "transform",
+    "-translate-y-1/2"
   ],
   theme: {
     extend: {colors: {
