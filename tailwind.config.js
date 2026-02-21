@@ -10,7 +10,7 @@ module.exports = {
     // Use regex patterns to match classes
     {
       pattern: /^w-/,
-      variants: ['sm', 'md', 'lg', 'xl', '2xl'], // Optional: include responsive variants
+      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-'], // Optional: include responsive variants
     },
     // Or be more specific
     {
@@ -125,6 +125,14 @@ module.exports = {
     "hover:text-teal-600",
     "hover:bg-gray-100",
     "focus:outline-none",
+    "h-[calc(100dvh-4rem)]",
+    "top-4",
+    "top-6",
+    "top-8",
+    "top-16",
+    "bottom-0",
+    "flex-shrink-0",
+    "overflow-hidden",
   ],
   theme: {
     extend: {colors: {
