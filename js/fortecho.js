@@ -69,6 +69,10 @@
       const alarmsList = document.getElementById("EventsList");
       const alarmsbuttons = alarmsList?.querySelectorAll(".type-button") || [];
 
+      const btn_menuT = document.getElementById("menuBtnT");
+      const menuT = document.getElementById("mobileMenuT");
+      const overlay = document.getElementById("menuOverlay");
+
 
       // ---------------- MENU ----------------
       if (btn_menu && menu) {
@@ -91,6 +95,36 @@
           link.addEventListener("click", closeMenu);
         });
       }
+
+      if (btn_menuT && menuT) {
+
+        function openMenuT() {
+          menuT.classList.remove("-translate-x-full");
+          menuT.classList.add("translate-x-0");
+          overlay.classList.remove("hidden");
+        }
+
+        // Cerrar menú
+        function closeMenuT() {
+          menuT.classList.add("-translate-x-full");
+          menuT.classList.remove("translate-x-0");
+          overlay.classList.add("hidden");
+        }
+
+        btn_menuT.addEventListener("click", () => {
+        if (menuT.classList.contains("-translate-x-full")) openMenuT();
+        else closeMenuT();
+      });
+
+      
+      overlay.addEventListener("click", closeMenuT);
+
+      
+      menuT.querySelectorAll("a.nav-link").forEach(link => {
+        link.addEventListener("click", closeMenuT);
+      });
+
+}
 
       // ---------------- SENSOR BUTTONS ----------------
       buttons.forEach(btn => {
@@ -1665,7 +1699,7 @@ function makeTooltipOptions() {
         // console.log("tagsById =", tagsById);
         // console.log("isArray =", Array.isArray(tagsById));
 
-        renderTagsGrid(tagsById);          // optional: refresh tags list
+        renderTagsGrid(tagsById, "tagsGrid");          // optional: refresh tags list
       }
 
       if (viewName === "alarms") {
@@ -1713,6 +1747,15 @@ function makeTooltipOptions() {
         //await loadTags();
         setLast24Hours();
         await loadData(1);
+        renderTagsGrid(tagsById, "tagsGridT"); 
+      }
+      const menuBtnT = document.getElementById("menuBtnT");
+      if (menuBtnT) {
+        if (viewName === "telemetry") {
+          menuBtnT.classList.remove("hidden"); // mostrar
+        } else {
+          menuBtnT.classList.add("hidden");    // ocultar
+        }
       }
     }
 
@@ -2444,8 +2487,8 @@ function getFilteredDataAlarms() {
     }
   }
 
-  function renderTagsGrid(tagsById) {
-    const grid = document.getElementById("tagsGrid");
+  function renderTagsGrid(tagsById,gridId = "tagsGrid") {
+    const grid = document.getElementById(gridId);
     if (!grid) return;
 
     // Convert { 47730: {...}, 57714: {...} } -> [{...}, {...}]

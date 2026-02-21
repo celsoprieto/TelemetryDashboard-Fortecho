@@ -87,7 +87,20 @@ module.exports = {
     "left-3",
     "top-1/2",
     "transform",
-    "-translate-y-1/2"
+    "-translate-y-1/2",
+    "-translate-x-full",
+    "translate-x-full",
+    "left-0",
+    "right-0",
+    "fixed",
+    "h-[calc(100vh-40px)]",
+    "w-full",
+    "bg-white",
+    "shadow-lg",
+    "transition-transform",
+    "duration-300",
+    "ease-in-out",
+    "z-50",
   ],
   theme: {
     extend: {colors: {
