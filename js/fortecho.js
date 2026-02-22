@@ -72,6 +72,7 @@
       const btn_menuT = document.getElementById("menuBtnT");
       const menuT = document.getElementById("mobileMenuT");
       const overlay = document.getElementById("menuOverlay");
+      const closeMenuTBtn = document.getElementById("closeMenuT");
 
 
       // ---------------- MENU ----------------
@@ -102,19 +103,30 @@
           menuT.classList.remove("-translate-x-full");
           menuT.classList.add("translate-x-0");
           overlay.classList.remove("hidden");
+          closeMenuTBtn.classList.remove("-translate-x-full");
+          closeMenuTBtn.classList.add("translate-x-0");
+          
         }
 
         // Cerrar menú
         function closeMenuT() {
           menuT.classList.add("-translate-x-full");
           menuT.classList.remove("translate-x-0");
-          overlay.classList.add("hidden");
+          overlay.classList.add("hidden");         
+          closeMenuTBtn.classList.add("-translate-x-full");
+          closeMenuTBtn.classList.remove("translate-x-0");
         }
 
         btn_menuT.addEventListener("click", () => {
         if (menuT.classList.contains("-translate-x-full")) openMenuT();
         else closeMenuT();
-      });
+        });
+
+        closeMenuTBtn.addEventListener("click", () => {
+        if (menuT.classList.contains("-translate-x-full")) openMenuT();
+        else closeMenuT();
+
+          });
 
       
       overlay.addEventListener("click", closeMenuT);

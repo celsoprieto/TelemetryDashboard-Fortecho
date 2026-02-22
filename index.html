@@ -33,7 +33,7 @@
   <nav class="fixed top-0 w-full bg-white shadow z-50">
 
     <!-- BOTÓN PEGADO TOTALMENTE A LA IZQUIERDA -->
-    <button id="menuBtnT"
+    <!-- <button id="menuBtnT"
       class="hidden absolute left-0 top-1/2 -translate-y-1/2 inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-teal-600 hover:bg-gray-100 focus:outline-none"
       aria-label="Open menu">
       <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"
@@ -41,7 +41,7 @@
         <path stroke-linecap="round" stroke-linejoin="round"
           d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
-    </button>
+    </button> -->
 
     <div class="navbar-container px-4 sm:px-6 lg:px-8 ">
       <div class="flex items-center justify-between h-8">
@@ -119,20 +119,39 @@
     <div id="menuOverlay" class="fixed inset-0 bg-black bg-opacity-30 hidden z-40"></div>
 
     <div id="mobileMenuT" class="fixed left-0 top-10 h-[calc(100dvh-4rem)] bg-white shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out z-50 rounded-tr-xl rounded-br-xl pb-4 flex flex-col overflow-hidden">
-    <!-- <div id="mobileMenuT" class="fixed left-0 top-16 bottom-0 w-1/2 bg-white shadow-lg z-50 rounded-tr-xl rounded-br-xl flex flex-col overflow-hidden"> -->
       <!-- Header con Search -->
-      <div class="p-4 flex-shrink-0">
-        <!-- <h2 class="text-lg font-bold text-gray-700 mb-2">Select Tags</h2> -->
-
+      <div class="p-4 flex items-center gap-2 flex-shrink-0">
         <!-- Search input -->
         <input type="text" id="tagSearch" placeholder="Search tags..."
-              class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+              class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <!-- BOTÓN CERRAR (FUERA del menú) -->
+        <button id="closeMenuT"
+                class="w-8 h-8 flex items-center justify-center
+                      rounded-full bg-custom-green shadow
+                      text-white hover:text-gray-900
+                      transition-all duration-300">
+          ✕
+        </button>
       </div>
       <!-- Grid (below) -->
       <div class="p-4 overflow-y-auto flex-1 relative">
         <div id="tagsGridT" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
     </div>
+
+    <!-- Tab Button -->
+    <button id="menuBtnT"
+      class="fixed left-0 top-20 -translate-y-1/2 z-40 
+            transform -translate-x-0
+            transition-transform duration-300 ease-in-out
+            bg-teal-600 text-white 
+            px-3 py-2 
+            rounded-r-xl shadow-lg flex items-center justify-center">
+
+      <span class="writing-mode-vertical text-sm font-semibold tracking-wide">
+        Tags
+      </span>
+    </button>
 
     <div class="controls z-60">
       <div class="sensor-list" id="sensorList1" >

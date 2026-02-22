@@ -547,6 +547,11 @@
   touch-action: manipulation; /* prevent accidental drag-selection */
 }
 
+.writing-mode-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
 
 
 

@@ -10,7 +10,7 @@ module.exports = {
     // Use regex patterns to match classes
     {
       pattern: /^w-/,
-      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-'], // Optional: include responsive variants
+      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-'], // Optional: include responsive variants
     },
     // Or be more specific
     {
@@ -133,6 +133,7 @@ module.exports = {
     "bottom-0",
     "flex-shrink-0",
     "overflow-hidden",
+    "-translate-x-[calc(100dvh-40px)]",
   ],
   theme: {
     extend: {colors: {
