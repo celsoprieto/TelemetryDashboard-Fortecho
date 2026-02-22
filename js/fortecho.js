@@ -675,23 +675,132 @@
     return out;
   }
 
+// const dualAxisContinuousFollowMarker = {
+//   id: "dualAxisContinuousFollowMarker",
+
+//   afterEvent(chart, args, pluginOptions) {
+//     const e = args.event;
+//     chart.$follow = chart.$follow || {};
+
+//     if (e.type === "mousemove") {
+//       chart.$follow.x = e.x;
+//       chart.$follow.y = e.y;
+//       chart.$follow.opacity = 1;   // opacidad completa al entrar
+//       chart.$follow.fadeOut = false;
+//       startFollowAnimation(chart);  // iniciamos animación
+//     }
+
+//     if (e.type === "mouseout" || e.type === "mouseleave") {
+//       chart.$follow.fadeOut = true;  // activamos fade out
+//       startFollowAnimation(chart);
+//     }
+//   },
+
+//   afterDatasetsDraw(chart, args, pluginOptions) {
+//     const opt = pluginOptions || {};
+//     if (opt.pointsVisible) return;
+
+//     const follow = chart.$follow;
+//     if (!follow?.x) return;
+
+//     const xScale = chart.scales.x;
+//     const ctx = chart.ctx;
+//     const area = chart.chartArea;
+
+//     const xValue = xScale.getValueForPixel(follow.x);
+
+//     function drawForDataset(datasetIndex, color) {
+//       const meta = chart.getDatasetMeta(datasetIndex);
+//       if (!meta || meta.hidden) return;
+
+//       const yScale = chart.scales[meta.yAxisID || "y"];
+//       if (!yScale) return;
+
+//       const data = chart.data.datasets[datasetIndex].data;
+//       if (!data || data.length < 2) return;
+
+//       // --- find segment ---
+//       let i = -1;
+//       for (let k = 0; k < data.length - 1; k++) {
+//         const x0 = new Date(data[k].x).getTime();
+//         const x1 = new Date(data[k + 1].x).getTime();
+//         if (xValue >= x0 && xValue <= x1) { i = k; break; }
+//       }
+//       if (i === -1) i = (xValue < new Date(data[0].x).getTime()) ? 0 : data.length - 2;
+
+//       const p0 = data[i], p1 = data[i+1];
+//       const x0 = new Date(p0.x).getTime(), y0 = p0.y;
+//       const x1 = new Date(p1.x).getTime(), y1 = p1.y;
+//       const t = (x1 - x0) === 0 ? 0 : (xValue - x0)/(x1 - x0);
+//       const yValue = y0 + t*(y1 - y0);
+//       const px = xScale.getPixelForValue(xValue);
+//       const py = yScale.getPixelForValue(yValue);
+
+//       if (px < area.left || px > area.right || py < area.top || py > area.bottom) return;
+
+//       const radius = opt.radius ?? 5;
+//       const strokeWidth = opt.strokeWidth ?? 2;
+//       const glowBlur = opt.glowBlur ?? 18;
+//       const glowAlpha = (opt.glowAlpha ?? 0.55) * follow.opacity;
+
+//       ctx.save();
+//       // Glow
+//       ctx.globalAlpha = glowAlpha;
+//       ctx.shadowColor = color;
+//       ctx.shadowBlur = glowBlur;
+//       ctx.fillStyle = color;
+//       ctx.beginPath();
+//       ctx.arc(px, py, radius, 0, Math.PI*2);
+//       ctx.fill();
+
+//       // Core
+//       ctx.globalAlpha = follow.opacity;
+//       ctx.shadowBlur = 0;
+//       ctx.fillStyle = color;
+//       ctx.beginPath();
+//       ctx.arc(px, py, radius, 0, Math.PI*2);
+//       ctx.fill();
+
+//       // Border
+//       ctx.lineWidth = strokeWidth;
+//       ctx.strokeStyle = `rgba(255,255,255,${follow.opacity})`;
+//       ctx.beginPath();
+//       ctx.arc(px, py, radius+0.5, 0, Math.PI*2);
+//       ctx.stroke();
+//       ctx.restore();
+//     }
+
+//     // --- Decide single / dual ---
+//     if (chart.options.currentMetric === "temp-humidity") {
+//       drawForDataset(opt.tempDatasetIndex ?? 0, opt.tempColor ?? "rgba(218,73,78,1)");
+//       drawForDataset(opt.humDatasetIndex ?? 1, opt.humColor ?? "rgba(53,170,223,1)");
+//     } else if (chart.options.currentMetric === "temperature") {
+//       drawForDataset(opt.datasetIndex ?? 0, opt.tempColor ?? "rgba(218,73,78,1)");
+//     } else if (chart.options.currentMetric === "humidity") {
+//       drawForDataset(opt.datasetIndex ?? 0, opt.humColor ?? "rgba(53,170,223,1)");
+//     } else if (chart.options.currentMetric === "light") {
+//       drawForDataset(opt.datasetIndex ?? 0, opt.lightColor ?? "rgba(255,206,86,1)");
+//     }
+//   }
+// };
+
+
 const dualAxisContinuousFollowMarker = {
   id: "dualAxisContinuousFollowMarker",
 
-  afterEvent(chart, args, pluginOptions) {
+  afterEvent(chart, args) {
     const e = args.event;
     chart.$follow = chart.$follow || {};
 
     if (e.type === "mousemove") {
       chart.$follow.x = e.x;
-      chart.$follow.y = e.y;
-      chart.$follow.opacity = 1;   // opacidad completa al entrar
+      chart.$follow.opacity = 1;
       chart.$follow.fadeOut = false;
-      startFollowAnimation(chart);  // iniciamos animación
+      startFollowAnimation(chart);
     }
 
     if (e.type === "mouseout" || e.type === "mouseleave") {
-      chart.$follow.fadeOut = true;  // activamos fade out
+      chart.$follow.fadeOut = true;
       startFollowAnimation(chart);
     }
   },
@@ -699,113 +808,166 @@ const dualAxisContinuousFollowMarker = {
   afterDatasetsDraw(chart, args, pluginOptions) {
     const opt = pluginOptions || {};
     if (opt.pointsVisible) return;
-
     const follow = chart.$follow;
     if (!follow?.x) return;
 
-    const xScale = chart.scales.x;
     const ctx = chart.ctx;
     const area = chart.chartArea;
-
+    const xScale = chart.scales.x;
     const xValue = xScale.getValueForPixel(follow.x);
+    const metric = chart.options.currentMetric;
 
-    function drawForDataset(datasetIndex, color) {
+    function drawForDataset(datasetIndex) {
       const meta = chart.getDatasetMeta(datasetIndex);
       if (!meta || meta.hidden) return;
 
-      const yScale = chart.scales[meta.yAxisID || "y"];
+      const ds = chart.data.datasets[datasetIndex];
+      const yScale = chart.scales[meta.yAxisID];
       if (!yScale) return;
 
-      const data = chart.data.datasets[datasetIndex].data;
+      const data = ds.data;
       if (!data || data.length < 2) return;
 
-      // --- find segment ---
+      // --- Buscar segmento ---
       let i = -1;
       for (let k = 0; k < data.length - 1; k++) {
-        const x0 = new Date(data[k].x).getTime();
-        const x1 = new Date(data[k + 1].x).getTime();
-        if (xValue >= x0 && xValue <= x1) { i = k; break; }
+        const x0 = +new Date(data[k].x);
+        const x1 = +new Date(data[k + 1].x);
+        if (xValue >= x0 && xValue <= x1) {
+          i = k;
+          break;
+        }
       }
-      if (i === -1) i = (xValue < new Date(data[0].x).getTime()) ? 0 : data.length - 2;
 
-      const p0 = data[i], p1 = data[i+1];
-      const x0 = new Date(p0.x).getTime(), y0 = p0.y;
-      const x1 = new Date(p1.x).getTime(), y1 = p1.y;
-      const t = (x1 - x0) === 0 ? 0 : (xValue - x0)/(x1 - x0);
-      const yValue = y0 + t*(y1 - y0);
+      if (i === -1) {
+        if (xValue < +new Date(data[0].x)) i = 0;
+        else i = data.length - 2;
+      }
+
+      const p0 = data[i];
+      const p1 = data[i + 1];
+
+      const x0 = +new Date(p0.x);
+      const x1 = +new Date(p1.x);
+      const y0 = p0.y;
+      const y1 = p1.y;
+
+      const t = (x1 - x0) === 0 ? 0 : (xValue - x0) / (x1 - x0);
+      const yValue = y0 + t * (y1 - y0);
+
       const px = xScale.getPixelForValue(xValue);
       const py = yScale.getPixelForValue(yValue);
 
-      if (px < area.left || px > area.right || py < area.top || py > area.bottom) return;
+      if (
+        px < area.left || px > area.right ||
+        py < area.top || py > area.bottom
+      ) return;
 
-      const radius = opt.radius ?? 5;
-      const strokeWidth = opt.strokeWidth ?? 2;
-      const glowBlur = opt.glowBlur ?? 18;
-      const glowAlpha = (opt.glowAlpha ?? 0.55) * follow.opacity;
+      const color = Array.isArray(ds.borderColor)
+        ? ds.borderColor[0]
+        : ds.borderColor || "rgba(0,0,0,1)";
+
+      const baseRadius = 3;
+      const breath = follow.breath ?? 1;
+
+      const radius = baseRadius * breath;
+      const glowRadius = radius * 3;
 
       ctx.save();
-      // Glow
-      ctx.globalAlpha = glowAlpha;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = glowBlur;
-      ctx.fillStyle = color;
+
+      // 🔥 Glow real con radial gradient
+      const gradient = ctx.createRadialGradient(
+        px, py, radius,
+        px, py, glowRadius
+      );
+
+      const solidColor = color.replace(/rgba?\(([^)]+)\)/, (match, values) => {
+        const parts = values.split(",");
+        if (parts.length === 4) parts[3] = follow.opacity;
+        else parts.push(follow.opacity);
+        return `rgba(${parts.join(",")})`;
+      });
+
+      const transparentColor = solidColor.replace(/[\d\.]+\)$/, "0)");
+
+      gradient.addColorStop(0, solidColor);
+      gradient.addColorStop(1, transparentColor);
+
+      ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(px, py, radius, 0, Math.PI*2);
+      ctx.arc(px, py, glowRadius, 0, Math.PI * 2);
       ctx.fill();
 
       // Core
-      ctx.globalAlpha = follow.opacity;
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = color;
+      ctx.fillStyle = solidColor;
       ctx.beginPath();
-      ctx.arc(px, py, radius, 0, Math.PI*2);
+      ctx.arc(px, py, radius, 0, Math.PI * 2);
       ctx.fill();
 
       // Border
-      ctx.lineWidth = strokeWidth;
+      ctx.lineWidth = 0.5;
       ctx.strokeStyle = `rgba(255,255,255,${follow.opacity})`;
       ctx.beginPath();
-      ctx.arc(px, py, radius+0.5, 0, Math.PI*2);
+      ctx.arc(px, py, radius + 0.5, 0, Math.PI * 2);
       ctx.stroke();
+
       ctx.restore();
     }
 
-    // --- Decide single / dual ---
-    if (chart.options.currentMetric === "temp-humidity") {
-      drawForDataset(opt.tempDatasetIndex ?? 0, opt.tempColor ?? "rgba(218,73,78,1)");
-      drawForDataset(opt.humDatasetIndex ?? 1, opt.humColor ?? "rgba(53,170,223,1)");
-    } else if (chart.options.currentMetric === "temperature") {
-      drawForDataset(opt.datasetIndex ?? 0, opt.tempColor ?? "rgba(218,73,78,1)");
-    } else if (chart.options.currentMetric === "humidity") {
-      drawForDataset(opt.datasetIndex ?? 0, opt.humColor ?? "rgba(53,170,223,1)");
-    } else if (chart.options.currentMetric === "light") {
-      drawForDataset(opt.datasetIndex ?? 0, opt.lightColor ?? "rgba(255,206,86,1)");
-    }
+    // 🔥 Dibujar para todos los datasets visibles
+    chart.data.datasets.forEach((ds, index) => {
+      const meta = chart.getDatasetMeta(index);
+      if (!meta || meta.hidden) return;
+      if (ds.label == "Temperature Weather") return;
+      if (ds.label == "Humidity Weather") return;
+
+      if (metric === "temperature" && !ds.label.includes("Temperature")) return;
+      if (metric === "humidity" && !ds.label.includes("Humidity")) return;
+      if (metric === "light" && !ds.label.includes("Light")) return;
+
+      if (metric === "temp-humidity") {
+        if (
+          !ds.label.includes("Temperature") &&
+          !ds.label.includes("Humidity")
+        ) return;
+      }
+
+      drawForDataset(index);
+    });
   }
 };
 
 // --- Animación suave ---
-  function startFollowAnimation(chart) {
-    if (!chart.$follow || chart.$follow.animating) return;
-    chart.$follow.animating = true;
+function startFollowAnimation(chart) {
+  if (!chart.$follow || chart.$follow.animating) return;
 
-    function step() {
-      const follow = chart.$follow;
-      if (!follow) return;
+  chart.$follow.animating = true;
+  chart.$follow.startTime = performance.now();
 
-      if (follow.fadeOut) {
-        follow.opacity -= 0.03; // velocidad de fade más suave
-        if (follow.opacity <= 0) {
-          chart.$follow = null;
-          return;
-        }
+  function step(now) {
+    const follow = chart.$follow;
+    if (!follow) return;
+
+    // 🔥 Respiración suave (onda seno)
+    const speed = 0.0035;      // menor = más lento
+    const amplitude = 0.25;    // intensidad respiración
+    follow.breath = 1 + amplitude * Math.sin(now * speed);
+
+    // 🔥 Fade out
+    if (follow.fadeOut) {
+      follow.opacity -= 0.03;
+      if (follow.opacity <= 0) {
+        chart.$follow = null;
+        return;
       }
-      chart.draw();
-      requestAnimationFrame(step);
     }
 
+    chart.draw();
     requestAnimationFrame(step);
   }
+
+  requestAnimationFrame(step);
+}
 
   Chart.register(dualAxisContinuousFollowMarker);
 
@@ -906,8 +1068,8 @@ const dualAxisContinuousFollowMarker = {
       datasets = [
         makeDataset("Temperature", lastTemps[tagId], "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
         makeDataset("Humidity", lastHums[tagId], "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
-        makeDataset("Temperature Weather", lastTemps_Weather[tagId], "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", "yTemp", true,!showWeatherTemp),
-        makeDataset("Humidity Weather", lastHums_Weather[tagId], "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", "yHum", true,!showWeatherHum)
+        makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", "yTemp", true,!showWeatherTemp),
+        makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", "yHum", true,!showWeatherHum)
       ];
 
       scales = {
