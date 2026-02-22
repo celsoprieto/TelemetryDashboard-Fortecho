@@ -3,13 +3,13 @@
     //let API_BASE = ""; // declare a variable to hold the value
 
     let mainChart;
-    let lastTempHumLabels = [];
-    let lastLightLabels = []; 
-    let lastTemps = [];
-    let lastHums = [];
+    let lastTempHumLabels = {};
+    let lastLightLabels = {}; 
+    let lastTemps = {};
+    let lastHums = {};
     let lastTemps_Weather = [];
     let lastHums_Weather = [];
-    let lastLights = [];
+    let lastLights = {};
     let currentMetric = 'temp-humidity'; // or 'humidity'
     let tagsById = {};   // <--- stores full objects by tagId
     let reloadTimer;
@@ -215,8 +215,8 @@
       
 
       // ---------------- TAG CHANGE ----------------
-      const tagSelect = document.getElementById("tagIdSelect");
-      tagSelect?.addEventListener("change", () => loadData(filtereddays));
+      // const tagSelect = document.getElementById("tagIdSelect");
+      // tagSelect?.addEventListener("change", () => loadData(filtereddays));
 
       // ---------------- FROM/TO CHANGE (DEBOUNCED) ----------------
       let reloadTimer;
@@ -403,7 +403,7 @@
       showLoading("loadingOverlay");
 
     try {
-        const tagId = Object.keys(tagsById).find(key => tagsById[key].isSelected);
+        const tagIdList = Object.keys(tagsById).filter(key => tagsById[key].isSelected);
         const from = document.getElementById('fromInput').value;
         const to   = document.getElementById('toInput').value;
 
@@ -430,75 +430,87 @@
         const toUtcIso   = new Date(toUtcbuffer).toISOString();
 
 
-        if (!tagId) {
+        if (tagIdList.length < 1) {
           alert('Please select a tagId');
           return;
         }
 
-        const params = new URLSearchParams({ sitecode });
-        if (tagId) params.append('tagId', tagId);
-        if (from) params.append('from', fromUtcIso);
-        if (to)   params.append('to', toUtcIso);
+        const TempHumLabels = {};
+        const LightLabels = {};
+        const temps  = {};
+        const hums  = {};
+        const lights = {};
 
-        const url = `${API_BASE}/telemetry?${params.toString()}`;
-        // console.log('Requesting:', url);
+        for (const tagId of tagIdList) {
+          const params = new URLSearchParams({ sitecode });
+          if (tagId) params.append('tagId', tagId);
+          if (from) params.append('from', fromUtcIso);
+          if (to)   params.append('to', toUtcIso);
 
-        const res = await fetch(url);
-        if (!res.ok) {
-          const text = await res.text();
-          alert('API error: ' + text);
-          return;
-        }
+          const url = `${API_BASE}/telemetry?${params.toString()}`;
+          // console.log('Requesting:', url);
 
-        const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) {
-          alert('No data returned for this tag/time range.');
-          return;
-        }
-
-        const TempHumLabels = [];
-        const LightLabels = [];
-        const temps  = [];
-        const hums   = [];
-        const lights = [];
-
-        for (const d of data) {
-          const s = d.sensorData;
-          if (!s) continue;
-
-          const utcTs = s.eventDateUtc || '';
-          let localLabel = utcTs;
-          // if (utcTs) {
-          //   // const dateObj = new Date(utcTs);
-          //   // localLabel = dateObj.toLocaleString(); // browser local time
-          //   // // Replace the comma with " - "
-          //   // localLabel = localLabel.replace(',', ' -');
-          //   const dateObj = new Date(utcTs);
-          //   // Ajuste a hora local y convertir a ISO string sin zona
-          //   localLabel = new Date(dateObj.getTime() - dateObj.getTimezoneOffset() * 60000)
-          //                   .toISOString()
-          //                   .slice(0, 19);
-          // }
-
-          // Temp/Humidity labels and values when sensorTrH = 1
-          if (s.sensorTrH === 1) {
-            TempHumLabels.push(localLabel);
-
-            const t = s.temperatureEv;
-            const h = s.humidityEv;
-
-            // keep temp as-is (can be < 0), ignore invalid humidity (< 0)
-            temps.push(t != null ? { x: localLabel, y: t } : null);
-            hums.push(h != null && h >= 0 ? { x: localLabel, y: h } : null);
+          const res = await fetch(url);
+          if (!res.ok) {
+            const text = await res.text();
+            alert('API error: ' + text);
+            return;
           }
 
-          // Light labels and values when sensorLum = 1
-          if (s.sensorLum === 1) {
-            LightLabels.push(localLabel);
+          const data = await res.json();
+          if (!Array.isArray(data) || data.length === 0) {
+            alert('No data returned for this tag/time range.');
+            return;
+          }
 
-            const l = s.luxEv;
-            // ignore values < 0
-            lights.push(l != null && l >= 0 ? { x: localLabel, y: l } : null);
+       
+
+          for (const d of data) {
+            const s = d.sensorData;
+            if (!s) continue;
+
+            if (!temps[tagId]) {
+              TempHumLabels[tagId] = [];
+              LightLabels[tagId] = [];
+              temps[tagId] = [];
+              hums[tagId] = [];
+              lights[tagId] = [];
+            }
+
+            const utcTs = s.eventDateUtc || '';
+            let localLabel = utcTs;
+            // if (utcTs) {
+            //   // const dateObj = new Date(utcTs);
+            //   // localLabel = dateObj.toLocaleString(); // browser local time
+            //   // // Replace the comma with " - "
+            //   // localLabel = localLabel.replace(',', ' -');
+            //   const dateObj = new Date(utcTs);
+            //   // Ajuste a hora local y convertir a ISO string sin zona
+            //   localLabel = new Date(dateObj.getTime() - dateObj.getTimezoneOffset() * 60000)
+            //                   .toISOString()
+            //                   .slice(0, 19);
+            // }
+
+            // Temp/Humidity labels and values when sensorTrH = 1
+            if (s.sensorTrH === 1) {
+              TempHumLabels[tagId].push(localLabel);
+
+              const t = s.temperatureEv;
+              const h = s.humidityEv;
+
+              // keep temp as-is (can be < 0), ignore invalid humidity (< 0)
+              temps[tagId].push(t != null ? { x: localLabel, y: t } : null);
+              hums[tagId].push(h != null && h >= 0 ? { x: localLabel, y: h } : null);
+            }
+
+            // Light labels and values when sensorLum = 1
+            if (s.sensorLum === 1) {
+              LightLabels[tagId].push(localLabel);
+
+              const l = s.luxEv;
+              // ignore values < 0
+              lights[tagId].push(l != null && l >= 0 ? { x: localLabel, y: l } : null);
+            }
           }
         }
 
@@ -532,7 +544,7 @@
     const tempHumBtn  = document.querySelector('.sensor-button[data-metric="temp-humidity"]');
 
     // helper: has non‑empty array
-    const hasData = arr => Array.isArray(arr) && arr.length > 0;
+    const hasData = obj => obj && Object.values(obj).some(arr => Array.isArray(arr) && arr.length > 0);
 
     if (tempBtn) tempBtn.disabled = !hasData(lastTemps);
     if (humBtn)  humBtn.disabled  = !hasData(lastHums);
@@ -797,7 +809,21 @@ const dualAxisContinuousFollowMarker = {
 
   Chart.register(dualAxisContinuousFollowMarker);
 
+  const colors = [
+    "rgba(218, 73, 78, 1)",   // rojo
+    "rgba(54, 162, 235, 1)",  // azul
+    "rgba(255, 206, 86, 1)",  // amarillo
+    "rgba(75, 192, 192, 1)",  // verde agua
+    "rgba(153, 102, 255, 1)", // morado
+    "rgba(255, 159, 64, 1)",  // naranja
+    "rgba(199, 199, 199, 1)", // gris claro
+    "rgba(255, 99, 132, 1)",  // rosa
+    "rgba(54, 162, 100, 1)",  // verde oscuro
+    "rgba(100, 149, 237, 1)"  // azul cornflower
+  ];
 
+
+  const colorsBg = colors.map(c => c.replace('1)', '0.1)'));
 
 
   function renderChart() {
@@ -813,6 +839,8 @@ const dualAxisContinuousFollowMarker = {
     let chartTitle = "";
     let datasets = [];
     let scales = {};
+    const tagId = Object.keys(tagsById).find(key => tagsById[key].isSelected);
+    const tagIds = Object.keys(tagsById).filter(key => tagsById[key].isSelected);
 
     const opTemp = document.getElementById("opTemp");
     const opHum  = document.getElementById("opHum");
@@ -831,37 +859,55 @@ const dualAxisContinuousFollowMarker = {
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C)";
       datasets = [
-        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "y"),
+        //makeDataset("Temperature", lastTemps[tagId], "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "y"),
         makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", undefined, true,!showWeatherTemp)
       ];
       scales = { y: makeYAxis("Temperature (°C)") };
+      for (let i = 0; i < tagIds.length; i++) {
+        const tagId = tagIds[i];
+        datasets.push(
+          makeDataset(`Temperature Tag ${tagId}`,lastTemps[tagId],colors[i],colorsBg[i],"y")
+      );
+    }
 
     } else if (currentMetric === "humidity") {
       labels = lastTempHumLabels;
       chartTitle = "Humidity (%)";
       datasets = [
-        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "y"),
+        // makeDataset("Humidity", lastHums[tagId], "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "y"),
         makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", undefined, true,!showWeatherHum)
       ];
       scales = { y: makeYAxis("Humidity (%)") };
+      for (let i = 0; i < tagIds.length; i++) {
+        const tagId = tagIds[i];
+        datasets.push(
+          makeDataset(`Humidity Tag ${tagId}`,lastHums[tagId],colors[i],colorsBg[i],"y")
+      );
+    }
 
     } else if (currentMetric === "light") {
       labels = lastLightLabels;
       chartTitle = "Light (lux)";
       datasets = [
-        makeDataset("Light", lastLights, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
+        // makeDataset("Light", lastLights, "rgba(220,128,21,1)", "rgba(220,128,21,0.1)")
       ];
       scales = { y: makeYAxis("Light (lux)") };
+       for (let i = 0; i < tagIds.length; i++) {
+          const tagId = tagIds[i];
+          datasets.push(
+            makeDataset(`Light Tag ${tagId}`,lastLights[tagId],colors[i],colorsBg[i],"y")
+        );
+      }
 
     } else if (currentMetric === "temp-humidity") {
       labels = lastTempHumLabels;
       chartTitle = "Temperature (°C) & Humidity (%)";
 
       datasets = [
-        makeDataset("Temperature", lastTemps, "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
-        makeDataset("Humidity", lastHums, "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
-        makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", "yTemp", true,!showWeatherTemp),
-        makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", "yHum", true,!showWeatherHum)
+        makeDataset("Temperature", lastTemps[tagId], "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
+        makeDataset("Humidity", lastHums[tagId], "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
+        makeDataset("Temperature Weather", lastTemps_Weather[tagId], "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", "yTemp", true,!showWeatherTemp),
+        makeDataset("Humidity Weather", lastHums_Weather[tagId], "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", "yHum", true,!showWeatherHum)
       ];
 
       scales = {
@@ -1018,9 +1064,9 @@ const dualAxisContinuousFollowMarker = {
   }
 
 
-  async function fetchData(fromMs, toMs) {
+  async function fetchData(fromMs, toMs, tagId) {
     
-    const tagId = tagsById.filter(x => x.isSelected === true);
+    
     if (!tagId) return { temps: [], hums: [], lights: [] };
 
     const from = new Date(fromMs).toISOString();
@@ -1114,6 +1160,9 @@ const dualAxisContinuousFollowMarker = {
     const nearLeft  = viewFrom < loadedFromMs + EDGE_MS;
     const nearRight = viewTo + 1 >= loadedToMs - EDGE_MS;  // small fudge factor
 
+    const tagId = Object.keys(tagsById).filter(key => tagsById[key].isSelected);
+
+
 
     if (!nearLeft && !nearRight) return;
 
@@ -1146,36 +1195,44 @@ const dualAxisContinuousFollowMarker = {
         // si no amplía rango, no hagas nada
         if (fetchFrom >= loadedFromMs && fetchTo <= loadedToMs) return;
 
-        const newData = await fetchData(fetchFrom, fetchTo);
-        //  load weather for same range
-        await ensureWeather(fetchFrom, fetchTo);
+        for (const tagIdAsync of tagId) {
+          const newData = await fetchData(fetchFrom, fetchTo, tagIdAsync);
+          //  load weather for same range
+          await ensureWeather(fetchFrom, fetchTo);
 
-        //  MERGE (solo añadimos lo que falta)
-        if (fetchFrom < loadedFromMs) {
-          prependUnique(lastTemps, newData.temps);
-          prependUnique(lastHums, newData.hums);
-          prependUnique(lastLights, newData.lights);
-          loadedFromMs = fetchFrom;
+          //  MERGE (solo añadimos lo que falta)
+          if (fetchFrom < loadedFromMs) {
+            prependUnique(lastTemps[tagIdAsync], newData.temps);
+            prependUnique(lastHums[tagIdAsync], newData.hums);
+            prependUnique(lastLights[tagIdAsync], newData.lights);
+            
+          }
+
+          if (fetchTo > loadedToMs) {
+            appendUnique(lastTemps[tagIdAsync], newData.temps);
+            appendUnique(lastHums[tagIdAsync], newData.hums);
+            appendUnique(lastLights[tagIdAsync], newData.lights);
+            
+          }
+
+          // 🔥 NO recrees chart. Solo update datasets.
+          chart.data.datasets.forEach(ds => {
+            if (ds.label === `Temperature Tag ${tagIdAsync}`) ds.data = lastTemps[tagIdAsync];
+            if (ds.label === `Humidity Tag ${tagIdAsync}`) ds.data = lastHums[tagIdAsync];
+            if (ds.label === `Light Tag ${tagIdAsync}`) ds.data = lastLights[tagIdAsync];
+            if (ds.label === "Temperature Weather") ds.data = lastTemps_Weather;
+            if (ds.label === "Humidity Weather") ds.data = lastHums_Weather;
+          });
+          
         }
 
-        if (fetchTo > loadedToMs) {
-          appendUnique(lastTemps, newData.temps);
-          appendUnique(lastHums, newData.hums);
-          appendUnique(lastLights, newData.lights);
-          loadedToMs = fetchTo;
-        }
-
-        // 🔥 NO recrees chart. Solo update datasets.
-        chart.data.datasets.forEach(ds => {
-          if (ds.label === "Temperature") ds.data = lastTemps;
-          if (ds.label === "Humidity") ds.data = lastHums;
-          if (ds.label === "Light") ds.data = lastLights;
-          if (ds.label === "Temperature Weather") ds.data = lastTemps_Weather;
-          if (ds.label === "Humidity Weather") ds.data = lastHums_Weather;
-        });
+        loadedFromMs = fetchFrom;
+        loadedToMs = fetchTo;
 
         needsUpdate = true;
         requestAnimationFrame(updateChart);
+
+       
 
         // chart.update("none");
 
@@ -2527,8 +2584,16 @@ function getFilteredDataAlarms() {
         if (tag.isSelected && selectedCount === 1) {
           return; 
         }
+
         // single-select: unselect everyone first
-        tagsArray.forEach(t => { t.isSelected = false; });
+        if (currentMetric === "temp-humidity") {
+          tagsArray.forEach(t => { t.isSelected = false; });
+        }
+
+        if (!tag.isSelected && selectedCount >= 10) {
+          alert("Cannot select more than 10 tags"); // opcional
+          return;
+        }
         tag.isSelected = !tag.isSelected;
         
         if (tag) {
