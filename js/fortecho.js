@@ -329,71 +329,6 @@
       return `${year}-${month}-${day} ${hour}:${minute}`;
     }
 
-    // async function loadTags() {
-    //   const select = document.getElementById('tagIdSelect');
-    //   select.innerHTML = ''; // clear existing options
-    //   tagsById = {}; // reset
-
-    //   try {
-    //     const res = await fetch(`${API_BASE}/tags`);
-    //     if (!res.ok) {
-    //       const text = await res.text();
-    //       console.error('Error fetching devices:', text);
-    //       alert('Error loading device IDs: ' + text);
-    //       return;
-    //     }
-
-    //     const tags = await res.json(); // array of objects
-    //     if (!Array.isArray(tags) || tags.length === 0) {
-    //       const opt = document.createElement('option');
-    //       opt.value = '';
-    //       opt.textContent = 'No tags found';
-    //       select.appendChild(opt);
-    //       return;
-    //     }
-
-    //     // Add a default placeholder
-    //     const placeholder = document.createElement('option');
-    //     placeholder.value = '';
-    //     placeholder.textContent = '-- Select Tag --';
-    //     placeholder.disabled = true;
-    //     placeholder.selected = true;
-    //     select.appendChild(placeholder);
-
-    //     for (const tag of tags) {
-    //       tag.isSelected = true;   // 👈 new boolean default
-    //       // save full object in memory
-    //       tagsById[tag.tagId] = tag;
-    //       const opt = document.createElement('option');
-    //       opt.value = tag.tagId;
-    //       // Show a nice label: "TAG001 - BrandA X100 (SN123)"
-    //       let text = `${tag.tagId} - ${tag.serialNumber || ''}`;
-    //       // Truncate to max 50 characters
-    //       if (text.length > 50) {
-    //         text = text.substring(0, 47) + '...'; // add ellipsis if truncated
-    //       }
-    //       opt.textContent = text ;
-    //       select.appendChild(opt);
-    //     }
-
-    //     // Listener para mostrar detalles al seleccionar
-    //     select.addEventListener('change', () => {
-    //       showTagDetails(select.value);
-    //     });
-
-    //     // Optionally select the first real tag
-    //     // Opcional: mostrar detalles del primer tag automáticamente
-    //     if (tags.length > 0) {
-    //       select.value = tags[0].tagId;
-    //       showTagDetails(tags[0].tagId);
-    //     }
-
-    //   } catch (err) {
-    //     console.error('Error loading devices:', err);
-    //     alert('Error loading device IDs (see console).');
-    //   }
-    // }
-
     async function loadTags() {
       tagsById = {}; // reset
 
@@ -2295,18 +2230,6 @@ function getFilteredDataAlarms() {
 
   // Add this function to handle what happens when a row is clicked
   function handleAlarmRowClick(rowData, rowElement) {
-    // Example: Log the clicked alarm data
-    //console.log('Alarm clicked:', rowData);
-    
-    // Remove highlight from all rows
-    // document.querySelectorAll('#tableABody tr[data-row-index]').forEach(r => {
-    //   r.classList.remove('bg-blue-100', 'border-l-4', 'border-blue-500');
-    // });
-    
-    // // Highlight clicked row
-    // rowElement.classList.add('bg-blue-100', 'border-l-4', 'border-blue-500');
-    
-    // Show modal with alarm details
     showAlarmDetailModal(rowData);
   }
 
@@ -2607,11 +2530,6 @@ function getFilteredDataAlarms() {
         // single-select: unselect everyone first
         tagsArray.forEach(t => { t.isSelected = false; });
         tag.isSelected = !tag.isSelected;
-        // update bar color dynamically
-        // bar.classList.remove("bg-custom-green", "bg-custom-blue");
-        // bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-blue");
-        // textElements.classList.remove("text-custom-green", "text-custom-blue");
-        // textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-blue");
         
         if (tag) {
           
