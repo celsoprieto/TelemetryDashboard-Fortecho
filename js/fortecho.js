@@ -27,6 +27,7 @@
     let weatherLoadedFromMs = null;
     let weatherLoadedToMs = null;
     let isFetching = false;
+    let currentView ; // or "alarms"
 
     const cBUFFER_MS = 24 * 60 * 60 * 1000; // 24h
     const cEDGE_MS   = 60 * 60 * 1000;     // 1h (cuando te acercas al borde, recarga)
@@ -328,9 +329,72 @@
       return `${year}-${month}-${day} ${hour}:${minute}`;
     }
 
+    // async function loadTags() {
+    //   const select = document.getElementById('tagIdSelect');
+    //   select.innerHTML = ''; // clear existing options
+    //   tagsById = {}; // reset
+
+    //   try {
+    //     const res = await fetch(`${API_BASE}/tags`);
+    //     if (!res.ok) {
+    //       const text = await res.text();
+    //       console.error('Error fetching devices:', text);
+    //       alert('Error loading device IDs: ' + text);
+    //       return;
+    //     }
+
+    //     const tags = await res.json(); // array of objects
+    //     if (!Array.isArray(tags) || tags.length === 0) {
+    //       const opt = document.createElement('option');
+    //       opt.value = '';
+    //       opt.textContent = 'No tags found';
+    //       select.appendChild(opt);
+    //       return;
+    //     }
+
+    //     // Add a default placeholder
+    //     const placeholder = document.createElement('option');
+    //     placeholder.value = '';
+    //     placeholder.textContent = '-- Select Tag --';
+    //     placeholder.disabled = true;
+    //     placeholder.selected = true;
+    //     select.appendChild(placeholder);
+
+    //     for (const tag of tags) {
+    //       tag.isSelected = true;   // 👈 new boolean default
+    //       // save full object in memory
+    //       tagsById[tag.tagId] = tag;
+    //       const opt = document.createElement('option');
+    //       opt.value = tag.tagId;
+    //       // Show a nice label: "TAG001 - BrandA X100 (SN123)"
+    //       let text = `${tag.tagId} - ${tag.serialNumber || ''}`;
+    //       // Truncate to max 50 characters
+    //       if (text.length > 50) {
+    //         text = text.substring(0, 47) + '...'; // add ellipsis if truncated
+    //       }
+    //       opt.textContent = text ;
+    //       select.appendChild(opt);
+    //     }
+
+    //     // Listener para mostrar detalles al seleccionar
+    //     select.addEventListener('change', () => {
+    //       showTagDetails(select.value);
+    //     });
+
+    //     // Optionally select the first real tag
+    //     // Opcional: mostrar detalles del primer tag automáticamente
+    //     if (tags.length > 0) {
+    //       select.value = tags[0].tagId;
+    //       showTagDetails(tags[0].tagId);
+    //     }
+
+    //   } catch (err) {
+    //     console.error('Error loading devices:', err);
+    //     alert('Error loading device IDs (see console).');
+    //   }
+    // }
+
     async function loadTags() {
-      const select = document.getElementById('tagIdSelect');
-      select.innerHTML = ''; // clear existing options
       tagsById = {}; // reset
 
       try {
@@ -344,47 +408,25 @@
 
         const tags = await res.json(); // array of objects
         if (!Array.isArray(tags) || tags.length === 0) {
-          const opt = document.createElement('option');
-          opt.value = '';
-          opt.textContent = 'No tags found';
-          select.appendChild(opt);
+          alert('No tags found');
           return;
         }
 
-        // Add a default placeholder
-        const placeholder = document.createElement('option');
-        placeholder.value = '';
-        placeholder.textContent = '-- Select Tag --';
-        placeholder.disabled = true;
-        placeholder.selected = true;
-        select.appendChild(placeholder);
 
         for (const tag of tags) {
-          tag.isSelected = true;   // 👈 new boolean default
+          tag.isSelected = false;   // 👈 new boolean default
           // save full object in memory
           tagsById[tag.tagId] = tag;
-          const opt = document.createElement('option');
-          opt.value = tag.tagId;
-          // Show a nice label: "TAG001 - BrandA X100 (SN123)"
-          let text = `${tag.tagId} - ${tag.serialNumber || ''}`;
-          // Truncate to max 50 characters
-          if (text.length > 50) {
-            text = text.substring(0, 47) + '...'; // add ellipsis if truncated
-          }
-          opt.textContent = text ;
-          select.appendChild(opt);
         }
 
-        // Listener para mostrar detalles al seleccionar
-        select.addEventListener('change', () => {
-          showTagDetails(select.value);
-        });
+
 
         // Optionally select the first real tag
         // Opcional: mostrar detalles del primer tag automáticamente
         if (tags.length > 0) {
-          select.value = tags[0].tagId;
-          showTagDetails(tags[0].tagId);
+          const firstKey = Object.keys(tagsById)[0];
+          if (firstKey) tagsById[firstKey].isSelected = true; 
+          refreshTagSelect();   
         }
 
       } catch (err) {
@@ -426,8 +468,7 @@
       showLoading("loadingOverlay");
 
     try {
-        const select = document.getElementById('tagIdSelect');
-        const tagId = select.value;
+        const tagId = Object.keys(tagsById).find(key => tagsById[key].isSelected);
         const from = document.getElementById('fromInput').value;
         const to   = document.getElementById('toInput').value;
 
@@ -1043,8 +1084,8 @@ const dualAxisContinuousFollowMarker = {
 
 
   async function fetchData(fromMs, toMs) {
-    const select = document.getElementById("tagIdSelect");
-    const tagId = select.value;
+    
+    const tagId = tagsById.filter(x => x.isSelected === true);
     if (!tagId) return { temps: [], hums: [], lights: [] };
 
     const from = new Date(fromMs).toISOString();
@@ -1775,6 +1816,7 @@ function makeTooltipOptions() {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         const view = link.dataset.view;
+        currentView = view;
         showView(view);
       });
     });
@@ -2514,9 +2556,9 @@ function getFilteredDataAlarms() {
       const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
 
       const card = document.createElement("div");
-      const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-red";
-      const textColorClass = tag.isSelected ? "text-custom-green" : "text-custom-red";
-      card.className = `
+      const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-blue";
+      const textColorClass = tag.isSelected ? "text-custom-green" : "text-custom-blue";
+      card.className = `card
         relative bg-white rounded-xl shadow-sm border border-gray-200 p-4
       `;
 
@@ -2552,9 +2594,9 @@ function getFilteredDataAlarms() {
       grid.appendChild(card);
 
       // checkbox event listener
-      const checkbox = card.querySelector(`input[type="checkbox"][data-tagid="${tag.tagId}"]`);
-      const bar = card.querySelector("div.absolute");
-      const textElements = card.querySelector("div.text-xs");
+      //const checkbox = card.querySelector(`input[type="checkbox"][data-tagid="${tag.tagId}"]`);
+      // const bar = card.querySelector("div.absolute");
+      // const textElements = card.querySelector("div.text-xs");
       // Add event listener after setting innerHTML
       const button = card.querySelector('button[data-tagid]');
       button.addEventListener('click', function() {
@@ -2562,12 +2604,14 @@ function getFilteredDataAlarms() {
         if (tag.isSelected && selectedCount === 1) {
           return; 
         }
+        // single-select: unselect everyone first
+        tagsArray.forEach(t => { t.isSelected = false; });
         tag.isSelected = !tag.isSelected;
         // update bar color dynamically
-        bar.classList.remove("bg-custom-green", "bg-custom-red");
-        bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-red");
-        textElements.classList.remove("text-custom-green", "text-custom-red");
-        textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-red");
+        // bar.classList.remove("bg-custom-green", "bg-custom-blue");
+        // bar.classList.add(tag.isSelected ? "bg-custom-green" : "bg-custom-blue");
+        // textElements.classList.remove("text-custom-green", "text-custom-blue");
+        // textElements.classList.add(tag.isSelected ? "text-custom-green" : "text-custom-blue");
         
         if (tag) {
           
@@ -2624,53 +2668,51 @@ function getFilteredDataAlarms() {
   }
 
   function refreshTagSelect() {
-    const select = document.getElementById('tagIdSelect');
-    const currentValue = select.value; // preserve current selection
-    
-    // Clear all options except placeholder
-    select.innerHTML = '';
-    
-    // Re-add placeholder
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = '-- select tag --';
-    placeholder.disabled = true;
-    placeholder.selected = true;
-    select.appendChild(placeholder);
-    
+
+      const buttons = document.querySelectorAll('button[data-tagid]');
+      const tagsArray = Object.values(tagsById);
+
+      buttons.forEach(btn => {
+
+        const tagId = btn.dataset.tagid;
+        const tag = tagsArray.find(t => t.tagId == tagId);
+
+
+      const card = btn.closest(".card");
+      const bar = card.querySelector("div.absolute");
+      const textElements = card.querySelector("div.text-xs");
+
+        // Reset classes
+        bar.classList.remove("bg-custom-green", "bg-custom-blue");
+        textElements.classList.remove("text-custom-green", "text-custom-blue");
+
+        if (tag.isSelected) {
+          bar.classList.add("bg-custom-green");
+          textElements.classList.add("text-custom-green");
+        } else {
+          bar.classList.add("bg-custom-blue");
+          textElements.classList.add("text-custom-blue");
+        }
+
+      });
+
     // Filter and add only selected tags
     const selectedTags = Object.values(tagsById).filter(tag => tag.isSelected === true);
     
     if (selectedTags.length === 0) {
-      const opt = document.createElement('option');
-      opt.value = '';
-      opt.textContent = 'No selected tags';
-      select.appendChild(opt);
       return;
     }
     
-    for (const tag of selectedTags) {
-      const opt = document.createElement('option');
-      opt.value = tag.tagId;
-      
-      let text = `${tag.tagId} - ${tag.serialNumber || ''}`;
-      if (text.length > 50) {
-        text = text.substring(0, 47) + '...';
-      }
-      opt.textContent = text;
-      select.appendChild(opt);
-    }
-    
-    // Try to restore previous selection (if still in list)
-    if (tagsById[currentValue]?.isSelected) {
-      select.value = currentValue;
-    } else if (selectedTags.length > 0) {
+
+    if (selectedTags.length > 0) {
       // Select first available tag
-      select.value = selectedTags[0].tagId;
+      // select.value = selectedTags[0].tagId;
       showTagDetails(selectedTags[0].tagId);
     }
 
-    loadData(filtereddays); 
+    if (currentView === "telemetry") {
+      loadData(filtereddays); 
+    }
   }
 
   function updateWeatherCheckboxes() {
