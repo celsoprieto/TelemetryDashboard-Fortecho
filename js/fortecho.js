@@ -675,115 +675,6 @@
     return out;
   }
 
-// const dualAxisContinuousFollowMarker = {
-//   id: "dualAxisContinuousFollowMarker",
-
-//   afterEvent(chart, args, pluginOptions) {
-//     const e = args.event;
-//     chart.$follow = chart.$follow || {};
-
-//     if (e.type === "mousemove") {
-//       chart.$follow.x = e.x;
-//       chart.$follow.y = e.y;
-//       chart.$follow.opacity = 1;   // opacidad completa al entrar
-//       chart.$follow.fadeOut = false;
-//       startFollowAnimation(chart);  // iniciamos animación
-//     }
-
-//     if (e.type === "mouseout" || e.type === "mouseleave") {
-//       chart.$follow.fadeOut = true;  // activamos fade out
-//       startFollowAnimation(chart);
-//     }
-//   },
-
-//   afterDatasetsDraw(chart, args, pluginOptions) {
-//     const opt = pluginOptions || {};
-//     if (opt.pointsVisible) return;
-
-//     const follow = chart.$follow;
-//     if (!follow?.x) return;
-
-//     const xScale = chart.scales.x;
-//     const ctx = chart.ctx;
-//     const area = chart.chartArea;
-
-//     const xValue = xScale.getValueForPixel(follow.x);
-
-//     function drawForDataset(datasetIndex, color) {
-//       const meta = chart.getDatasetMeta(datasetIndex);
-//       if (!meta || meta.hidden) return;
-
-//       const yScale = chart.scales[meta.yAxisID || "y"];
-//       if (!yScale) return;
-
-//       const data = chart.data.datasets[datasetIndex].data;
-//       if (!data || data.length < 2) return;
-
-//       // --- find segment ---
-//       let i = -1;
-//       for (let k = 0; k < data.length - 1; k++) {
-//         const x0 = new Date(data[k].x).getTime();
-//         const x1 = new Date(data[k + 1].x).getTime();
-//         if (xValue >= x0 && xValue <= x1) { i = k; break; }
-//       }
-//       if (i === -1) i = (xValue < new Date(data[0].x).getTime()) ? 0 : data.length - 2;
-
-//       const p0 = data[i], p1 = data[i+1];
-//       const x0 = new Date(p0.x).getTime(), y0 = p0.y;
-//       const x1 = new Date(p1.x).getTime(), y1 = p1.y;
-//       const t = (x1 - x0) === 0 ? 0 : (xValue - x0)/(x1 - x0);
-//       const yValue = y0 + t*(y1 - y0);
-//       const px = xScale.getPixelForValue(xValue);
-//       const py = yScale.getPixelForValue(yValue);
-
-//       if (px < area.left || px > area.right || py < area.top || py > area.bottom) return;
-
-//       const radius = opt.radius ?? 5;
-//       const strokeWidth = opt.strokeWidth ?? 2;
-//       const glowBlur = opt.glowBlur ?? 18;
-//       const glowAlpha = (opt.glowAlpha ?? 0.55) * follow.opacity;
-
-//       ctx.save();
-//       // Glow
-//       ctx.globalAlpha = glowAlpha;
-//       ctx.shadowColor = color;
-//       ctx.shadowBlur = glowBlur;
-//       ctx.fillStyle = color;
-//       ctx.beginPath();
-//       ctx.arc(px, py, radius, 0, Math.PI*2);
-//       ctx.fill();
-
-//       // Core
-//       ctx.globalAlpha = follow.opacity;
-//       ctx.shadowBlur = 0;
-//       ctx.fillStyle = color;
-//       ctx.beginPath();
-//       ctx.arc(px, py, radius, 0, Math.PI*2);
-//       ctx.fill();
-
-//       // Border
-//       ctx.lineWidth = strokeWidth;
-//       ctx.strokeStyle = `rgba(255,255,255,${follow.opacity})`;
-//       ctx.beginPath();
-//       ctx.arc(px, py, radius+0.5, 0, Math.PI*2);
-//       ctx.stroke();
-//       ctx.restore();
-//     }
-
-//     // --- Decide single / dual ---
-//     if (chart.options.currentMetric === "temp-humidity") {
-//       drawForDataset(opt.tempDatasetIndex ?? 0, opt.tempColor ?? "rgba(218,73,78,1)");
-//       drawForDataset(opt.humDatasetIndex ?? 1, opt.humColor ?? "rgba(53,170,223,1)");
-//     } else if (chart.options.currentMetric === "temperature") {
-//       drawForDataset(opt.datasetIndex ?? 0, opt.tempColor ?? "rgba(218,73,78,1)");
-//     } else if (chart.options.currentMetric === "humidity") {
-//       drawForDataset(opt.datasetIndex ?? 0, opt.humColor ?? "rgba(53,170,223,1)");
-//     } else if (chart.options.currentMetric === "light") {
-//       drawForDataset(opt.datasetIndex ?? 0, opt.lightColor ?? "rgba(255,206,86,1)");
-//     }
-//   }
-// };
-
 
 const dualAxisContinuousFollowMarker = {
   id: "dualAxisContinuousFollowMarker",
@@ -881,14 +772,9 @@ const dualAxisContinuousFollowMarker = {
         px, py, glowRadius
       );
 
-      const solidColor = color.replace(/rgba?\(([^)]+)\)/, (match, values) => {
-        const parts = values.split(",");
-        if (parts.length === 4) parts[3] = follow.opacity;
-        else parts.push(follow.opacity);
-        return `rgba(${parts.join(",")})`;
-      });
 
-      const transparentColor = solidColor.replace(/[\d\.]+\)$/, "0)");
+      const solidColor = toRGBA(color, follow.opacity);
+      const transparentColor = toRGBA(color, 0);
 
       gradient.addColorStop(0, solidColor);
       gradient.addColorStop(1, transparentColor);
@@ -905,11 +791,11 @@ const dualAxisContinuousFollowMarker = {
       ctx.fill();
 
       // Border
-      ctx.lineWidth = 0.5;
-      ctx.strokeStyle = `rgba(255,255,255,${follow.opacity})`;
-      ctx.beginPath();
-      ctx.arc(px, py, radius + 0.5, 0, Math.PI * 2);
-      ctx.stroke();
+      // ctx.lineWidth = 0;
+      // ctx.strokeStyle = `rgba(255,255,255,${follow.opacity})`;
+      // ctx.beginPath();
+      // ctx.arc(px, py, radius + 0.5, 0, Math.PI * 2);
+      // ctx.stroke();
 
       ctx.restore();
     }
@@ -969,24 +855,61 @@ function startFollowAnimation(chart) {
   requestAnimationFrame(step);
 }
 
+  const colorCache = {};
+
+  function toRGBA(color, alpha = 1) {
+    if (!colorCache[color]) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1;
+      canvas.height = 1;
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, 1, 1);
+
+      const data = ctx.getImageData(0, 0, 1, 1).data;
+      colorCache[color] = [data[0], data[1], data[2]];
+    }
+
+    const [r, g, b] = colorCache[color];
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
   Chart.register(dualAxisContinuousFollowMarker);
 
-  const colors = [
-    "rgba(218, 73, 78, 1)",   // rojo
-    "rgba(54, 162, 235, 1)",  // azul
-    "rgba(255, 206, 86, 1)",  // amarillo
-    "rgba(75, 192, 192, 1)",  // verde agua
-    "rgba(153, 102, 255, 1)", // morado
-    "rgba(255, 159, 64, 1)",  // naranja
-    "rgba(199, 199, 199, 1)", // gris claro
-    "rgba(255, 99, 132, 1)",  // rosa
-    "rgba(54, 162, 100, 1)",  // verde oscuro
-    "rgba(100, 149, 237, 1)"  // azul cornflower
-  ];
 
 
-  const colorsBg = colors.map(c => c.replace('1)', '0.1)'));
+  function generateModernDistinctColors(count = 10, firstColor = null) {
+    const colors = [];
 
+    // Si se especifica un primer color → lo usamos
+    if (firstColor) {
+      colors.push(firstColor);
+    }
+
+    const startIndex = firstColor ? 1 : 0;
+    const total = firstColor ? count - 1 : count;
+
+    for (let i = 0; i < total; i++) {
+
+      // Distribución uniforme de hue
+      const hue = Math.round((360 / count) * (i + startIndex));
+
+      const saturation = 65 + (i % 2) * 10;
+      const lightness = 45 + (i % 3) * 8;
+
+      colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
+    }
+
+    return colors.slice(0, count);
+  }
+
+  const redTones = generateModernDistinctColors(10,"rgba(218,73,78,1)");
+  const blueTones = generateModernDistinctColors(10,"rgba(53,170,223,1)");
+  const lightTones = generateModernDistinctColors(10,"rgba(220,128,21,1)");
+  const colorsredBg = redTones.map(c => c.replace('1)', '0.1)'));
+  const colorsblueBg = blueTones.map(c => c.replace('1)', '0.1)'));
+  const colorslightBg = lightTones.map(c => c.replace('1)', '0.1)'));
 
   function renderChart() {
     const canvas = document.getElementById("mainChart");
@@ -1028,7 +951,7 @@ function startFollowAnimation(chart) {
       for (let i = 0; i < tagIds.length; i++) {
         const tagId = tagIds[i];
         datasets.push(
-          makeDataset(`Temperature Tag ${tagId}`,lastTemps[tagId],colors[i],colorsBg[i],"y")
+          makeDataset(`Temperature Tag ${tagId}`,lastTemps[tagId],redTones[i],colorsredBg[i],"y")
       );
     }
 
@@ -1043,7 +966,7 @@ function startFollowAnimation(chart) {
       for (let i = 0; i < tagIds.length; i++) {
         const tagId = tagIds[i];
         datasets.push(
-          makeDataset(`Humidity Tag ${tagId}`,lastHums[tagId],colors[i],colorsBg[i],"y")
+          makeDataset(`Humidity Tag ${tagId}`,lastHums[tagId],blueTones[i],colorsblueBg[i],"y")
       );
     }
 
@@ -1057,7 +980,7 @@ function startFollowAnimation(chart) {
        for (let i = 0; i < tagIds.length; i++) {
           const tagId = tagIds[i];
           datasets.push(
-            makeDataset(`Light Tag ${tagId}`,lastLights[tagId],colors[i],colorsBg[i],"y")
+            makeDataset(`Light Tag ${tagId}`,lastLights[tagId],lightTones[i],colorslightBg[i],"y")
         );
       }
 
@@ -1574,187 +1497,137 @@ function applyXAxisRange() {
     };
   }
 
-  
-function makeTooltipOptions() {
 
-  function getTooltipEl(chart) {
-    let tooltipEl = document.getElementById('chartjs-tooltip');
-    if (!tooltipEl) {
-      tooltipEl = document.createElement('div');
-      tooltipEl.id = 'chartjs-tooltip';
-      tooltipEl.style.position = 'absolute';
-      tooltipEl.style.background = '#ffffff';
-      tooltipEl.style.border = '1px solid #d0d7e2';
-      tooltipEl.style.padding = '8px';
-      tooltipEl.style.fontFamily = 'sans-serif';
-      tooltipEl.style.fontSize = '10px';
-      tooltipEl.style.pointerEvents = 'none';
-      tooltipEl.style.borderRadius = '4px';
-      tooltipEl.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
-      tooltipEl.style.transition = 'all 0.1s ease';
-      tooltipEl.style.opacity = 0;
-      document.body.appendChild(tooltipEl);
-    }
-    return tooltipEl;
-  }
+  function makeTooltipOptions() {
 
-  return {
-    enabled: false,
-    mode: 'nearest',
-    intersect: false,
-    external: function(context) {
-      const tooltipEl = getTooltipEl(context.chart);
-      const tooltipModel = context.tooltip;
-      const chart = context.chart;
-      const e = chart._lastEvent;
-      const isMouseDown = e?.native?.buttons === 1;
-      const isWheelZoom = chart.$wheelZooming === true;
-      
-      //console.log("Tooltip event:", e?.type, "MouseDown:", isMouseDown, "WheelZoom:", isWheelZoom);
-
-      if (isMouseDown || isWheelZoom) {
+    function getTooltipEl(chart) {
+      let tooltipEl = document.getElementById('chartjs-tooltip');
+      if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.id = 'chartjs-tooltip';
+        tooltipEl.style.position = 'absolute';
+        tooltipEl.style.padding = '10px 12px';
+        tooltipEl.style.fontFamily = 'Inter, sans-serif';
+        tooltipEl.style.fontSize = '11px';
+        tooltipEl.style.pointerEvents = 'none';
+        tooltipEl.style.borderRadius = '10px';
+        tooltipEl.style.background = 'rgba(255,255,255,0.75)';
+        tooltipEl.style.backdropFilter = 'blur(8px)';
+        tooltipEl.style.border = '1px solid rgba(255,255,255,0.4)';
+        tooltipEl.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+        tooltipEl.style.transition = 'opacity 0.12s ease, transform 0.12s ease';
+        tooltipEl.style.transform = 'translateY(6px)';
         tooltipEl.style.opacity = 0;
-        return;
-      }
+        tooltipEl.style.zIndex = 1000;
 
-      if (tooltipModel.opacity === 0) {
-        tooltipEl.style.opacity = 0;
-        return;
-      }
+        tooltipEl.innerHTML = `<div class="tooltip-content"></div>`;
 
-      const xScale = chart.scales.x;
-      const xValue = xScale.getValueForPixel(tooltipModel.caretX);
+        document.body.appendChild(tooltipEl);
 
-      // Formato de fecha/hora en tooltip
-      const date = new Date(xValue);
-      const dateStr = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-      const timeStr = date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
-
-      let innerHtml = `<div style="font-weight: normal; margin-bottom:4px;">${dateStr} ${timeStr}</div>`;
-
-      // ---- recorrer todos los datasets ----
-      chart.data.datasets.forEach(ds => {
-        if (!ds.data || ds.data.length === 0) return;
-        if (ds.hidden) return;
-
-        let nearest = null;
-        let minDiff = Infinity;
-
-        ds.data.forEach(v => {
-          // v = {x, y}
-          const ts = new Date(v.x).getTime(); // milisegundos
-          if (ts == null) return;
-
-          const diff = Math.abs(ts - xValue);
-          if (diff < minDiff) {
-            minDiff = diff;
-            nearest = v;
+        // Pulsing animation para marcadores
+        const style = document.createElement('style');
+        style.innerHTML = `
+          @keyframes pulse {
+            0% { transform: scale(1); opacity:1; }
+            50% { transform: scale(1.4); opacity:0.5; }
+            100% { transform: scale(1); opacity:1; }
           }
+        `;
+        document.head.appendChild(style);
+      }
+      return tooltipEl;
+    }
+
+    return {
+      enabled: false,
+      mode: 'nearest',
+      intersect: false,
+      external: function(context) {
+        const chart = context.chart;
+        const tooltipModel = context.tooltip;
+        const tooltipEl = getTooltipEl(chart);
+
+        const e = chart._lastEvent;
+        const isMouseDown = e?.native?.buttons === 1;
+        const isWheelZoom = chart.$wheelZooming === true;
+
+        if (isMouseDown || isWheelZoom || tooltipModel.opacity === 0) {
+          tooltipEl.style.opacity = 0;
+          return;
+        }
+
+        const xScale = chart.scales.x;
+        const xValue = xScale.getValueForPixel(tooltipModel.caretX);
+
+        // Fecha/hora
+        const date = new Date(xValue);
+        const dateStr = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+        const timeStr = date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
+
+        let innerHtml = `<div style="font-weight:normal; margin-bottom:4px;">${dateStr} ${timeStr}</div>`;
+
+        chart.data.datasets.forEach(ds => {
+          if (!ds.data || ds.data.length === 0 || ds.hidden) return;
+
+          let nearest = null;
+          let minDiff = Infinity;
+
+          ds.data.forEach(v => {
+            const ts = new Date(v.x).getTime();
+            if (ts == null) return;
+            const diff = Math.abs(ts - xValue);
+            if (diff < minDiff) {
+              minDiff = diff;
+              nearest = v;
+            }
+          });
+          if (!nearest) return;
+
+          const y = nearest.y;
+          const label = ds.label;
+          let unit = '';
+          const metric = chart.options.currentMetric;
+
+          if (metric === "temperature") unit = " °C";
+          else if (metric === "humidity") unit = " %";
+          else if (metric === "light") unit = " Lux";
+          else if (metric === "temp-humidity") {
+            if (label.includes("Temperature")) unit = " °C";
+            if (label.includes("Humidity")) unit = " %";
+          }
+
+          const color = ds.borderColor || ds.backgroundColor || '#000';
+
+          const markerHtml = label.includes("Weather")
+            ? `<span style="display:inline-block;width:8px;height:3px;background:${color};border-radius:2px;"></span>`
+            : `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};animation: pulse 1s ease-in-out infinite;"></span>`;
+
+          innerHtml += `<div style="font-size:11px; display:flex; align-items:center; gap:4px;">
+                          ${markerHtml} <span>${label}: <b>${y}${unit}</b></span>
+                        </div>`;
         });
 
-        if (!nearest) return;
+        tooltipEl.querySelector('.tooltip-content').innerHTML = innerHtml;
 
-        const y = nearest.y;
-        const label = ds.label;
-        let unit = '';
-        const metric = chart.options.currentMetric;
+        // Posición
+        const canvasRect = chart.canvas.getBoundingClientRect();
+        const tooltipWidth  = tooltipEl.offsetWidth;
+        const tooltipHeight = tooltipEl.offsetHeight;
+        const offsetX = 38;
+        const padding = 10;
 
-        if (metric === "temperature") unit = " °C";
-        else if (metric === "humidity") unit = " %";
-        else if (metric === "light") unit = " Lux";
-        else if (metric === "temp-humidity") {
-          if (label.includes("Temperature")) unit = " °C";
-          if (label.includes("Humidity")) unit = " %";
-        }
+        let x = canvasRect.left + window.pageXOffset + tooltipModel.caretX + offsetX;
+        let yPos = canvasRect.top + window.pageYOffset + tooltipModel.caretY - tooltipHeight / 2;
 
-        const color = ds.borderColor || ds.backgroundColor || '#000';
+        yPos = Math.max(canvasRect.top + window.pageYOffset + padding,
+                        Math.min(yPos, canvasRect.top + window.pageYOffset + canvasRect.height - tooltipHeight - padding));
 
-        // Marcador: línea para Weather, círculo para normal
-        let markerHtml = '';
-        if (label.includes("Weather")) {
-          markerHtml = `<span style="
-            display:inline-block;
-            width:8px;
-            height:3px;
-            background:${color};
-            border-radius:2px;
-          "></span>`;
-        } else {
-          markerHtml = `<span style="
-            display:inline-block;
-            width:8px;
-            height:8px;
-            border-radius:50%;
-            background:${color};
-          "></span>`;
-        }
-
-        innerHtml += `
-          <div style="font-size:11px; display:flex; align-items:center; gap:4px;">
-            ${markerHtml} <span>${label}: <b>${y}${unit}</b></span>
-          </div>`;
-      });
-
-      tooltipEl.innerHTML = innerHtml;
-
-      // Posicionar tooltip cerca del cursor
-      const canvasRect = chart.canvas.getBoundingClientRect();
-
-      const tooltipWidth  = tooltipEl.offsetWidth;
-      const tooltipHeight = tooltipEl.offsetHeight;
-
-      const padding = 10;
-      const offsetX = 14;
-      const offsetY = 0;
-
-      let x;
-      let y =
-        canvasRect.top +
-        window.pageYOffset +
-        tooltipModel.caretY -
-        tooltipHeight / 2;
-
-      // ¿hay espacio a la derecha?
-      const spaceRight =
-        canvasRect.left +
-        window.pageXOffset +
-        canvasRect.width -
-        (canvasRect.left + window.pageXOffset + tooltipModel.caretX);
-
-      // si no hay espacio, lo ponemos a la izquierda
-      if (spaceRight < tooltipWidth + offsetX) {
-        x =
-          canvasRect.left +
-          window.pageXOffset +
-          tooltipModel.caretX -
-          tooltipWidth -
-          offsetX;
-      } else {
-        x =
-          canvasRect.left +
-          window.pageXOffset +
-          tooltipModel.caretX +
-          offsetX;
+        tooltipEl.style.left = x + "px";
+        tooltipEl.style.top = yPos + "px";
+        tooltipEl.style.opacity = 1;
       }
-
-      // límites verticales (para que no se salga arriba/abajo)
-      const minY = canvasRect.top + window.pageYOffset + padding;
-      const maxY =
-        canvasRect.top +
-        window.pageYOffset +
-        canvasRect.height -
-        tooltipHeight -
-        padding;
-
-      y = Math.max(minY, Math.min(y, maxY));
-
-      tooltipEl.style.opacity = 1;
-      tooltipEl.style.left = x + "px";
-      tooltipEl.style.top = y + "px";
-
-          }
-  };
-}
+    };
+  }
 
 
 
