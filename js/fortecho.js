@@ -904,9 +904,9 @@ function startFollowAnimation(chart) {
     return colors.slice(0, count);
   }
 
-  const redTones = generateModernDistinctColors(10,"rgba(218,73,78,1)");
-  const blueTones = generateModernDistinctColors(10,"rgba(53,170,223,1)");
-  const lightTones = generateModernDistinctColors(10,"rgba(220,128,21,1)");
+  const redTones = generateModernDistinctColors(10,"hsl(358, 66%, 57%)");
+  const blueTones = generateModernDistinctColors(10,"hsl(197, 66%, 57%)");
+  const lightTones = generateModernDistinctColors(10,"hsl(36, 66%, 57%)");
   const colorsredBg = redTones.map(c => c.replace('1)', '0.1)'));
   const colorsblueBg = blueTones.map(c => c.replace('1)', '0.1)'));
   const colorslightBg = lightTones.map(c => c.replace('1)', '0.1)'));
@@ -989,8 +989,8 @@ function startFollowAnimation(chart) {
       chartTitle = "Temperature (°C) & Humidity (%)";
 
       datasets = [
-        makeDataset("Temperature", lastTemps[tagId], "rgba(218,73,78,1)", "rgba(218,73,78,0.1)", "yTemp"),
-        makeDataset("Humidity", lastHums[tagId], "rgba(53,170,223,1)", "rgba(53,170,223,0.1)", "yHum"),
+        makeDataset("Temperature", lastTemps[tagId],redTones[0], colorsredBg[0], "yTemp"),
+        makeDataset("Humidity", lastHums[tagId], blueTones[0], colorsblueBg[0], "yHum"),
         makeDataset("Temperature Weather", lastTemps_Weather, "rgba(255, 99, 132, 1)", "rgba(255, 99, 132, 0.2)", "yTemp", true,!showWeatherTemp),
         makeDataset("Humidity Weather", lastHums_Weather, "rgba(54, 162, 235, 1)", "rgba(54, 162, 235, 0.2)", "yHum", true,!showWeatherHum)
       ];
