@@ -1497,7 +1497,6 @@ function applyXAxisRange() {
     };
   }
 
-
   function makeTooltipOptions() {
 
     function getTooltipEl(chart) {
@@ -1609,28 +1608,30 @@ function applyXAxisRange() {
 
         tooltipEl.querySelector('.tooltip-content').innerHTML = innerHtml;
 
-        // Posición
-        const canvasRect = chart.canvas.getBoundingClientRect();
+        // Posición dentro del área de la gráfica
+        const area = chart.chartArea;
         const tooltipWidth  = tooltipEl.offsetWidth;
         const tooltipHeight = tooltipEl.offsetHeight;
-        const offsetX = 38;
-        const padding = 10;
+        const padding = 6; // espacio interior del canvas
+        const offsetX = 28; // distancia horizontal del cursor
 
-        let x = canvasRect.left + window.pageXOffset + tooltipModel.caretX + offsetX;
-        let yPos = canvasRect.top + window.pageYOffset + tooltipModel.caretY - tooltipHeight / 2;
+        // Horizontal: intentar derecha, si no, izquierda
+        let x = tooltipModel.caretX + offsetX;
+        if (x + tooltipWidth > area.right) {
+          x = tooltipModel.caretX - tooltipWidth - offsetX;
+        }
+        x = Math.max(area.left + padding, Math.min(x, area.right - tooltipWidth - padding));
 
-        yPos = Math.max(canvasRect.top + window.pageYOffset + padding,
-                        Math.min(yPos, canvasRect.top + window.pageYOffset + canvasRect.height - tooltipHeight - padding));
+        // Vertical: centrar sobre el cursor, limitar dentro de área
+        let yPos = tooltipModel.caretY - tooltipHeight / 2;
+        yPos = Math.max(area.top + padding, Math.min(yPos, area.bottom - tooltipHeight - padding));
 
-        tooltipEl.style.left = x + "px";
-        tooltipEl.style.top = yPos + "px";
+        tooltipEl.style.left = x + chart.canvas.getBoundingClientRect().left + window.pageXOffset + "px";
+        tooltipEl.style.top  = yPos + chart.canvas.getBoundingClientRect().top + window.pageYOffset + "px";
         tooltipEl.style.opacity = 1;
       }
     };
   }
-
-
-
 
   function last24h() {
     const toInput = document.getElementById('toInput');
