@@ -147,6 +147,19 @@
           btn.classList.add("active");
 
           currentMetric = btn.dataset.metric;
+          if (currentMetric === "temp-humidity") {
+            let firstFound = false;
+
+            for (const tag of Object.values(tagsById)) {
+              if (tag.isSelected && !firstFound) {
+                firstFound = true;      
+              } else {
+                tag.isSelected = false; 
+              }
+            }
+
+            refreshTagSelect(); 
+          }
           renderChart();
         });
       });
