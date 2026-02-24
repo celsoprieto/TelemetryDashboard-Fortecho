@@ -161,6 +161,7 @@
             refreshTagSelect(); 
           }
           renderChart();
+          showTagDetails();
         });
       });
 
@@ -385,7 +386,7 @@
 
 
     // Función para mostrar make y model
-    function showTagDetails(tagId) {
+    function showTagDetails1(tagId) {
     const div = document.getElementById('selectedTagdetails');
     const artistLabel = document.getElementById('artistlabel');
     const titleLabel = document.getElementById('titlelabel');
@@ -408,6 +409,63 @@
     div.classList.remove('hidden');
   }
 
+function showTagDetails() {
+  const div = document.getElementById('selectedTagdetails');
+  div.innerHTML = ''; // Limpiar botones anteriores
+
+  // Convertir tagsById a array
+  const tagsArray = Object.values(tagsById || {});
+
+  // Filtrar los seleccionados (máx 10)
+  const selectedTags = tagsArray.filter(tag => tag.isSelected === true).slice(0, 10);
+
+  if (selectedTags.length === 0) {
+    div.classList.add('hidden');
+    return;
+  }
+  let color;
+  // Crear botón para cada tag seleccionado
+  selectedTags.forEach((tag, index) => {
+    const button = document.createElement('button');
+    button.className = 'title-button';
+    button.type = 'button';
+    button.dataset.metric = 'title';
+    switch(currentMetric) {
+      case 'temperature':
+        color = redTones[index] || 'black';
+        break;
+      case 'humidity':
+        color = blueTones[index] || 'black';
+        break;
+      case 'light':
+        color = lightTones[index] || 'black';
+        break;
+      case 'temp-humidity':
+        color = redTones[0] || 'black';
+        break;
+      default:
+        break;
+    }
+    const span = document.createElement('span');
+    span.className = 'sensor-value font-semibold';
+    span.textContent = (tag.model || '').trim();
+
+    const spanPulse = document.createElement('span');
+    spanPulse.style.display = 'inline-block';
+    spanPulse.style.width = '8px';
+    spanPulse.style.height = '8px';
+    spanPulse.style.borderRadius = '50%';
+    spanPulse.style.backgroundColor = color;
+    spanPulse.style.marginLeft = '4px'; // separarlo un poco del texto
+    spanPulse.style.animation = 'pulse 2s ease-in-out infinite';
+
+    button.appendChild(spanPulse);
+    button.appendChild(span);
+    div.appendChild(button);
+  });
+
+  div.classList.remove('hidden');
+}
 
 
 
@@ -1540,15 +1598,15 @@ function applyXAxisRange() {
         document.body.appendChild(tooltipEl);
 
         // Pulsing animation para marcadores
-        const style = document.createElement('style');
-        style.innerHTML = `
-          @keyframes pulse {
-            0% { transform: scale(1); opacity:1; }
-            50% { transform: scale(1.4); opacity:0.5; }
-            100% { transform: scale(1); opacity:1; }
-          }
-        `;
-        document.head.appendChild(style);
+        // const style = document.createElement('style');
+        // style.innerHTML = `
+        //   @keyframes pulse {
+        //     0% { transform: scale(1); opacity:1; }
+        //     50% { transform: scale(1.4); opacity:0.5; }
+        //     100% { transform: scale(1); opacity:1; }
+        //   }
+        // `;
+        // document.head.appendChild(style);
       }
       return tooltipEl;
     }
@@ -1627,7 +1685,7 @@ function applyXAxisRange() {
 
           const markerHtml = label.includes("Weather")
             ? `<span style="display:inline-block;width:8px;height:3px;background:${color};border-radius:2px;"></span>`
-            : `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};animation: pulse 1s ease-in-out infinite;"></span>`;
+            : `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};animation: pulse 2s ease-in-out infinite;"></span>`;
 
           let avgHtml = "";
           if (showAvg) {

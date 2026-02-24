@@ -231,7 +231,8 @@
       height: 80px; /* opcional: fija mismo alto */
   }
 
-  .range-button {
+  .range-button,
+  .title-button {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -247,6 +248,12 @@
       cursor: pointer;
       width: 60px; /* opcional: fija mismo ancho que los otros botones */
       height: 60px; /* opcional: fija mismo alto */
+  }
+
+  .title-button {
+    width: auto; 
+    height:auto ;
+    padding: 8px 16px; 
   }
 
   .sensor-button:hover,
@@ -276,7 +283,8 @@
     background: #f5f7fb;
   }
 
-   .range-button.active {
+   .range-button.active,
+   .title-button.active {
     background: #008c8c;
     color: #ffffff;
     border-color: #008c8c;
@@ -550,6 +558,11 @@
 .writing-mode-vertical {
   writing-mode: vertical-rl;
   text-orientation: mixed;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
 }
 
 
