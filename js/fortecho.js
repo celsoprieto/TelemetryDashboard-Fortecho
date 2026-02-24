@@ -424,10 +424,11 @@ function showTagDetails() {
     return;
   }
   let color;
+  let color2;
   // Crear botón para cada tag seleccionado
   selectedTags.forEach((tag, index) => {
     const button = document.createElement('button');
-    button.className = 'title-button';
+    button.className = 'title-button flex items-center gap-2';
     button.type = 'button';
     button.dataset.metric = 'title';
     switch(currentMetric) {
@@ -442,24 +443,42 @@ function showTagDetails() {
         break;
       case 'temp-humidity':
         color = redTones[0] || 'black';
+        color2 = blueTones[0] || 'black';
         break;
       default:
         break;
     }
+   
+
+    const pointsContainer = document.createElement('div');
+    pointsContainer.style.display = 'flex';
+    pointsContainer.style.gap = '8px'; // espacio entre puntos
+
+    const spanPulse1 = document.createElement('span');
+    spanPulse1.style.display = 'inline-block';
+    spanPulse1.style.width = '8px';
+    spanPulse1.style.height = '8px';
+    spanPulse1.style.borderRadius = '50%';
+    spanPulse1.style.backgroundColor = color;
+    spanPulse1.style.animation = 'pulse 2s ease-in-out infinite';
+    pointsContainer.appendChild(spanPulse1);
+
+    if (currentMetric === 'temp-humidity') {
+      const spanPulse2 = document.createElement('span');
+      spanPulse2.style.display = 'inline-block';
+      spanPulse2.style.width = '8px';
+      spanPulse2.style.height = '8px';
+      spanPulse2.style.borderRadius = '50%';
+      spanPulse2.style.backgroundColor = color2;
+      spanPulse2.style.animation = 'pulse 2s ease-in-out infinite';
+       pointsContainer.appendChild(spanPulse2);
+    }
+
     const span = document.createElement('span');
     span.className = 'sensor-value font-semibold';
     span.textContent = (tag.model || '').trim();
 
-    const spanPulse = document.createElement('span');
-    spanPulse.style.display = 'inline-block';
-    spanPulse.style.width = '8px';
-    spanPulse.style.height = '8px';
-    spanPulse.style.borderRadius = '50%';
-    spanPulse.style.backgroundColor = color;
-    spanPulse.style.marginLeft = '4px'; // separarlo un poco del texto
-    spanPulse.style.animation = 'pulse 2s ease-in-out infinite';
-
-    button.appendChild(spanPulse);
+    button.appendChild(pointsContainer);
     button.appendChild(span);
     div.appendChild(button);
   });
