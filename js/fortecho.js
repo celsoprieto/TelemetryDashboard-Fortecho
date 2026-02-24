@@ -266,7 +266,7 @@
 
       checkbox.addEventListener('change', () => {
         if (!mainChart) return; 
-        mainChart.options.plugins.annotation.annotations = getAnnotations();
+        mainChart.options.plugins.annotation.annotations = getAnnotations(mainChart);
         mainChart.update(); // update without animation for instant feedback
       });
     });
@@ -1055,7 +1055,7 @@ function startFollowAnimation(chart) {
               humColor: "rgba(53,170,223,1)"
             },
             annotation: {
-              annotations: getAnnotations()
+              annotations: {}
             },
             legend: { display: false },
             tooltip: makeTooltipOptions(),
@@ -1118,12 +1118,15 @@ function startFollowAnimation(chart) {
         requestAnimationFrame(updateChart);      
       });
 
+      mainChart.options.plugins.annotation.annotations = getAnnotations(mainChart);
+      mainChart.update();
+
 
     } else {
       // update existing chart
       //mainChart.data.labels = labels;
       mainChart.data.datasets = datasets;
-      mainChart.options.plugins.annotation.annotations = getAnnotations();
+      mainChart.options.plugins.annotation.annotations = getAnnotations(mainChart);
 
 
       mainChart.options.currentMetric = currentMetric;
@@ -1506,7 +1509,7 @@ function applyXAxisRange() {
         tooltipEl.id = 'chartjs-tooltip';
         tooltipEl.style.position = 'absolute';
         tooltipEl.style.padding = '10px 12px';
-        tooltipEl.style.fontFamily = 'Inter, sans-serif';
+        tooltipEl.style.fontFamily = 'Segoe UI, system-ui, sans-serif';
         tooltipEl.style.fontSize = '11px';
         tooltipEl.style.pointerEvents = 'none';
         tooltipEl.style.borderRadius = '10px';
@@ -1563,9 +1566,9 @@ function applyXAxisRange() {
         const dateStr = date.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
         const timeStr = date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false });
 
-        let innerHtml = `<div style="font-weight:normal; margin-bottom:4px;">${dateStr} ${timeStr}</div>`;
+        let innerHtml = `<div style="font-weight:200;font-size:10px; margin-bottom:4px;">${dateStr} ${timeStr}</div>`;
 
-        chart.data.datasets.forEach(ds => {
+        chart.data.datasets.forEach((ds,index) => {
           if (!ds.data || ds.data.length === 0 || ds.hidden) return;
 
           let nearest = null;
@@ -1583,9 +1586,21 @@ function applyXAxisRange() {
           if (!nearest) return;
 
           const y = nearest.y;
+          const avg = averageIndividual(context, index);
+          const diff = y - avg;
+          const diffText = (diff >= 0 ? "+" : "") + diff.toFixed(1);
+          const diffColor = diff >= 0 ? "#16a34a" : "#dc2626";
           const label = ds.label;
           let unit = '';
           const metric = chart.options.currentMetric;
+          const avgTemp = document.getElementById("avTemp")?.checked;
+          const avgHum  = document.getElementById("avHum")?.checked;
+          const avLight  = document.getElementById("avLight")?.checked;
+          let showAvg = false;
+          if (label.includes("Temperature") && avgTemp) showAvg = true;
+          if (label.includes("Humidity") && avgHum) showAvg = true;
+          if (label.includes("Light") && avLight) showAvg = true;
+          if (label.includes("Weather") ) showAvg = false;
 
           if (metric === "temperature") unit = " °C";
           else if (metric === "humidity") unit = " %";
@@ -1601,9 +1616,45 @@ function applyXAxisRange() {
             ? `<span style="display:inline-block;width:8px;height:3px;background:${color};border-radius:2px;"></span>`
             : `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};animation: pulse 1s ease-in-out infinite;"></span>`;
 
-          innerHtml += `<div style="font-size:11px; display:flex; align-items:center; gap:4px;">
-                          ${markerHtml} <span>${label}: <b>${y}${unit}</b></span>
-                        </div>`;
+          let avgHtml = "";
+          if (showAvg) {
+            avgHtml = `
+              <div style="display:flex; flex-direction:column; gap:1px; font-size:10px;">
+                <div style="display:flex; justify-content:space-between; opacity:0.75;">
+                  <span>Average</span>
+                  <span>${avg.toFixed(1)}${unit}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-weight:600; color:${diffColor};">
+                  <span>Δ vs Avg</span>
+                  <span>${diffText}${unit}</span>
+                </div>
+              </div>
+            `;
+          }
+
+          innerHtml += `<div style="
+                            display:flex;
+                            flex-direction:column;
+                            gap:2px;
+                            line-height:1.05;
+                            font-family:'Segoe UI', system-ui, sans-serif;
+                            font-size:11px;
+                            min-width:140px;
+                          ">
+
+                            <div style="display:flex; flex-direction:column; gap:1px; margin-bottom:6px;">
+                              <div style="display:flex; align-items:center; gap:6px;">
+                                ${markerHtml}
+                                <span style="opacity:0.75;">${label}:</span>
+                                <span style="margin-left:auto; font-weight:600;">
+                                  ${y}${unit}
+                                </span>
+                              </div>
+
+                              ${avgHtml}
+                            </div>
+
+                          </div>`;
         });
 
         tooltipEl.querySelector('.tooltip-content').innerHTML = innerHtml;
@@ -2788,6 +2839,38 @@ function getFilteredDataAlarms() {
   function average(ctx, datasetIndex = 0) {
 
   const chart = ctx.chart;
+  const xScale = chart.scales.x;
+
+  const from = xScale.min;
+  const to = xScale.max;
+
+  let allYValues = [];
+
+  chart.data.datasets.forEach(ds => {
+
+    if (ds.hidden) return; // solo visibles
+    if (!ds?.data?.length) return;
+    if (ds.label.includes("Weather") ) return;
+
+    const visiblePoints = ds.data
+      .filter(p => p && typeof p === "object" && typeof p.y === "number")
+      .filter(p => {
+        const xMs = new Date(p.x).getTime();
+        return xMs >= from && xMs <= to;
+      })
+      .map(p => p.y);
+
+    allYValues.push(...visiblePoints);
+  });
+
+  if (!allYValues.length) return 0;
+
+  return allYValues.reduce((a, b) => a + b, 0) / allYValues.length;
+}
+
+  function averageIndividual(ctx, datasetIndex = 0) {
+
+  const chart = ctx.chart;
   const ds = chart.data.datasets[datasetIndex];
   if (!ds?.data?.length) return 0;
 
@@ -2817,7 +2900,7 @@ function getFilteredDataAlarms() {
     ? "rgba(53,170,223,1)" 
     : "rgba(0,0,0,1)";  // default color
 
-    function getAnnotations() {
+    function getAnnotations(chart) {
       const showTemp  = document.getElementById("avTemp")?.checked ?? false;
       const showHum   = document.getElementById("avHum")?.checked ?? false;
       const showLight = document.getElementById("avLight")?.checked ?? false;
@@ -2828,7 +2911,13 @@ function getFilteredDataAlarms() {
 
       const annotations = {};
 
-      if (currentMetric === "temperature" && showTemp) {
+      const chartDatasets = chart.data.datasets.filter(ds => !ds.hidden);
+
+      const tempDatasets  = chartDatasets.filter(ds => ds.label.includes("Temperature") &&  !ds.label.includes("Weather"));
+      const humDatasets   = chartDatasets.filter(ds => ds.label.includes("Humidity") &&  !ds.label.includes("Weather"));
+      const lightDatasets = chartDatasets.filter(ds => ds.label.includes("Light") &&  !ds.label.includes("Weather"));
+
+      if (currentMetric === "temperature" && showTemp && tempDatasets.length === 1) {
         annotations.avgTemp = {
           type: "line",
           borderColor: " #157372",
@@ -2846,7 +2935,7 @@ function getFilteredDataAlarms() {
         };
       }
 
-      if (currentMetric === "humidity" && showHum) {
+      if (currentMetric === "humidity" && showHum && humDatasets.length === 1) {
         annotations.avgHum = {
           type: "line",
           borderColor: " #157372",
@@ -2864,7 +2953,7 @@ function getFilteredDataAlarms() {
         };
       }
 
-      if (currentMetric === "light" && showLight) {
+      if (currentMetric === "light" && showLight && lightDatasets.length === 1) {
         annotations.avgLight = {
           type: "line",
           borderColor: " #157372",
@@ -2890,11 +2979,11 @@ function getFilteredDataAlarms() {
             borderDash: [1,4],
             borderWidth: 2,
             yScaleID: "yTemp",
-            yMin: (ctx) => average(ctx, 0),
-            yMax: (ctx) => average(ctx, 0),
+            yMin: (ctx) => averageIndividual(ctx, 0),
+            yMax: (ctx) => averageIndividual(ctx, 0),
             label: {
               display: true,
-              content: (ctx) => "Avg T: " + average(ctx, 0).toFixed(1) + " °C",
+              content: (ctx) => "Avg T: " + averageIndividual(ctx, 0).toFixed(1) + " °C",
               position: "start",
               backgroundColor: "rgba(218,73,78,1)",
             }
@@ -2907,11 +2996,11 @@ function getFilteredDataAlarms() {
             borderDash: [1,4],
             borderWidth: 2,
             yScaleID: "yHum",
-            yMin: (ctx) => average(ctx, 1),
-            yMax: (ctx) => average(ctx, 1),
+            yMin: (ctx) => averageIndividual(ctx, 1),
+            yMax: (ctx) => averageIndividual(ctx, 1),
             label: {
               display: true,
-              content: (ctx) => "Avg H: " + average(ctx, 1).toFixed(1) + " %",
+              content: (ctx) => "Avg H: " + averageIndividual(ctx, 1).toFixed(1) + " %",
               position: "end",
               backgroundColor: "#35AADF", 
             }
