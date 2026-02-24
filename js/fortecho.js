@@ -1661,18 +1661,40 @@ function applyXAxisRange() {
         chart.data.datasets.forEach((ds,index) => {
           if (!ds.data || ds.data.length === 0 || ds.hidden) return;
 
-          let nearest = null;
-          let minDiff = Infinity;
+          // let nearest = null;
+          // let minDiff = Infinity;
 
-          ds.data.forEach(v => {
+          // ds.data.forEach(v => {
+          //   const ts = new Date(v.x).getTime();
+          //   if (ts == null) return;
+          //   const diff = Math.abs(ts - xValue);
+          //   if (diff < minDiff) {
+          //     minDiff = diff;
+          //     nearest = v;
+          //   }
+          // });
+          // if (!nearest) return;
+
+          // Obtener límites reales del dataset
+          const firstPoint = ds.data[0];
+          const lastPoint  = ds.data[ds.data.length - 1];
+
+          if (!firstPoint || !lastPoint) return;
+
+          const dataMin = new Date(firstPoint.x).getTime();
+          const dataMax = new Date(lastPoint.x).getTime();
+
+          // Si el cursor está fuera del rango real del dataset → no mostrar
+          if (xValue < dataMin || xValue > dataMax) return;
+
+          // Buscar punto cercano con tolerancia
+          const tolerance = 3600000; // 1 hora
+
+          const nearest = ds.data.find(v => {
             const ts = new Date(v.x).getTime();
-            if (ts == null) return;
-            const diff = Math.abs(ts - xValue);
-            if (diff < minDiff) {
-              minDiff = diff;
-              nearest = v;
-            }
+            return Math.abs(ts - xValue) < tolerance;
           });
+
           if (!nearest) return;
 
           const y = nearest.y;
