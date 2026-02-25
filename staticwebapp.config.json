@@ -22,8 +22,5 @@
     { "route": "/login", "statusCode": 302, "redirect": "/.auth/login/customOpenIdConnect/aad-ext" },
     { "route": "/logout", "statusCode": 302, "redirect": "/.auth/logout" },
     { "route": "/*", "allowedRoles": ["authenticated"] }
-  ],
-  "responseOverrides": {
-    "401": { "statusCode": 302, "redirect": "/login" }
-  }
+  ]
 }
