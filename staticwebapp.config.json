@@ -1,14 +1,15 @@
 {
   "auth": {
     "identityProviders": {
-      "azureActiveDirectory_B2C": {
-        "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/ab4a18a3-81ca-46ef-9ff5-c48f63662f31/v2.0",
-          "clientIdSettingName": "AZURE_EXT_CLIENT_ID",
-          "clientSecretSettingName": "AZURE_EXT_CLIENT_SECRET"
-        },
-        "login": {
-          "name": "aad-ext"
+      "customOpenIdConnect": {
+        "aad-ext": {
+          "registration": {
+            "clientIdSettingName": "AZURE_EXT_CLIENT_ID",
+            "clientSecretSettingName": "AZURE_EXT_CLIENT_SECRET",
+            "openIdConnectConfiguration": {
+              "wellKnownOpenIdConfiguration": "https://login.microsoftonline.com/ab4a18a3-81ca-46ef-9ff5-c48f63662f31/v2.0/.well-known/openid-configuration"
+            }
+          }
         }
       }
     }
@@ -17,7 +18,7 @@
     {
       "route": "/login",
       "statusCode": 302,
-      "redirect": "/.auth/login/aad-ext"
+      "redirect": "/.auth/login/customOpenIdConnect/aad-ext"
     },
     {
       "route": "/logout",
