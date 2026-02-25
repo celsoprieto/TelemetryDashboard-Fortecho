@@ -6,23 +6,9 @@
       "statusCode": 302
     },
     {
-      "route": "/callback",
-      "redirect": "/api/callback",
+      "route": "/logout",
+      "redirect": "/api/logout",
       "statusCode": 302
-    },
-    {
-      "route": "/api/*",
-      "allowedRoles": ["authenticated"]
-    },
-    {
-      "route": "/*",
-      "allowedRoles": ["anonymous", "authenticated"]
     }
-  ],
-  "responseOverrides": {
-    "401": {
-      "statusCode": 302,
-      "redirect": "/login"
-    }
-  }
+  ]
 }
