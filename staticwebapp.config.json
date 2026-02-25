@@ -16,18 +16,18 @@
   },
   "routes": [
     {
+      "route": "/",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
       "route": "/login",
       "statusCode": 302,
-      "redirect": "/.auth/login/customOpenIdConnect/aad-ext"
+      "redirect": "https://ambitious-pond-03dbc0503.2.azurestaticapps.net/.auth/login/customOpenIdConnect/aad-ext"
     },
     {
       "route": "/logout",
       "statusCode": 302,
       "redirect": "/.auth/logout"
-    },
-    {
-      "route": "/",
-      "allowedRoles": ["anonymous", "authenticated"]
     },
     {
       "route": "/*",
