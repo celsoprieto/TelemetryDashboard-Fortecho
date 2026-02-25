@@ -10,14 +10,13 @@
               "wellKnownOpenIdConfiguration": "https://celsoprietocustomers.ciamlogin.com/ab4a18a3-81ca-46ef-9ff5-c48f63662f31/v2.0/.well-known/openid-configuration"
             }
           },
-          "login": {
-            "scopes": ["openid", "profile", "email"]
-          }
+          "login": { "scopes": ["openid", "profile", "email"] }
         }
       }
     }
   },
   "routes": [
+    { "route": "/.auth/*", "allowedRoles": ["anonymous"] },
     { "route": "/", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/login", "statusCode": 302, "redirect": "/.auth/login/customOpenIdConnect/aad-ext" },
     { "route": "/logout", "statusCode": 302, "redirect": "/.auth/logout" },
