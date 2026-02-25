@@ -9,6 +9,10 @@
             "openIdConnectConfiguration": {
               "wellKnownOpenIdConfiguration": "https://celsoprietocustomers.ciamlogin.com/celsoprietocustomers.onmicrosoft.com/v2.0/.well-known/openid-configuration"
             }
+          },
+          "login": {
+            "nameClaimType": "name",
+            "scopes": ["openid", "profile", "email"]
           }
         }
       }
@@ -22,7 +26,7 @@
     {
       "route": "/login",
       "statusCode": 302,
-      "redirect": "https://ambitious-pond-03dbc0503.2.azurestaticapps.net/.auth/login/customOpenIdConnect/aad-ext"
+      "redirect": "/.auth/login/customOpenIdConnect/aad-ext"
     },
     {
       "route": "/logout",
