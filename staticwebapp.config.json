@@ -1,0 +1,22 @@
+{
+  "auth": {
+    "identityProviders": {
+      "customOpenIdConnectProviders": {
+        "externalid": {
+          "registration": {
+            "clientIdSettingName": "EXTERNALID_CLIENT_ID",
+            "clientCredential": {
+              "clientSecretSettingName": "EXTERNALID_CLIENT_SECRET"
+            },
+            "openIdConnectConfiguration": {
+              "wellKnownOpenIdConfiguration": "https://celsoprietocustomers.ciamlogin.com/ab4a18a3-81ca-46ef-9ff5-c48f63662f31/v2.0/.well-known/openid-configuration"
+            }
+          },
+          "login": {
+            "nameClaimType": "name"
+          }
+        }
+      }
+    }
+  }
+}
