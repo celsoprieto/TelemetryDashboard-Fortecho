@@ -13,10 +13,27 @@
             }
           },
           "login": {
-            "nameClaimType": "name"
+            "nameClaimType": "name",
+            "loginParameterNames": ["scope", "response_type"],
+            "scope": "openid profile email"
           }
         }
       }
-    }
+    },
+    "platform": {
+      "login": {
+        "routes": {
+          "login": "/.auth/login/externalid",
+          "logout": "/.auth/logout"
+        },
+        "defaultProvider": "externalid"
+      }
+    },
+    "routes": [
+      {
+        "route": "/*",
+        "allowedRoles": ["authenticated"]
+      }
+    ]
   }
 }
