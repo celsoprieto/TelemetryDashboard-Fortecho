@@ -1,1 +1,1 @@
-{"routes":[],"auth":{"rolesSource":"https://celsowebcustomers.b2clogin.com/celsowebcustomers.onmicrosoft.com/Telemetry/v2.0/","identityProviders":{"azureActiveDirectory":{"registration":{"openIdIssuer":"https://login.microsoftonline.com/1ea2a1c5-35dd-4edd-b21b-29d4105b6c21","clientIdSettingName":"AZURE_CLIENT_ID","clientSecretSettingName":"AZURE_CLIENT_SECRET_APP_SETTING_NAME"}}}}}
+{"routes":[]}
