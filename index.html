@@ -3,17 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <title>CP - System Dashboard</title>
-  
-  <!-- <script>
-  fetch('/.auth/me')
-    .then(res => res.json())
-    .then(data => {
-      if (!data.clientPrincipal) {
-        // User not logged in, redirect to login
-        window.location.href = '/.auth/login/aad';
-      }
-    });
-  </script> -->
+  <script>
+    fetch('/.auth/me')
+      .then(res => res.json())
+      .then(user => {
+        if (!user.clientPrincipal) {
+          // No está logueado, forzar login
+          window.location.href = '/.auth/login/externalid';
+        } else {
+          document.body.innerHTML = `
+            <h1>Bienvenido, ${user.clientPrincipal.userDetails}</h1>
+            <p>Email: ${user.clientPrincipal.userRoles.join(', ')}</p>
+            <a href="/.auth/logout">Cerrar sesión</a>
+          `;
+        }
+      });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- <script src="https://cdn.tailwindcss.com"></script> --> 
   <!-- <script src="https://cdn.jsdelivr.net/npm/date-fns@2"></script> -->

@@ -14,19 +14,9 @@
           },
           "login": {
             "nameClaimType": "name",
-            "loginParameterNames": ["scope", "response_type"],
-            "scope": "openid profile email"
+            "loginParameterNames": ["scope", "response_type"]
           }
         }
-      }
-    },
-    "platform": {
-      "login": {
-        "routes": {
-          "login": "/.auth/login/externalid",
-          "logout": "/.auth/logout"
-        },
-        "defaultProvider": "externalid"
       }
     },
     "routes": [
