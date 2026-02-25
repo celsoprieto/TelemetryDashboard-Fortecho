@@ -26,6 +26,10 @@
       "redirect": "/.auth/logout"
     },
     {
+      "route": "/",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
       "route": "/*",
       "allowedRoles": ["authenticated"]
     }
