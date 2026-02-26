@@ -279,7 +279,7 @@
 
         async function getOffice() {
           //const user = await fetch("/.auth/me").then(r => r.json());
-          const userId = userInfo.clientPrincipal.userId;
+          const userId = userInfo.userId;
           const res = await fetch(`${API_BASE}/api/GetUserOffice/${userId}`);
           const data = await res.json();
           console.log("Office:", data.officeLocation);
