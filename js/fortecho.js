@@ -35,7 +35,6 @@
     let EDGE_MS   = cEDGE_MS;     // 1h (cuando te acercas al borde, recarga)
     let filtereddays = 1; // default to 1 day for buffer/edge calculations
 
-    let userInfo = null;
    
 
       function loadScript(url) {
