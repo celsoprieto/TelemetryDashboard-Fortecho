@@ -2,23 +2,16 @@
   "routes": [
     {
       "route": "/",
-      "allowedRoles": ["authenticated"],
-      "responseOverrides": {
-        "401": {
-          "redirect": "/.auth/login/externalid"
-        }
-      }
+      "allowedRoles": ["authenticated"]
     },
     {
       "route": "/*",
-      "allowedRoles": ["authenticated"],
-      "responseOverrides": {
-        "401": {
-          "redirect": "/.auth/login/externalid"
-        }
-      }
+      "allowedRoles": ["authenticated"]
     }
   ],
+  "responseOverrides": {
+    "401": { "redirect": "/.auth/login/externalid" }
+  },
   "auth": {
     "identityProviders": {
       "customOpenIdConnectProviders": {
@@ -35,15 +28,6 @@
           "login": {
             "nameClaimType": "name"
           }
-        }
-      }
-    },
-    "platform": {
-      "login": {
-        "defaultProvider": "externalid",
-        "routes": {
-          "login": "/.auth/login/externalid",
-          "logout": "/.auth/logout"
         }
       }
     }
