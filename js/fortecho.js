@@ -221,18 +221,15 @@
 
       // ---------------- LOAD USER INFO ----------------
 
-      fetch('/.auth/me')
-        .then(res => res.json())
-        .then(data => {
-          const claims = data.clientPrincipal?.claims || [];
-          const nameClaim = claims.find(c => c.typ === "name");
-
-          if (nameClaim) {
-            const link = document.querySelector('#userLi a');
-            if (link) link.textContent = nameClaim.val;
+       function updateUserLi() {
+          if (!userInfo) return; // Asegurarse que userInfo ya existe
+          const nameClaim = userInfo.claims.find(c => c.typ === "name");
+          const link = document.querySelector('#userLi a');
+          if (link && nameClaim) {
+            link.textContent = nameClaim.val;
           }
-        })
-        .catch(err => console.error(err));
+        }
+        updateUserLi();
 
       // ---------------- INIT DATE RANGE + VIEW ----------------
       setFromTo();

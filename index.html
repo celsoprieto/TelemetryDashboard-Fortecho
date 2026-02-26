@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <title>CP - System Dashboard</title>
   <script>
+    let userInfo = null;
      async function checkLogin() {
       const res = await fetch('/.auth/me');
       const data = await res.json();
