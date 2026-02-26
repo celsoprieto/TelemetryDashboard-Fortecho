@@ -246,18 +246,29 @@
           if (textEl && nameClaim) textEl.textContent = nameClaim.val;
           if (textElMobile && nameClaim) textElMobile.textContent = nameClaim.val;
           try {
-            fetch(`${API_BASE}/GetUserOffice`)
-              .then(res => {
-                if (!res.ok) throw new Error("Network response was not ok");
-                return res.json();
-              })
-              .then(user => {
-                console.log("Display Name:", user.displayName);
-                console.log("Office Location:", user.officeLocation);
-              })
-              .catch(err => {
-                console.error("Error fetching user office:", err);
-              });
+              // // 1️⃣ Get SWA user info (includes token)
+              // const meRes = await fetch(`/.auth/me`);
+              // if (!meRes.ok) throw new Error("Cannot get user info from /.auth/me");
+
+              // const me = await meRes.json();
+
+              // // 2️⃣ Extract access token
+              // const swaToken = me?.[0]?.access_token;
+              // if (!swaToken) throw new Error("User is not authenticated");
+
+              // // 3️⃣ Call API with token
+              // const apiRes = await fetch(`${API_BASE}/api/GetUserOffice`, {
+              //   headers: {
+              //     "x-ms-client-principal-token": swaToken
+              //   }
+              // });
+
+              // if (!apiRes.ok) {
+              //   const text = await apiRes.text();
+              //   throw new Error(`API error: ${apiRes.status} - ${text}`);
+              // }
+
+              // const user = await apiRes.json();
           } catch (err) {
             console.error(err);
           }
