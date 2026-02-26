@@ -53,7 +53,7 @@
       const res = await fetch('/.auth/me');
       const data = await res.json();
       if (!data.clientPrincipal) {
-        window.location.href = '/.auth/login/externalid';
+        //window.location.href = '/.auth/login/externalid';
       } else {
         const user = data.clientPrincipal;
         userInfo = user;
