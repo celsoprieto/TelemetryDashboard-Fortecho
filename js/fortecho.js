@@ -28,6 +28,7 @@
     let weatherLoadedToMs = null;
     let isFetching = false;
     let currentView ; // or "alarms"
+    let userInfo = null;
 
     const cBUFFER_MS = 24 * 60 * 60 * 1000; // 24h
     const cEDGE_MS   = 60 * 60 * 1000;     // 1h (cuando te acercas al borde, recarga)
@@ -47,9 +48,22 @@
       });
     }
 
+    async function loaduserdetails(params) {
+
+      const res = await fetch('/.auth/me');
+      const data = await res.json();
+      if (!data.clientPrincipal) {
+        window.location.href = '/.auth/login/externalid';
+      } else {
+        const user = data.clientPrincipal;
+        userInfo = user;
+      }
+    }
+
     async function loadAll() {
       await loadScript("js/fsalarms.js");
       //console.log("fsalarms.js loaded, now you can use it");
+      loaduserdetails();
     }
 
     
