@@ -1989,8 +1989,27 @@ function applyXAxisRange() {
          const userMenuMobile = document.getElementById('userMenuMobile');     // optional: load data into it
          if (userMenu) userMenu.classList.toggle('hidden');
          if (userMenuMobile) userMenuMobile.classList.toggle('hidden');
-         return;
+         
+       
+      function clickOutsideHandler(e) {
+        if (
+          (userMenu && !userMenu.contains(e.target) && e.target.id !== 'userLi') &&
+          (userMenuMobile && !userMenuMobile.contains(e.target) && e.target.id !== 'userLiMobile')
+        ) {
+          if (userMenu) userMenu.classList.add('hidden');
+          if (userMenuMobile) userMenuMobile.classList.add('hidden');
+          document.removeEventListener('click', clickOutsideHandler); // cleanup
+        }
       }
+
+      setTimeout(() => { 
+        document.addEventListener('click', clickOutsideHandler);
+      }, 0);
+
+      return;
+      }
+
+
       views.forEach(v => v.classList.add("hidden"));
 
       const el = document.getElementById(`view-${viewName}`);
