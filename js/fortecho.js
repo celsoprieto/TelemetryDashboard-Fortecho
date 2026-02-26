@@ -63,7 +63,7 @@
     async function loadAll() {
       await loadScript("js/fsalarms.js");
       //console.log("fsalarms.js loaded, now you can use it");
-      loaduserdetails();
+      
     }
 
     
@@ -235,6 +235,7 @@
       // ---------------- LOAD USER INFO ----------------
 
        async function updateUserLi() {
+        loaduserdetails();
           if (!userInfo) return; // Asegurarse que userInfo ya existe
           const nameClaim = userInfo.claims.find(c => c.typ === "name");
           const link = document.querySelector('#userLi a');
