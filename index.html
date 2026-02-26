@@ -4,23 +4,7 @@
   <meta charset="utf-8" />
   <title>CP - System Dashboard</title>
   <script>
-    async function checkLogin() {
-      const res = await fetch('/.auth/me');
-      const data = await res.json();
-      if (!data.clientPrincipal) {
-        // No logueado → redirigir a External ID
-        window.location.href = '/.auth/login/externalid';
-      } else {
-        // Logueado → mostrar información del usuario
-        const user = data.clientPrincipal;
-        document.body.innerHTML = `
-          <h1>Bienvenido, ${user.userDetails}</h1>
-          <p>Roles: ${user.userRoles.join(', ')}</p>
-          <p>ID: ${user.userId}</p>
-          <a href="/.auth/logout">Cerrar sesión</a>
-        `;
-      }
-    }
+    
 
     checkLogin();
   </script>
