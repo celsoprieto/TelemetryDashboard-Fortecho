@@ -219,6 +219,21 @@
         });
       });
 
+      // ---------------- LOAD USER INFO ----------------
+
+      fetch('/.auth/me')
+        .then(res => res.json())
+        .then(data => {
+          const claims = data.clientPrincipal?.claims || [];
+          const nameClaim = claims.find(c => c.typ === "name");
+
+          if (nameClaim) {
+            const link = document.querySelector('#userLi a');
+            if (link) link.textContent = nameClaim.val;
+          }
+        })
+        .catch(err => console.error(err));
+
       // ---------------- INIT DATE RANGE + VIEW ----------------
       setFromTo();
       switchView();

@@ -20,14 +20,14 @@
         //   <p>ID: ${user.userId}</p>
         //   <a href="/.auth/logout">Cerrar sesión</a>
         // `;
-        const claims = data.clientPrincipal?.claims || [];
-        const nameClaim = claims.find(c => c.typ === "name");
+        // const claims = data.clientPrincipal?.claims || [];
+        // const nameClaim = claims.find(c => c.typ === "name");
 
-        if (nameClaim) {
-          // Reemplaza el texto dentro del <a>
-          document.querySelector('#userLi a').textContent = nameClaim.val;
-           document.querySelector('#userLimobile a').textContent = nameClaim.val;
-        }
+        // if (nameClaim) {
+        //   // Reemplaza el texto dentro del <a>
+        //   document.querySelector('#userLi a').textContent = nameClaim.val;
+        //    document.querySelector('#userLimobile a').textContent = nameClaim.val;
+        // }
 
 
       }
