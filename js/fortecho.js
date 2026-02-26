@@ -283,7 +283,7 @@
           const res = await fetch(`${API_BASE}/GetUserOffice/${userId}`);
           const data = await res.json();
           console.log("Office:", data.officeLocation);
-          sitecode = data.officeLocation;
+          sitecode = parseInt(data.officeLocation);
         }
 
         await getOffice();
