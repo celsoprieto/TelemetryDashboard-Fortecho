@@ -1,6 +1,5 @@
 {
   "routes": [
-    { "route": "/", "redirect": "/.auth/login/externalid", "statusCode": 302 },
     { "route": "/*", "allowedRoles": ["authenticated"] }
   ],
   "auth": {
@@ -17,19 +16,9 @@
             }
           },
           "login": {
-            "nameClaimType": "name",
-            "scope": "openid profile email"
+            "nameClaimType": "name"
           }
         }
-      }
-    },
-    "platform": {
-      "login": {
-        "routes": {
-          "login": "/.auth/login/externalid",
-          "logout": "/.auth/logout"
-        },
-        "defaultProvider": "externalid"
       }
     }
   }
