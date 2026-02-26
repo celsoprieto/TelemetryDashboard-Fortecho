@@ -1947,6 +1947,12 @@ function applyXAxisRange() {
     const views = document.querySelectorAll(".view");
 
     async function showView(viewName) {
+
+      if (viewName === "es") {
+         const userMenu = document.getElementById('userMenu');     // optional: load data into it
+         userMenu.classList.toggle('hidden');
+         return;
+      }
       views.forEach(v => v.classList.add("hidden"));
 
       const el = document.getElementById(`view-${viewName}`);
@@ -1962,10 +1968,7 @@ function applyXAxisRange() {
         await loadEvents();        // optional: load data into it
       }
 
-      if (viewName === "es") {
-         const userMenu = document.getElementById('userMenu');     // optional: load data into it
-         userMenu.classList.toggle('hidden');
-      }
+
 
       if (viewName === "tags") {
         // console.log("tagsById =", tagsById);
