@@ -220,13 +220,22 @@
 
       // ---------------- LOAD USER INFO ----------------
 
-       function updateUserLi() {
+       async function updateUserLi() {
           if (!userInfo) return; // Asegurarse que userInfo ya existe
           const nameClaim = userInfo.claims.find(c => c.typ === "name");
           const link = document.querySelector('#userLi a');
           if (link && nameClaim) {
             link.textContent = nameClaim.val;
           }
+          const clientPrincipal = await fetch("/.auth/me").then(res => res.json());
+          const accessToken = userInfo.identityProviderTokens?.externalid?.access_token;
+
+          const office = await fetch("https://graph.microsoft.com/v1.0/me?$select=officeLocation", {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          }).then(r => r.json());
+
+          console.log(office.officeLocation);
+
         }
         updateUserLi();
 
