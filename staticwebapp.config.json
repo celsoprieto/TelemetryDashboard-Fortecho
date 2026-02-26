@@ -1,4 +1,8 @@
 {
+  "routes": [
+    { "route": "/", "redirect": "/.auth/login/externalid", "statusCode": 302 },
+    { "route": "/*", "allowedRoles": ["authenticated"] }
+  ],
   "auth": {
     "identityProviders": {
       "customOpenIdConnectProviders": {
@@ -13,16 +17,20 @@
             }
           },
           "login": {
-            "nameClaimType": "name"
+            "nameClaimType": "name",
+            "scope": "openid profile email"
           }
         }
       }
     },
-    "routes": [
-      {
-        "route": "/*",
-        "allowedRoles": ["authenticated"]
+    "platform": {
+      "login": {
+        "routes": {
+          "login": "/.auth/login/externalid",
+          "logout": "/.auth/logout"
+        },
+        "defaultProvider": "externalid"
       }
-    ]
+    }
   }
 }
