@@ -13,27 +13,12 @@
             }
           },
           "login": {
-            "nameClaimType": "name",
-            "loginParameterNames": ["scope", "response_type"]
+            "nameClaimType": "name"
           }
         }
       }
     },
-    "platform": {
-      "login": {
-        "routes": {
-          "login": "/.auth/login/externalid",
-          "logout": "/.auth/logout"
-        },
-        "defaultProvider": "externalid"
-      }
-    },
     "routes": [
-      {
-        "route": "/",
-        "redirect": "/.auth/login/externalid",
-        "statusCode": 302
-      },
       {
         "route": "/*",
         "allowedRoles": ["authenticated"]

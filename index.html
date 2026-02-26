@@ -4,20 +4,25 @@
   <meta charset="utf-8" />
   <title>CP - System Dashboard</title>
   <script>
-    fetch('/.auth/me')
-      .then(res => res.json())
-      .then(user => {
-        if (!user.clientPrincipal) {
-          // No está logueado, forzar login
-          window.location.href = '/.auth/login/externalid';
-        } else {
-          document.body.innerHTML = `
-            <h1>Bienvenido, ${user.clientPrincipal.userDetails}</h1>
-            <p>Email: ${user.clientPrincipal.userRoles.join(', ')}</p>
-            <a href="/.auth/logout">Cerrar sesión</a>
-          `;
-        }
-      });
+    async function checkLogin() {
+      const res = await fetch('/.auth/me');
+      const data = await res.json();
+      if (!data.clientPrincipal) {
+        // No logueado → redirigir a External ID
+        window.location.href = '/.auth/login/externalid';
+      } else {
+        // Logueado → mostrar información del usuario
+        const user = data.clientPrincipal;
+        document.body.innerHTML = `
+          <h1>Bienvenido, ${user.userDetails}</h1>
+          <p>Roles: ${user.userRoles.join(', ')}</p>
+          <p>ID: ${user.userId}</p>
+          <a href="/.auth/logout">Cerrar sesión</a>
+        `;
+      }
+    }
+
+    checkLogin();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- <script src="https://cdn.tailwindcss.com"></script> --> 
