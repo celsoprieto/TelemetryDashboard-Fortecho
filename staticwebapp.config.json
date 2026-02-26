@@ -2,11 +2,21 @@
   "routes": [
     {
       "route": "/",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["authenticated"],
+      "responseOverrides": {
+        "401": {
+          "redirect": "/.auth/login/externalid"
+        }
+      }
     },
     {
       "route": "/*",
-      "allowedRoles": ["authenticated"]
+      "allowedRoles": ["authenticated"],
+      "responseOverrides": {
+        "401": {
+          "redirect": "/.auth/login/externalid"
+        }
+      }
     }
   ],
   "auth": {
