@@ -1962,6 +1962,11 @@ function applyXAxisRange() {
         await loadEvents();        // optional: load data into it
       }
 
+      if (viewName === "es") {
+         const userMenu = document.getElementById('userMenu');     // optional: load data into it
+         userMenu.classList.toggle('hidden');
+      }
+
       if (viewName === "tags") {
         // console.log("tagsById =", tagsById);
         // console.log("isArray =", Array.isArray(tagsById));
