@@ -110,7 +110,9 @@
         });
 
         menu.querySelectorAll("a.nav-link").forEach(link => {
-          link.addEventListener("click", closeMenu);
+          if (!link.closest("#userLiMobile")) { // exclude the language link
+            link.addEventListener("click", closeMenu);
+          }
         });
       }
 
@@ -238,19 +240,27 @@
         await loaduserdetails();
           if (!userInfo) return; // Asegurarse que userInfo ya existe
           const nameClaim = userInfo.claims.find(c => c.typ === "name");
-          const link = document.querySelector('#userLi a');
-          if (link && nameClaim) {
-            link.textContent = nameClaim.val;
+          const textEl = document.querySelector('#userLi .user-text');
+          const textElMobile = document.querySelector('#userLiMobile .user-text');
+
+          if (textEl && nameClaim) textEl.textContent = nameClaim.val;
+          if (textElMobile && nameClaim) textElMobile.textContent = nameClaim.val;
+          try {
+            fetch(`${API_BASE}/GetUserOffice`)
+              .then(res => {
+                if (!res.ok) throw new Error("Network response was not ok");
+                return res.json();
+              })
+              .then(user => {
+                console.log("Display Name:", user.displayName);
+                console.log("Office Location:", user.officeLocation);
+              })
+              .catch(err => {
+                console.error("Error fetching user office:", err);
+              });
+          } catch (err) {
+            console.error(err);
           }
-          const clientPrincipal = await fetch("/.auth/me").then(res => res.json());
-          const accessToken = userInfo.identityProviderTokens?.externalid?.access_token;
-
-          const office = await fetch("https://graph.microsoft.com/v1.0/me?$select=officeLocation", {
-            headers: { Authorization: `Bearer ${accessToken}` }
-          }).then(r => r.json());
-
-          console.log(office.officeLocation);
-
         }
         updateUserLi();
 
@@ -1965,7 +1975,9 @@ function applyXAxisRange() {
 
       if (viewName === "es") {
          const userMenu = document.getElementById('userMenu');     // optional: load data into it
-         userMenu.classList.toggle('hidden');
+         const userMenuMobile = document.getElementById('userMenuMobile');     // optional: load data into it
+         if (userMenu) userMenu.classList.toggle('hidden');
+         if (userMenuMobile) userMenuMobile.classList.toggle('hidden');
          return;
       }
       views.forEach(v => v.classList.add("hidden"));

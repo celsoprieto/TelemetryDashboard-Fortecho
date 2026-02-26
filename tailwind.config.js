@@ -10,7 +10,7 @@ module.exports = {
     // Use regex patterns to match classes
     {
       pattern: /^w-/,
-      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-'], // Optional: include responsive variants
+      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-', 'mr-'], // Optional: include responsive variants
     },
     // Or be more specific
     {

@@ -67,14 +67,48 @@
             <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="events">ESP-TCP Events</a>
           </li>
           <li id="userLi" class="relative group">
-            <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="es">
-              Español
+            <a href="#"
+              class="nav-link !flex items-center gap-2 text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium"
+              data-view="es">
+              
+              <!-- <svg xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round"
+                class="lucide lucide-circle-user">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg> -->
+
+              <span class="user-text"></span>
             </a>
+
 
             <!-- Submenú -->
             <ul id="userMenu" class="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg hidden z-10">
+               <!-- Settings -->
               <li>
-                <a href="/.auth/logout" class="block px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600">
+                <a href="/" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium close-menu">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53" />
+                  </svg>
+                  Settings
+                </a>
+              </li>
+
+              <!-- Logout -->
+              <li>
+                <a href="/.auth/logout" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                  </svg>
                   Logout
                 </a>
               </li>
@@ -112,8 +146,32 @@
           <li>
             <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="events">ESP-TCP Events</a>
           </li>
-          <li id="userLimobile">
-            <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="es">Español</a>
+          <li id="userLiMobile">
+            <a href="#" class="nav-link flex items-center gap-2block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="es">Español</a>
+            <!-- Submenú móvil -->
+            <ul id="userMenuMobile" class="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg hidden z-10">
+               <!-- Settings -->
+              <li>
+                <a href="/" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium close-menu">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53" />
+                  </svg>
+                  Settings
+                </a>
+              </li>
+
+              <!-- Logout -->
+              <li>
+                <a href="/.auth/logout" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+                  </svg>
+                  Logout
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
       </div>
