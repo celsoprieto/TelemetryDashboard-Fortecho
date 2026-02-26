@@ -1,6 +1,13 @@
 {
   "routes": [
-    { "route": "/*", "allowedRoles": ["authenticated"] }
+    {
+      "route": "/",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/*",
+      "allowedRoles": ["authenticated"]
+    }
   ],
   "auth": {
     "identityProviders": {
