@@ -27,6 +27,15 @@
           }
         }
       }
+    },
+    "platform": {
+      "login": {
+        "defaultProvider": "externalid",
+        "routes": {
+          "login": "/.auth/login/externalid",
+          "logout": "/.auth/logout"
+        }
+      }
     }
   }
 }
