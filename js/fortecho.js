@@ -36,34 +36,7 @@
     let filtereddays = 1; // default to 1 day for buffer/edge calculations
 
     let userInfo = null;
-    async function checkLogin() {
-      const res = await fetch('/.auth/me');
-      const data = await res.json();
-      if (!data.clientPrincipal) {
-        // No logueado → redirigir a External ID
-        window.location.href = '/.auth/login/externalid';
-      } else {
-        // Logueado → mostrar información del usuario
-        const user = data.clientPrincipal;
-        userInfo = user;
-        // document.body.innerHTML = `
-        //   <h1>Bienvenido, ${user.userDetails}</h1>
-        //   <p>Roles: ${user.userRoles.join(', ')}</p>
-        //   <p>ID: ${user.userId}</p>
-        //   <a href="/.auth/logout">Cerrar sesión</a>
-        // `;
-        const claims = data.clientPrincipal?.claims || [];
-        const nameClaim = claims.find(c => c.typ === "name");
-
-        if (nameClaim) {
-          // Reemplaza el texto dentro del <a>
-          document.querySelector('#userLi a').textContent = nameClaim.val;
-           document.querySelector('#userLimobile a').textContent = nameClaim.val;
-        }
-
-
-      }
-    }
+   
 
       function loadScript(url) {
       return new Promise((resolve, reject) => {
