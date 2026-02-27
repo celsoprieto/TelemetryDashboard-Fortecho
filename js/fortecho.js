@@ -3258,7 +3258,7 @@ function getFilteredDataAlarms() {
 
   async function callSettings() {
       try {
-          const response = await fetch(`${API_BASE}/GetUser`, {
+          const response = await fetch(`${API_BASE}/user`, {
               method: "GET",
               headers: {
                   "Content-Type": "application/json"
