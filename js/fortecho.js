@@ -616,7 +616,7 @@ function showTagDetails() {
           if (from) params.append('from', fromUtcIso);
           if (to)   params.append('to', toUtcIso);
 
-          const url = `/telemetry?${params.toString()}`;
+          const url = `api/telemetry?${params.toString()}`;
           // console.log('Requesting:', url);
 
           const res = await fetch(url);
@@ -3289,7 +3289,7 @@ function getFilteredDataAlarms() {
 
   function logout() {
     window.location.replace(
-      "/.auth/logout?post_logout_redirect_uri=/loggedout&clear=1"
+      "/.auth/logout?post_logout_redirect_uri=/loggedout"
     );
   }
 
