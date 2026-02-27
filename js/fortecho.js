@@ -1,5 +1,6 @@
 // Replace this with your actual Function App URL:
-    const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
+    //const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
+    const API_BASE = '';
     //let API_BASE = ""; // declare a variable to hold the value
   
 
@@ -284,7 +285,12 @@
           const res = await fetch(`${API_BASE}/GetUserOffice/${userId}`);
           const data = await res.json();
           //console.log("Office:", data.officeLocation);
-          sitecode = parseInt(data.officeLocation);
+           if (data.officeLocation !== undefined &&
+              data.officeLocation !== null &&
+              data.officeLocation !== "") {
+
+              sitecode = parseInt(data.officeLocation, 10);
+          }
         }
 
         await getOffice();
