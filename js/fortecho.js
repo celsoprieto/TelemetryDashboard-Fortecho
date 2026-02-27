@@ -1,6 +1,7 @@
 // Replace this with your actual Function App URL:
     const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
     //let API_BASE = ""; // declare a variable to hold the value
+    const functionsBase = process.env.FUNCTIONS_BASE;
 
     let mainChart;
     let lastTempHumLabels = {};
