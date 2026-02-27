@@ -3287,5 +3287,11 @@ function getFilteredDataAlarms() {
       }
   }
 
+  function logout() {
+    window.location.replace(
+      "/.auth/logout?post_logout_redirect_uri=/loggedout&clear=1"
+    );
+  }
+
 
 

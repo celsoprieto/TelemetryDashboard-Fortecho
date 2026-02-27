@@ -1,6 +1,14 @@
 {
   "routes": [
     {
+      "route": "/loggedout",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
+      "route": "/api/*",
+      "allowedRoles": ["authenticated"]
+    },
+    {
       "route": "/",
       "allowedRoles": ["authenticated"]
     },
