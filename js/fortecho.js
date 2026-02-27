@@ -3279,7 +3279,7 @@ function getFilteredDataAlarms() {
           // console.log("Settings:", data);
 
           // aquí puedes mostrar datos en un modal o cambiar vista
-          alert(JSON.stringify(data));
+          // alert(JSON.stringify(data));
 
       } catch (err) {
           console.error(err);
