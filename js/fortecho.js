@@ -1,3 +1,4 @@
+import { UserApi } from "./UserApi.js";
 // Replace this with your actual Function App URL:
     //const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
     const API_BASE = '';
@@ -277,6 +278,106 @@
         }
         await updateUserLi();
 
+        //-----------------------Settings button handler-----------------------
+        document.getElementById("settingsBtn").addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                callSettings();
+            } catch (err) {
+                console.error(err);
+                alert("Error calling backend");
+            }
+        });
+
+        document.getElementById("settingsBtnMobile").addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                callSettings();
+            } catch (err) {
+                console.error(err);
+                alert("Error calling backend");
+            }
+        });
+
+        //-------------------Buttons logout handlers-----------------------
+        document.getElementById("MenuBtnLogout").addEventListener("click", (e) => {
+          e.preventDefault();
+          try {            
+            logout();  
+          } catch (err) {
+            console.error(err);
+            alert("Error during logout");
+          }
+        });
+
+        document.getElementById("MenuBtnLogoutMobile").addEventListener("click", (e) => {
+          e.preventDefault();
+          try {
+            logout();
+          } catch (err) {
+            console.error(err);
+            alert("Error during logout");
+          }
+        });
+
+        //--------------Enable/Disable data points handlers----------------
+        document.getElementById("datapointbutton").addEventListener("click", () => {
+          event.preventDefault();
+          try {
+          togglePoints();
+          } catch (err) {
+            console.error(err);
+            alert("Error toggling data points");
+          }
+        });
+
+        //----------buttons handlers for range selection----------------
+        document.getElementById("last24h()").addEventListener("click", () => {
+          event.preventDefault();
+          try {
+            last24h();
+          } catch (err) {
+            console.error(err);
+            alert("Error setting range to last 24 hours");
+          }
+        });
+        document.getElementById("lastweek()").addEventListener("click", () => {
+          event.preventDefault();
+          try {
+            lastweek();
+          } catch (err) {
+            console.error(err);
+            alert("Error setting range to last week");
+          }
+        });
+        document.getElementById("lastmonth()").addEventListener("click", () => {
+          event.preventDefault();
+          try {
+            lastmonth();
+          } catch (err) {
+            console.error(err);
+            alert("Error setting range to last month");
+          }
+        });
+        document.getElementById("last3months()").addEventListener("click", () => {
+          event.preventDefault();
+          try {
+            last3months();
+          } catch (err) {
+            console.error(err);
+            alert("Error setting range to last 3 months");
+          }
+        });
+        document.getElementById("last6months()").addEventListener("click", () => {
+          event.preventDefault();
+          try {
+            last6months();
+          } catch (err) {
+            console.error(err);
+            alert("Error setting range to last 6 months");
+          }
+        });
+        
 
 
         async function getOffice() {
@@ -3264,28 +3365,13 @@ function getFilteredDataAlarms() {
 
   async function callSettings() {
       try {
-          const response = await fetch(`/api/user`, {
-              method: "GET",
-              headers: {
-                  "Content-Type": "application/json"
-              }
-          });
-
-          if (!response.ok) {
-              throw new Error("Error calling API");
-          }
-
-          const data = await response.json();
-          // console.log("Settings:", data);
-
-          // aquí puedes mostrar datos en un modal o cambiar vista
-          // alert(JSON.stringify(data));
-
+          const data = await UserApi.getUser(); 
       } catch (err) {
           console.error(err);
           alert("Error calling backend");
       }
   }
+
 
   function logout() {
     window.location.replace(

@@ -27,7 +27,7 @@
 
   <link rel="stylesheet" href="css/tailwind.css">
   <link rel="stylesheet" href="css/custom.css">
-  <script src="js/fortecho.js"></script>
+  <script type="module" src="/js/fortecho.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body class="pt-8">
@@ -79,7 +79,7 @@
             <ul id="userMenu" class="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg hidden z-10">
                <!-- Settings -->
               <li>
-                <a  class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium close-menu" onclick="callSettings()">
+                <a  class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium close-menu" href="#" id="settingsBtn">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53" />
@@ -90,7 +90,7 @@
 
               <!-- Logout -->
               <li>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium" onclick="logout()">
+                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium" id="MenuBtnLogout" >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
@@ -139,7 +139,7 @@
             <ul id="userMenuMobile" class="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg hidden z-10">
                <!-- Settings -->
               <li>
-                <a  class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium close-menu"  onclick="callSettings()">
+                <a  class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium close-menu"  href="#" id="settingsBtnMobile">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53" />
@@ -150,7 +150,7 @@
 
               <!-- Logout -->
               <li>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium" onclick="logout()"`>
+                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium" id="MenuBtnLogoutMobile" >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
@@ -332,7 +332,7 @@
 
 
           <div class="flex flex-row gap-2 items-end self-end">
-          <button class="range-button active" type="button" data-metric="last24h" onclick="last24h()">
+          <button class="range-button active" type="button" data-metric="last24h" id="last24h()">
             <span class="range-icon">
               <svg xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 24 24" 
@@ -351,7 +351,7 @@
             <span class="sensor-value">1 D</span>
           </button>
 
-          <button class="range-button" type="button" data-metric="lastweek" onclick="lastweek()">
+          <button class="range-button" type="button" data-metric="lastweek" id="lastweek()">
             <span class="range-icon">
               <svg xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 24 24" 
@@ -370,7 +370,7 @@
             <span class="sensor-value">1 W</span>
           </button>
 
-          <button class="range-button" type="button" data-metric="lastmonth" onclick="lastmonth()">
+          <button class="range-button" type="button" data-metric="lastmonth" id="lastmonth()">
             <span class="range-icon">
               <svg xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 24 24" 
@@ -389,7 +389,7 @@
             <span class="sensor-value">1 M</span>
           </button>
 
-          <button class="range-button" type="button" data-metric="last3months" onclick="last3months()">
+          <button class="range-button" type="button" data-metric="last3months" id="last3months()">
             <span class="range-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 24 24" 
@@ -408,7 +408,7 @@
             <span class="sensor-value">3 M</span>
           </button>
 
-          <button class="range-button" type="button" data-metric="last6months" onclick="last6months()">
+          <button class="range-button" type="button" data-metric="last6months" id="last6months()">
             <span class="range-icon">
               <svg xmlns="http://www.w3.org/2000/svg" 
                     viewBox="0 0 24 24" 
@@ -507,8 +507,7 @@
         </div>
 
         <!-- Enable/disable -->
-          <button 
-            onclick="togglePoints()" 
+          <button id="datapointbutton"
             class="flex flex-row items-center justify-center space-x-4 p-2 border rounded bg-custom-green hover:bg-opacity-80 transition cursor-pointer">
             <div class="px-2 text-white font-semibold text-sm border-gray-300">
               Data Points        
