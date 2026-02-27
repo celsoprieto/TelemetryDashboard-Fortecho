@@ -282,7 +282,7 @@
           const userId = userInfo.userId;
           const res = await fetch(`${API_BASE}/GetUserOffice/${userId}`);
           const data = await res.json();
-          console.log("Office:", data.officeLocation);
+          //console.log("Office:", data.officeLocation);
           sitecode = parseInt(data.officeLocation);
         }
 
@@ -3253,6 +3253,31 @@ function getFilteredDataAlarms() {
     pointsVisible = !pointsVisible;
     mainChart.options.plugins.dualAxisContinuousFollowMarker.pointsVisible = pointsVisible;
     mainChart.update();
+  }
+
+  async function callSettings() {
+      try {
+          const response = await fetch(`${API_BASE}/GetUserSettings`, {
+              method: "GET",
+              headers: {
+                  "Content-Type": "application/json"
+              }
+          });
+
+          if (!response.ok) {
+              throw new Error("Error calling API");
+          }
+
+          const data = await response.json();
+          console.log("Settings:", data);
+
+          // aquí puedes mostrar datos en un modal o cambiar vista
+          alert(JSON.stringify(data));
+
+      } catch (err) {
+          console.error(err);
+          alert("Error calling backend");
+      }
   }
 
 
