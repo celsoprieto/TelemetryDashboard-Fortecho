@@ -377,7 +377,7 @@ import { UserApi } from "./UserApi.js";
             alert("Error setting range to last 6 months");
           }
         });
-        
+
 
 
         async function getOffice() {
@@ -3363,9 +3363,31 @@ function getFilteredDataAlarms() {
     mainChart.update();
   }
 
+  async function updateLanguageToEN() {
+    try {
+        const patchBody = {
+            Settings: {
+                Language: "en"
+            }
+        };
+
+        const data = await UserApi.patchUser(patchBody); 
+
+
+        if (data) {
+            console.log("Language updated successfully!");
+        } else {
+            console.error("Error updating language:", response.status, await response.text());
+        }
+    } catch (err) {
+        console.error("Error calling API:", err);
+    }
+}
+
   async function callSettings() {
       try {
           const data = await UserApi.getUser(); 
+          updateLanguageToEN();
       } catch (err) {
           console.error(err);
           alert("Error calling backend");
