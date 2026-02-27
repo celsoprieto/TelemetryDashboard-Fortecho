@@ -3367,7 +3367,8 @@ function getFilteredDataAlarms() {
     try {
         const patchBody = {
             Settings: {
-                Language: "en"
+                Theme: "dark",
+                Language: "us"
             }
         };
 
