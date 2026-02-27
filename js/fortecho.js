@@ -3276,7 +3276,7 @@ function getFilteredDataAlarms() {
           }
 
           const data = await response.json();
-          console.log("Settings:", data);
+          // console.log("Settings:", data);
 
           // aquí puedes mostrar datos en un modal o cambiar vista
           alert(JSON.stringify(data));
