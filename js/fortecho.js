@@ -282,7 +282,7 @@
         async function getOffice() {
           //const user = await fetch("/.auth/me").then(r => r.json());
           const userId = userInfo.userId;
-          const res = await fetch(`/GetUserOffice/${userId}`);
+          const res = await fetch(`/api/GetUserOffice/${userId}`);
           const data = await res.json();
           //console.log("Office:", data.officeLocation);
            if (data.officeLocation !== undefined &&
@@ -426,7 +426,7 @@
       tagsById = {}; // reset
 
       try {
-        const res = await fetch(`/tags`);
+        const res = await fetch(`/api/tags`);
         if (!res.ok) {
           const text = await res.text();
           console.error('Error fetching devices:', text);
@@ -1331,7 +1331,7 @@ function startFollowAnimation(chart) {
 
     const params = new URLSearchParams({ sitecode, tagId, from, to });
 
-    const res = await fetch(`/telemetry?${params.toString()}`);
+    const res = await fetch(`/api/telemetry?${params.toString()}`);
     if (!res.ok) throw new Error(await res.text());
 
     const data = await res.json();
@@ -2149,7 +2149,7 @@ function hideLoading(el) {
     const params = new URLSearchParams();
     params.set("deviceId", deviceIdForEvents);
     // fetch(...) to your function
-    const url = `/deviceevents?${params.toString()}`;
+    const url = `/api/deviceevents?${params.toString()}`;
 
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -2921,7 +2921,7 @@ function getFilteredDataAlarms() {
     params.set("sitecode", sitecode);
     params.set("eventType", selectedIds.join(","));
     // fetch(...) to your function
-    const url = `/alarmsbysitecode?${params.toString()}`;
+    const url = `/api/alarmsbysitecode?${params.toString()}`;
 
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -3264,7 +3264,7 @@ function getFilteredDataAlarms() {
 
   async function callSettings() {
       try {
-          const response = await fetch(`/user`, {
+          const response = await fetch(`/api/user`, {
               method: "GET",
               headers: {
                   "Content-Type": "application/json"
