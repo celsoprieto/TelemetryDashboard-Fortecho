@@ -3262,7 +3262,8 @@ function getFilteredDataAlarms() {
               method: "GET",
               headers: {
                   "Content-Type": "application/json"
-              }
+              },
+              credentials: "include"  // <--- crucial
           });
 
           if (!response.ok) {
