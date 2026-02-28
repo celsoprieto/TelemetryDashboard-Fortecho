@@ -1870,10 +1870,18 @@ function applyXAxisRange() {
           // Buscar punto cercano con tolerancia
           const tolerance = 3600000; // 1 hora
 
-          const nearest = ds.data.find(v => {
-            const ts = new Date(v.x).getTime();
-            return Math.abs(ts - xValue) < tolerance;
-          });
+          // const nearest = ds.data.find(v => {
+          //   const ts = new Date(v.x).getTime();
+          //   return Math.abs(ts - xValue) < tolerance;
+          // });
+          const nearest = ds.data.reduce((prev, curr) => {
+          const prevTs = new Date(prev.x).getTime();
+          const currTs = new Date(curr.x).getTime();
+
+          return Math.abs(currTs - xValue) < Math.abs(prevTs - xValue)
+            ? curr
+            : prev;
+        });
 
           if (!nearest) return;
 
