@@ -711,33 +711,38 @@ function showTagDetails() {
         const hums  = {};
         const lights = {};
 
-        for (const tagId of tagIdList) {
-          const params = new URLSearchParams({ sitecode });
-          if (tagId) params.append('tagId', tagId);
-          if (from) params.append('from', fromUtcIso);
-          if (to)   params.append('to', toUtcIso);
+        const tagIds= tagIdList.join(','); // join selected tagIds into a comma-separated string
 
-          const url = `api/telemetry?${params.toString()}`;
-          // console.log('Requesting:', url);
+        //for (const tagId of tagIdList) {
+        const params = new URLSearchParams({ sitecode });
+        if (tagIds) params.append('tagIds', tagIds);
+        if (from) params.append('from', fromUtcIso);
+        if (to)   params.append('to', toUtcIso);
 
-          const res = await fetch(url);
-          if (!res.ok) {
-            const text = await res.text();
-            alert('API error: ' + text);
-            return;
-          }
+        const url = `api/telemetry?${params.toString()}`;
+        // console.log('Requesting:', url);
 
-          const data = await res.json();
-          if (!Array.isArray(data) || data.length === 0) {
-            alert('No data returned for this tag/time range.');
-            return;
-          }
+        const res = await fetch(url);
+        if (!res.ok) {
+          const text = await res.text();
+          alert('API error: ' + text);
+          return;
+        }
 
-       
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          alert('No data returned for this tag/time range.');
+          return;
+        }
 
-          for (const d of data) {
+      
+
+        data.forEach((item) => {
+          const tagId = item.TagId;
+          const sensorDataArray = Array.isArray(item.Data) ? item.Data : item.Data ? [item.Data] : [];
+          sensorDataArray.forEach((d) => {
             const s = d.sensorData;
-            if (!s) continue;
+            if (!s) return;
 
             if (!temps[tagId]) {
               TempHumLabels[tagId] = [];
@@ -781,8 +786,9 @@ function showTagDetails() {
               // ignore values < 0
               lights[tagId].push(l != null && l >= 0 ? { x: localLabel, y: l } : null);
             }
-          }
-        }
+          });
+        });
+        //}
 
         // store for toggle use
         lastTempHumLabels  = TempHumLabels ;
@@ -1422,15 +1428,15 @@ function startFollowAnimation(chart) {
   }
 
 
-  async function fetchData(fromMs, toMs, tagId) {
+  async function fetchData(fromMs, toMs, tagIds) {
     
     
-    if (!tagId) return { temps: [], hums: [], lights: [] };
+    if (!tagIds) return { temps: [], hums: [], lights: [] };
 
     const from = new Date(fromMs).toISOString();
     const to   = new Date(toMs).toISOString();
 
-    const params = new URLSearchParams({ sitecode, tagId, from, to });
+    const params = new URLSearchParams({ sitecode, tagIds, from, to });
 
     const res = await fetch(`/api/telemetry?${params.toString()}`);
     if (!res.ok) throw new Error(await res.text());
@@ -1443,25 +1449,34 @@ function startFollowAnimation(chart) {
     const hums  = [];
     const lights = [];
 
-    for (const d of data) {
-      const s = d.sensorData;
-      if (!s?.eventDateUtc) continue;
+    data.forEach((item) => {
+      const tagId = item.TagId;
+      if (!temps[tagId]) temps[tagId] = [];
+      if (!hums[tagId]) hums[tagId] = [];
+      if (!lights[tagId]) lights[tagId] = [];
+      const sensorDataArray = Array.isArray(item.Data) ? item.Data : item.Data ? [item.Data] : [];
+        sensorDataArray.forEach((d) => {
+          // for (const d of data) {
+            const s = d.sensorData;
+            if (!s?.eventDateUtc) return;
 
-      const x = s.eventDateUtc;
+            const x = s.eventDateUtc;
 
-      if (s.sensorTrH === 1) {
-        const t = s.temperatureEv;
-        const h = s.humidityEv;
+            if (s.sensorTrH === 1) {
+              const t = s.temperatureEv;
+              const h = s.humidityEv;
 
-        if (t != null) temps.push({ x, y: t });
-        if (h != null && h >= 0) hums.push({ x, y: h });
-      }
+              if (t != null) temps[tagId].push({ x, y: t });
+              if (h != null && h >= 0) hums[tagId].push({ x, y: h });
+            }
 
-      if (s.sensorLum === 1) {
-        const l = s.luxEv;
-        if (l != null && l >= 0) lights.push({ x, y: l });
-      }
-    }
+            if (s.sensorLum === 1) {
+              const l = s.luxEv;
+              if (l != null && l >= 0) lights[tagId].push({ x, y: l });
+            }
+          // }
+        });
+    });
 
     return { temps, hums, lights };
   }
@@ -1552,37 +1567,41 @@ function startFollowAnimation(chart) {
 
         // si no amplía rango, no hagas nada
         if (fetchFrom >= loadedFromMs && fetchTo <= loadedToMs) return;
+        const tagIdAsync = tagId.join(","); // in case multiple tags are selected, we fetch them together
+        //for (const tagIdAsync of tagId) {
+        const newData = await fetchData(fetchFrom, fetchTo, tagIdAsync);
+        //  load weather for same range
+        await ensureWeather(fetchFrom, fetchTo);
 
-        for (const tagIdAsync of tagId) {
-          const newData = await fetchData(fetchFrom, fetchTo, tagIdAsync);
-          //  load weather for same range
-          await ensureWeather(fetchFrom, fetchTo);
-
-          //  MERGE (solo añadimos lo que falta)
-          if (fetchFrom < loadedFromMs) {
-            prependUnique(lastTemps[tagIdAsync], newData.temps);
-            prependUnique(lastHums[tagIdAsync], newData.hums);
-            prependUnique(lastLights[tagIdAsync], newData.lights);
-            
-          }
-
-          if (fetchTo > loadedToMs) {
-            appendUnique(lastTemps[tagIdAsync], newData.temps);
-            appendUnique(lastHums[tagIdAsync], newData.hums);
-            appendUnique(lastLights[tagIdAsync], newData.lights);
-            
-          }
-
-          // 🔥 NO recrees chart. Solo update datasets.
-          chart.data.datasets.forEach(ds => {
-            if (ds.label === `Temperature Tag ${tagIdAsync}`) ds.data = lastTemps[tagIdAsync];
-            if (ds.label === `Humidity Tag ${tagIdAsync}`) ds.data = lastHums[tagIdAsync];
-            if (ds.label === `Light Tag ${tagIdAsync}`) ds.data = lastLights[tagIdAsync];
-            if (ds.label === "Temperature Weather") ds.data = lastTemps_Weather;
-            if (ds.label === "Humidity Weather") ds.data = lastHums_Weather;
-          });
+        for (const tagIdnew of tagId) {
+        //  MERGE (solo añadimos lo que falta)
+        if (fetchFrom < loadedFromMs) {
+          prependUnique(lastTemps[tagIdAsync], newData.temps[tagIdnew]);
+          prependUnique(lastHums[tagIdAsync], newData.hums[tagIdnew]);
+          prependUnique(lastLights[tagIdAsync], newData.lights[tagIdnew]);
           
         }
+
+        if (fetchTo > loadedToMs) {
+          appendUnique(lastTemps[tagIdAsync], newData.temps[tagIdnew]);
+          appendUnique(lastHums[tagIdAsync], newData.hums[tagIdnew]);
+          appendUnique(lastLights[tagIdAsync], newData.lights[tagIdnew]);
+          
+        }
+      
+
+        // 🔥 NO recrees chart. Solo update datasets.
+        chart.data.datasets.forEach(ds => {
+          if (ds.label === `Temperature Tag ${tagIdAsync}`) ds.data = lastTemps[tagIdAsync];
+          if (ds.label === `Humidity Tag ${tagIdAsync}`) ds.data = lastHums[tagIdAsync];
+          if (ds.label === `Light Tag ${tagIdAsync}`) ds.data = lastLights[tagIdAsync];
+          if (ds.label === "Temperature Weather") ds.data = lastTemps_Weather;
+          if (ds.label === "Humidity Weather") ds.data = lastHums_Weather;
+        });
+
+        }
+          
+        //}
 
         loadedFromMs = fetchFrom;
         loadedToMs = fetchTo;
