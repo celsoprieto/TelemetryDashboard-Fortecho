@@ -730,72 +730,73 @@ function showTagDetails() {
         }
 
         const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) {
+        // if (!Array.isArray(data) || data.length === 0) {
+        //   alert('No data returned for this tag/time range.');
+        //   return;
+        // }
+
+        const hasData =
+          Object.values(data.T || {}).some(arr => arr.length > 0) ||
+          Object.values(data.rH || {}).some(arr => arr.length > 0) ||
+          Object.values(data.light || {}).some(arr => arr.length > 0);
+
+        if (!hasData) {
           alert('No data returned for this tag/time range.');
           return;
         }
 
       
 
-        data.forEach((item) => {
-          const tagId = item.TagId;
-          const sensorDataArray = Array.isArray(item.Data) ? item.Data : item.Data ? [item.Data] : [];
-          sensorDataArray.forEach((d) => {
-            const s = d.sensorData;
-            if (!s) return;
+        // data.forEach((item) => {
+        //   const tagId = item.TagId;
+        //   const sensorDataArray = Array.isArray(item.Data) ? item.Data : item.Data ? [item.Data] : [];
+        //   sensorDataArray.forEach((d) => {
+        //     const s = d.sensorData;
+        //     if (!s) return;
 
-            if (!temps[tagId]) {
-              TempHumLabels[tagId] = [];
-              LightLabels[tagId] = [];
-              temps[tagId] = [];
-              hums[tagId] = [];
-              lights[tagId] = [];
-            }
+        //     if (!temps[tagId]) {
+        //       TempHumLabels[tagId] = [];
+        //       LightLabels[tagId] = [];
+        //       temps[tagId] = [];
+        //       hums[tagId] = [];
+        //       lights[tagId] = [];
+        //     }
 
-            const utcTs = s.eventDateUtc || '';
-            let localLabel = utcTs;
-            // if (utcTs) {
-            //   // const dateObj = new Date(utcTs);
-            //   // localLabel = dateObj.toLocaleString(); // browser local time
-            //   // // Replace the comma with " - "
-            //   // localLabel = localLabel.replace(',', ' -');
-            //   const dateObj = new Date(utcTs);
-            //   // Ajuste a hora local y convertir a ISO string sin zona
-            //   localLabel = new Date(dateObj.getTime() - dateObj.getTimezoneOffset() * 60000)
-            //                   .toISOString()
-            //                   .slice(0, 19);
-            // }
+        //     const utcTs = s.eventDateUtc || '';
+        //     let localLabel = utcTs;
+        //     // Temp/Humidity labels and values when sensorTrH = 1
+        //     if (s.sensorTrH === 1) {
+        //       TempHumLabels[tagId].push(localLabel);
 
-            // Temp/Humidity labels and values when sensorTrH = 1
-            if (s.sensorTrH === 1) {
-              TempHumLabels[tagId].push(localLabel);
+        //       const t = s.temperatureEv;
+        //       const h = s.humidityEv;
 
-              const t = s.temperatureEv;
-              const h = s.humidityEv;
+        //       // keep temp as-is (can be < 0), ignore invalid humidity (< 0)
+        //       temps[tagId].push(t != null ? { x: localLabel, y: t } : null);
+        //       hums[tagId].push(h != null && h >= 0 ? { x: localLabel, y: h } : null);
+        //     }
 
-              // keep temp as-is (can be < 0), ignore invalid humidity (< 0)
-              temps[tagId].push(t != null ? { x: localLabel, y: t } : null);
-              hums[tagId].push(h != null && h >= 0 ? { x: localLabel, y: h } : null);
-            }
+        //     // Light labels and values when sensorLum = 1
+        //     if (s.sensorLum === 1) {
+        //       LightLabels[tagId].push(localLabel);
 
-            // Light labels and values when sensorLum = 1
-            if (s.sensorLum === 1) {
-              LightLabels[tagId].push(localLabel);
-
-              const l = s.luxEv;
-              // ignore values < 0
-              lights[tagId].push(l != null && l >= 0 ? { x: localLabel, y: l } : null);
-            }
-          });
-        });
-        //}
+        //       const l = s.luxEv;
+        //       // ignore values < 0
+        //       lights[tagId].push(l != null && l >= 0 ? { x: localLabel, y: l } : null);
+        //     }
+        //   });
+        // });
 
         // store for toggle use
         lastTempHumLabels  = TempHumLabels ;
         lastLightLabels   = LightLabels ;
-        lastTemps  = temps;
-        lastHums   = hums;
-        lastLights = lights;
+        // lastTemps  = temps;
+        // lastHums   = hums;
+        // lastLights = lights;
+        lastTemps  = data.T;
+        lastHums   = data.rH;
+        lastLights = data.light;
+
 
         updateMetricButtons();
         await loadWeather(weatherLoadedFromMs, weatherLoadedToMs);
@@ -1445,40 +1446,50 @@ function startFollowAnimation(chart) {
 
     await loadWeather(weatherLoadedFromMs, weatherLoadedToMs); // ensure we have weather data for the new range
 
-    const temps = [];
-    const hums  = [];
-    const lights = [];
+    // const temps = [];
+    // const hums  = [];
+    // const lights = [];
 
-    data.forEach((item) => {
-      const tagId = item.TagId;
-      if (!temps[tagId]) temps[tagId] = [];
-      if (!hums[tagId]) hums[tagId] = [];
-      if (!lights[tagId]) lights[tagId] = [];
-      const sensorDataArray = Array.isArray(item.Data) ? item.Data : item.Data ? [item.Data] : [];
-        sensorDataArray.forEach((d) => {
-          // for (const d of data) {
-            const s = d.sensorData;
-            if (!s?.eventDateUtc) return;
+    const hasData =
+    Object.values(data.T || {}).some(arr => arr.length > 0) ||
+    Object.values(data.rH || {}).some(arr => arr.length > 0) ||
+    Object.values(data.light || {}).some(arr => arr.length > 0);
 
-            const x = s.eventDateUtc;
+    if (!hasData) {
+      alert('No data returned for this tag/time range.');
+      return;
+    }
 
-            if (s.sensorTrH === 1) {
-              const t = s.temperatureEv;
-              const h = s.humidityEv;
+    // data.forEach((item) => {
+    //   const tagId = item.TagId;
+    //   if (!temps[tagId]) temps[tagId] = [];
+    //   if (!hums[tagId]) hums[tagId] = [];
+    //   if (!lights[tagId]) lights[tagId] = [];
+    //   const sensorDataArray = Array.isArray(item.Data) ? item.Data : item.Data ? [item.Data] : [];
+    //     sensorDataArray.forEach((d) => {
+    //       // for (const d of data) {
+    //         const s = d.sensorData;
+    //         if (!s?.eventDateUtc) return;
 
-              if (t != null) temps[tagId].push({ x, y: t });
-              if (h != null && h >= 0) hums[tagId].push({ x, y: h });
-            }
+    //         const x = s.eventDateUtc;
 
-            if (s.sensorLum === 1) {
-              const l = s.luxEv;
-              if (l != null && l >= 0) lights[tagId].push({ x, y: l });
-            }
-          // }
-        });
-    });
+    //         if (s.sensorTrH === 1) {
+    //           const t = s.temperatureEv;
+    //           const h = s.humidityEv;
 
-    return { temps, hums, lights };
+    //           if (t != null) temps[tagId].push({ x, y: t });
+    //           if (h != null && h >= 0) hums[tagId].push({ x, y: h });
+    //         }
+
+    //         if (s.sensorLum === 1) {
+    //           const l = s.luxEv;
+    //           if (l != null && l >= 0) lights[tagId].push({ x, y: l });
+    //         }
+    //       // }
+    //     });
+    // });
+
+    return { temps: data.T, hums: data.rH, lights: data.light };
   }
 
   function prependUnique(baseArr, newArr) {
