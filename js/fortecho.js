@@ -17,7 +17,7 @@ import { UserApi } from "./UserApi.js";
     let tagsById = {};   // <--- stores full objects by tagId
     let reloadTimer;
     let isSyncingInputs = false;
-    let sitecode = 33; // hardcoded for now, can be dynamic if needed
+    let sitecode = 0; // hardcoded for now, can be dynamic if needed
     let eventsGridBuilt = false;
     let deviceIdForEvents = "watchdog_cp"; // hardcoded, adjust as needed
     let deviceeventsrawData = [];
@@ -394,7 +394,20 @@ import { UserApi } from "./UserApi.js";
           }
         }
 
-        await getOffice();
+        const data = await UserApi.getUser(); 
+        if (!data) { 
+          await getOffice();
+          const browserLang = navigator.language || navigator.languages?.[0] || "en";
+          await UserApi.createUser({
+            settings: {
+              theme: "light",
+              language: browserLang,
+              siteCode: sitecode
+            }
+          });
+        }else{
+          sitecode = data.Settings?.SiteCode || sitecode; // use existing siteCode if available
+        }
 
       // ---------------- INIT DATE RANGE + VIEW ----------------
       setFromTo();
