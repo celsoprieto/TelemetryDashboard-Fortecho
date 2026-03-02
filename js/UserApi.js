@@ -85,7 +85,7 @@ export const UserApi = {
         body: JSON.stringify(patchData),
       });
 
-      if (res.status === 204) {
+      if (res.ok) {
         console.log("User patched successfully");
         return true;
       } else {

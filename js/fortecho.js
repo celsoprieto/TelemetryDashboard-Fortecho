@@ -400,9 +400,9 @@ import { UserApi } from "./UserApi.js";
           const browserLang = navigator.language || navigator.languages?.[0] || "en";
           await UserApi.createUser({
             settings: {
-              theme: "light",
-              language: browserLang,
-              siteCode: sitecode
+              Theme: "light",
+              Language: browserLang,
+              SiteCode: sitecode
             }
           });
         }else{
@@ -3416,10 +3416,12 @@ function getFilteredDataAlarms() {
 
   async function updateLanguageToEN() {
     try {
+        const browserLang = navigator.language || navigator.languages?.[0] || "en";
         const patchBody = {
             Settings: {
                 Theme: "dark",
-                Language: "us"
+                Language: browserLang,
+                SiteCode: sitecode
             }
         };
 
