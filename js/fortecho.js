@@ -417,7 +417,7 @@ import { UserApi } from "./UserApi.js";
        await loadTags();
       // setLast24Hours();
       // await loadData(); // moved to switchView() to ensure it runs when telemetry view is active
-      await loadAlarms(); 
+      //await loadAlarms(); 
 
       
 
