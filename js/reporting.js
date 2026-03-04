@@ -1,12 +1,16 @@
+import { redTones, blueTones, lightTones } from "./fortecho.js";
 
-
-async function generateReport(tagIds, from, to, format,currentMetric,title) {
+export async function generateReport(tagIds, from, to, format,currentMetric,title) {
     
 
     const sitecode = window.appState.sitecode
     const options = {
         Metric: currentMetric,
-        Title: title
+        Title: title,
+        RedTones: redTones,
+        BlueTones: blueTones,
+        LightTones: lightTones,
+        JoinedGraph: currentMetric != "temp-humidity"
 
     }
     const params = new URLSearchParams({

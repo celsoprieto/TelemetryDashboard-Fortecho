@@ -1,4 +1,6 @@
 import { UserApi } from "./UserApi.js";
+import { selectedIds , getRowClass, closeAlarmDetailModal} from "./fsalarms.js";
+import { generateReport } from "./reporting.js";
 // Replace this with your actual Function App URL:
     //const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
     const API_BASE = '';
@@ -46,8 +48,9 @@ import { UserApi } from "./UserApi.js";
         return new Promise((resolve, reject) => {
             const s = document.createElement("script");
             s.src = url;
+            s.type = "module";
             s.onload = () => {
-                console.log(`${url} loaded`);
+                //console.log(`${url} loaded`);
                 resolve();
             };
             s.onerror = () => reject(new Error(`Failed to load script: ${url}`));
@@ -1237,9 +1240,9 @@ function startFollowAnimation(chart) {
     return colors.slice(0, count);
   }
 
-  const redTones = generateModernDistinctColors(10,"hsl(358, 66%, 57%)");
-  const blueTones = generateModernDistinctColors(10,"hsl(197, 66%, 57%)");
-  const lightTones = generateModernDistinctColors(10,"hsl(36, 66%, 57%)");
+  export const redTones = generateModernDistinctColors(10,"hsl(358, 66%, 57%)");
+  export const blueTones = generateModernDistinctColors(10,"hsl(197, 66%, 57%)");
+  export const lightTones = generateModernDistinctColors(10,"hsl(36, 66%, 57%)");
   const colorsredBg = redTones.map(c => c.replace('1)', '0.1)'));
   const colorsblueBg = blueTones.map(c => c.replace('1)', '0.1)'));
   const colorslightBg = lightTones.map(c => c.replace('1)', '0.1)'));

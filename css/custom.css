@@ -269,7 +269,8 @@
   }
 
   .sensor-button:disabled,
-   .type-button:disabled,
+  .report-button:disabled,
+  .type-button:disabled,
   .load-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -278,6 +279,7 @@
 
   /* para que no haga hover cuando está disabled */
   .sensor-button:disabled:hover,
+  .report-button:disabled:hover,
   .type-button:disabled:hover,
   .load-button:disabled:hover {
     background: #f5f7fb;

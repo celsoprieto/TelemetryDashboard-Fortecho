@@ -1,4 +1,4 @@
-function getRowClass(eventTypeId) {
+export function getRowClass(eventTypeId) {
   switch (eventTypeId) {
     case 5:  // Alarm
       return "bg-custom-red-light hover:bg-custom-red"; // 
@@ -21,7 +21,7 @@ function getRowClass(eventTypeId) {
   }
 }
 
-const eventTypes = {
+export const eventTypes = {
   5:  { code: "ALARM",       description: "Motion, Contact Open" },
   6:  { code: "TAMPER",      description: "Magnet removed from Tag" },
   7:  { code: "OFFLINE",     description: "Reader not communicating with program" },
@@ -37,9 +37,9 @@ const eventTypes = {
   23: { code: "mLUM-LIMIT",  description: "Median Luminosity (Illuminance) maximum limit exceeded" }
 };
 
-const selectedIds = Object.keys(eventTypes).map(id => parseInt(id));
+export const selectedIds = Object.keys(eventTypes).map(id => parseInt(id));
 
-const metricToEventTypeIds = {
+export const metricToEventTypeIds = {
   alarm: [5, 11],
   tamper: [6, 10],
   missing: [16],
@@ -178,7 +178,7 @@ function getAlarmSeverityText(eventTypeId) {
   }
 }
 
-function closeAlarmDetailModal() {
+export function closeAlarmDetailModal() {
   const modal = document.getElementById('alarmDetailModal');
   modal.classList.add('hidden');
 }

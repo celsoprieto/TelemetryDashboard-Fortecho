@@ -10,7 +10,7 @@ module.exports = {
     // Use regex patterns to match classes
     {
       pattern: /^w-/,
-      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-', 'mr-'], // Optional: include responsive variants
+      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-', 'mr-', 'p-'], // Optional: include responsive variants
     },
     // Or be more specific
     {
@@ -27,6 +27,7 @@ module.exports = {
     'pb-2',
     'pb-3',
     'pb-4', 
+    'p-1.5',
     // Margin classes
     'ml-4',
     'mr-4',
@@ -134,6 +135,7 @@ module.exports = {
     "flex-shrink-0",
     "overflow-hidden",
     "-translate-x-[calc(100dvh-40px)]",
+    "opacity-70",
   ],
   theme: {
     extend: {colors: {

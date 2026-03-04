@@ -13,7 +13,7 @@ export const UserApi = {
         return null;
       }
       const data = await res.json();
-      console.log("User fetched:", data);
+      //console.log("User fetched:", data);
       return data;
     } catch (err) {
       console.error("Fetch error:", err);
