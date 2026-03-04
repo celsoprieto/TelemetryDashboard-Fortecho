@@ -7,9 +7,6 @@ export async function generateReport(tagIds, from, to, format,currentMetric,titl
     const options = {
         Metric: currentMetric,
         Title: title,
-        RedTones: redTones,
-        BlueTones: blueTones,
-        LightTones: lightTones,
         JoinedGraph: currentMetric != "temp-humidity"
 
     }
@@ -24,6 +21,7 @@ export async function generateReport(tagIds, from, to, format,currentMetric,titl
 
     // 1️⃣ Llamada a la Function que devuelve URL SAS
     const response = await fetch(`/api/TelemetryReport?${params.toString()}`);
+    
     if (!response.ok) throw new Error("Error generando reporte");
 
     const data = await response.json(); // <-- JSON con { url, expires }
