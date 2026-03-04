@@ -5,6 +5,7 @@ import { UserApi } from "./UserApi.js";
     //let API_BASE = ""; // declare a variable to hold the value
   
 
+    window.appState = window.appState || {};
     let mainChart;
     let lastTempHumLabels = {};
     let lastLightLabels = {}; 
@@ -17,7 +18,7 @@ import { UserApi } from "./UserApi.js";
     let tagsById = {};   // <--- stores full objects by tagId
     let reloadTimer;
     let isSyncingInputs = false;
-    let sitecode = 0; // hardcoded for now, can be dynamic if needed
+    window.appState.sitecode = 0; // hardcoded for now, can be dynamic if needed
     let eventsGridBuilt = false;
     let deviceIdForEvents = "watchdog_cp"; // hardcoded, adjust as needed
     let deviceeventsrawData = [];
@@ -41,14 +42,17 @@ import { UserApi } from "./UserApi.js";
 
    
 
-      function loadScript(url) {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement("script");
-        s.src = url;
-        s.onload = resolve;
-        s.onerror = reject;
-        document.head.appendChild(s);
-      });
+    function loadScript(url) {
+        return new Promise((resolve, reject) => {
+            const s = document.createElement("script");
+            s.src = url;
+            s.onload = () => {
+                console.log(`${url} loaded`);
+                resolve();
+            };
+            s.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+            document.head.appendChild(s);
+        });
     }
 
     async function loaduserdetails(params) {
@@ -64,7 +68,10 @@ import { UserApi } from "./UserApi.js";
     }
 
     async function loadAll() {
-      await loadScript("js/fsalarms.js");
+      await Promise.all([
+        loadScript("js/fsalarms.js"),
+        loadScript("js/reporting.js"),
+      ]);
       //console.log("fsalarms.js loaded, now you can use it");
       
     }
@@ -378,6 +385,8 @@ import { UserApi } from "./UserApi.js";
           }
         });
 
+        
+
 
 
         async function getOffice() {
@@ -390,7 +399,7 @@ import { UserApi } from "./UserApi.js";
               data.officeLocation !== null &&
               data.officeLocation !== "") {
 
-              sitecode = parseInt(data.officeLocation, 10);
+              window.appState.sitecode = parseInt(data.officeLocation, 10);
           }
         }
 
@@ -402,12 +411,36 @@ import { UserApi } from "./UserApi.js";
             settings: {
               Theme: "light",
               Language: browserLang,
-              SiteCode: sitecode
+              SiteCode: window.appState.sitecode
             }
           });
         }else{
-          sitecode = data.Settings?.SiteCode || sitecode; // use existing siteCode if available
+          window.appState.sitecode = data.Settings?.SiteCode || window.appState.sitecode; // use existing siteCode if available
         }
+
+        //--------------------REPORTING INDIVIDUAL BUTTON----------------------
+        document.getElementById("reportingButton")
+          .addEventListener("click", async () => {
+
+              const btn = document.getElementById("reportingButton");
+
+              try {
+                  btn.disabled = true;
+                  btn.classList.add("opacity-70");
+                  const tagIdList = Object.keys(tagsById).filter(key => tagsById[key].isSelected);
+                  const from = document.getElementById('fromInput').value;
+                  const to   = document.getElementById('toInput').value;
+                  const title = `Express_Report_${tagIdList.join("_")}_${getNowForFile()}`;
+
+                  await generateReport(tagIdList, from, to, "pdf",currentMetric,title);
+
+              } catch (err) {
+                  alert("Error al generar el reporte");
+              } finally {
+                  btn.disabled = false;
+                  btn.classList.remove("opacity-70");
+              }
+          });
 
       // ---------------- INIT DATE RANGE + VIEW ----------------
       setFromTo();
@@ -513,7 +546,17 @@ import { UserApi } from "./UserApi.js";
             
     });
 
-    
+    function getNowForFile() {
+      const now = new Date();
+
+      const year   = now.getFullYear();
+      const month  = String(now.getMonth() + 1).padStart(2, "0");
+      const day    = String(now.getDate()).padStart(2, "0");
+      const hours  = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+
+      return `${year}-${month}-${day}_${hours}-${minutes}`;
+  }
       
 
     function reloadDataDebounced() {
@@ -727,7 +770,7 @@ function showTagDetails() {
         const tagIds= tagIdList.join(','); // join selected tagIds into a comma-separated string
 
         //for (const tagId of tagIdList) {
-        const params = new URLSearchParams({ sitecode });
+        const params = new URLSearchParams({ sitecode: window.appState.sitecode });
         if (tagIds) params.append('tagIds', tagIds);
         if (from) params.append('from', fromUtcIso);
         if (to)   params.append('to', toUtcIso);
@@ -1450,7 +1493,7 @@ function startFollowAnimation(chart) {
     const from = new Date(fromMs).toISOString();
     const to   = new Date(toMs).toISOString();
 
-    const params = new URLSearchParams({ sitecode, tagIds, from, to });
+    const params = new URLSearchParams({ sitecode: window.appState.sitecode, tagIds, from, to });
 
     const res = await fetch(`/api/telemetry?${params.toString()}`);
     if (!res.ok) throw new Error(await res.text());
@@ -3070,7 +3113,7 @@ function getFilteredDataAlarms() {
       showLoading("loadingOverlayAlarms");
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
     const params = new URLSearchParams();
-    params.set("sitecode", sitecode);
+    params.set("sitecode", window.appState.sitecode);
     params.set("eventType", selectedIds.join(","));
     // fetch(...) to your function
     const url = `/api/alarmsbysitecode?${params.toString()}`;
@@ -3421,7 +3464,7 @@ function getFilteredDataAlarms() {
             Settings: {
                 Theme: "dark",
                 Language: browserLang,
-                SiteCode: sitecode
+                SiteCode: window.appState.sitecode
             }
         };
 
