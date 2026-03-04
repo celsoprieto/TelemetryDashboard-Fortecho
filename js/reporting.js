@@ -22,15 +22,20 @@ export async function generateReport(tagIds, from, to, format,currentMetric,titl
         options: JSON.stringify(options)
     });
 
+    // 1️⃣ Llamada a la Function que devuelve URL SAS
     const response = await fetch(`/api/TelemetryReport?${params.toString()}`);
+    if (!response.ok) throw new Error("Error generando reporte");
 
-    if (!response.ok) {
-        throw new Error("Error generando reporte");
-    }
+    const data = await response.json(); // <-- JSON con { url, expires }
+    const sasUrl = data.url;
 
-    const blob = await response.blob();
+    // 2️⃣ Descargar desde Blob usando SAS
+    const pdfResponse = await fetch(sasUrl);
+    if (!pdfResponse.ok) throw new Error("Error downloading PDF");
 
-    // Descargar archivo automáticamente
+    const blob = await pdfResponse.blob();
+
+    // 3️⃣ Descargar automáticamente
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -38,6 +43,7 @@ export async function generateReport(tagIds, from, to, format,currentMetric,titl
     document.body.appendChild(a);
     a.click();
     a.remove();
+    window.URL.revokeObjectURL(url); 
 }
 
 function sanitizeFileName(name) {
