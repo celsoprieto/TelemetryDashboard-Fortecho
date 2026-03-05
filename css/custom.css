@@ -128,7 +128,8 @@
     label { margin-right: 10px; }
     /* canvas { max-width: 900px; } */
 
-  .sensor-list {
+  .sensor-list,
+  .report-list {
     display: flex;
     gap: 12px;
     justify-content: center;
@@ -375,7 +376,8 @@
     box-sizing: border-box;
   }
 
-  .sensor-list {
+  .sensor-list,
+  .report-list {
     flex-wrap: wrap;
   }
 
@@ -386,7 +388,8 @@
   }
 
   /* sensores ocupan una columna completa */
-  .sensor-list {
+  .sensor-list,
+  .report-list {
       grid-column: 1 / -1;
       justify-content: center;
     }
@@ -427,7 +430,8 @@
       align-items: center;
     }
 
-    .sensor-list {
+    .sensor-list,
+    .report-list {
       grid-column: 1 / -1;
       justify-content: center;
     }

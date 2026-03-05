@@ -1,6 +1,6 @@
 import { UserApi } from "./UserApi.js";
 import { selectedIds , getRowClass, closeAlarmDetailModal} from "./fsalarms.js";
-import { generateReport } from "./reporting.js";
+import { generateReport,downloadFile} from "./reporting.js";
 // Replace this with your actual Function App URL:
     //const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
     const API_BASE = '';
@@ -24,8 +24,10 @@ import { generateReport } from "./reporting.js";
     let eventsGridBuilt = false;
     let deviceIdForEvents = "watchdog_cp"; // hardcoded, adjust as needed
     let deviceeventsrawData = [];
+    let reportsrawData = [];
     let alarmsrawData = [];
     let currentAlarmsRows = [];
+    let currentReportsRows = [];
     let pointsVisible = true;
     let timer;
     let loadedFromMs = null;
@@ -426,7 +428,8 @@ import { generateReport } from "./reporting.js";
           .addEventListener("click", async () => {
 
               const btn = document.getElementById("reportingButton");
-
+               const reportsLink = Array.from(document.querySelectorAll("a[data-view]"))
+                .find(link => link.dataset.view === "reports");
               try {
                   btn.disabled = true;
                   btn.classList.add("opacity-70");
@@ -435,7 +438,11 @@ import { generateReport } from "./reporting.js";
                   const to   = document.getElementById('toInput').value;
                   const title = `Express_Report_${tagIdList.join("_")}_${getNowForFile()}`;
 
-                  await generateReport(tagIdList, from, to, "pdf",currentMetric,title);
+                  //reportsLink.click(); // navigate to reports view
+                  const reportPromise = generateReport(tagIdList, from, to, "pdf",currentMetric,title);
+                  await new Promise(requestAnimationFrame);
+                  reportsLink.click(); 
+                  await reportPromise;
 
               } catch (err) {
                   alert("Error al generar el reporte");
@@ -2244,7 +2251,9 @@ function applyXAxisRange() {
         await loadEvents();        // optional: load data into it
       }
 
-
+      if (viewName === "reports") {
+        await loadReports();        // optional: load data into it
+      }
 
       if (viewName === "tags") {
         // console.log("tagsById =", tagsById);
@@ -2373,6 +2382,38 @@ function hideLoading(el) {
 
   }
 
+    async function loadReports() {
+    //console.log("Loading events from Azure Function...");
+    try {
+      // Aquí harías la llamada a tu Azure Function para obtener los eventos
+    const params = new URLSearchParams();
+    params.set("sitecode", window.appState.sitecode);
+    // fetch(...) to your function
+    const url = `/api/reports?${params.toString()}`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const reports = await res.json();
+
+    if (!Array.isArray(reports) || reports.length === 0) {
+      alert('No data returned for this tag/time range.');
+      return;
+    }
+
+      reportsrawData = Array.isArray(reports) ? reports : []; // guarda los datos crudos para posibles usos futuros
+      stateReports.page = 1;
+      renderReports();
+
+    } catch (err) {
+        console.error(err);
+        alert("Load failed: " + err.message);
+      } finally {
+        // hideLoading(); // si quieres mostrar un loading específico para eventos, hazlo aquí
+      }
+
+  }
+
 
 
 
@@ -2392,15 +2433,28 @@ function hideLoading(el) {
   ];
 
     const columnalarms = [
-    { key: "document_dateUtc", label: "Alarm Date" },
-    { key: "event_type", label: "Alarm Type" },
-    { key: "tagId", label: "Device ID" },
-    { key: "object_marque", label: "Artist" },
-    { key: "object_model", label: "Title" }
-    // ,
-    // { key: "id", label: "Id" },
-    // { key: "sequenceNumber", label: "Sequence" }
-  ];
+      { key: "document_dateUtc", label: "Alarm Date" },
+      { key: "event_type", label: "Alarm Type" },
+      { key: "tagId", label: "Device ID" },
+      { key: "object_marque", label: "Artist" },
+      { key: "object_model", label: "Title" }
+      // ,
+      // { key: "id", label: "Id" },
+      // { key: "sequenceNumber", label: "Sequence" }
+    ];
+
+    const columnreports = [
+      { key: "title", label: "Title" },
+      { key: "period", label: "Period" },
+      { key: "name", label: "Created by" },
+      { key: "createdat", label: "Created at" },
+      { key: "type", label: "Type" },
+      { key: "status", label: "" },
+      { key: "", label: "" }
+      // ,
+      // { key: "id", label: "Id" },
+      // { key: "sequenceNumber", label: "Sequence" }
+    ];
 
   //let data = [...deviceeventsrawData]; // datos crudos, sin filtrar ni paginar
 
@@ -2413,6 +2467,15 @@ function hideLoading(el) {
   };
 
     let stateAlarms = {
+    search: "",
+    selectedEventTypeIds: [5,6,7,10,11,12,13,14,15,16,17,22,23], // para filtrar por tipo de evento
+    sortKey: "document_dateUtc",
+    sortDir: "desc",
+    page: 1,
+    pageSize: 20
+  };
+
+    let stateReports = {
     search: "",
     selectedEventTypeIds: [5,6,7,10,11,12,13,14,15,16,17,22,23], // para filtrar por tipo de evento
     sortKey: "document_dateUtc",
@@ -2503,6 +2566,28 @@ function getFilteredDataAlarms() {
   });
 }
 
+
+function getFilteredDataReports() {
+  const q = stateReports.search.trim().toLowerCase();
+
+  // example: allowed event types (put your selected ones here)
+  const allowedEventTypeIds = stateReports.selectedEventTypeIds; // e.g. [5, 6, 7]
+
+  return reportsrawData.filter(row => {
+    // 1) filter by event_typeId
+    // if (allowedEventTypeIds?.length) {
+    //   if (!allowedEventTypeIds.includes(Number(row.event_typeId))) return false;
+    // }
+
+    // 2) filter by search text
+    if (!q) return true;
+
+    return columnreports.some(c =>
+      safeStr(row[c.key]).toLowerCase().includes(q)
+    );
+  });
+}
+
   function getSortedData(rows) {
     const { sortKey, sortDir } = state;
 
@@ -2547,6 +2632,30 @@ function getFilteredDataAlarms() {
     });
   }
 
+  
+
+  function getSortedDataReports(rows) {
+    const { sortKey, sortDir } = stateReports;
+
+    return [...rows].sort((a, b) => {
+      let va = a[sortKey];
+      let vb = b[sortKey];
+
+      // sort timestamp properly
+      if (sortKey === "updatedat") {
+        va = new Date(va).getTime();
+        vb = new Date(vb).getTime();
+      } else {
+        va = safeStr(va).toLowerCase();
+        vb = safeStr(vb).toLowerCase();
+      }
+
+      if (va < vb) return sortDir === "asc" ? -1 : 1;
+      if (va > vb) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+  }
+
   function getPagedData(rows) {
     const start = (state.page - 1) * state.pageSize;
     return rows.slice(start, start + state.pageSize);
@@ -2555,6 +2664,11 @@ function getFilteredDataAlarms() {
     function getPagedDataAlarms(rows) {
     const start = (stateAlarms.page - 1) * stateAlarms.pageSize;
     return rows.slice(start, start + stateAlarms.pageSize);
+  }
+
+  function getPagedDataReports(rows) {
+    const start = (stateReports.page - 1) * stateReports.pageSize;
+    return rows.slice(start, start + stateReports.pageSize);
   }
 
   // ==========================
@@ -2595,57 +2709,6 @@ function getFilteredDataAlarms() {
         render();
       });
     });
-  }
-
-  function renderHeadAlarms1() {
-    const head = document.getElementById("tableAHead");
-
-    // Clear existing headers
-    head.innerHTML = '';
-
-    // Build headers safely
-    columnalarms.forEach(col => {
-      const th = document.createElement('th');
-      th.dataset.key = col.key;
-      th.className = "px-4 py-3 text-left font-semibold whitespace-nowrap cursor-pointer select-none hover:text-gray-900";
-
-      // Arrow logic
-      const isActive = stateAlarms.sortKey === col.key;
-      const arrow = isActive ? (stateAlarms.sortDir === "asc" ? "▲" : "▼") : "";
-
-      // Inner content
-      const div = document.createElement('div');
-      div.className = "flex items-center gap-2";
-
-      const spanLabel = document.createElement('span');
-      spanLabel.className = "eventscolumnheaderAlarms";
-      spanLabel.textContent = col.label;
-
-      const spanArrow = document.createElement('span');
-      spanArrow.className = "eventscolumnheaderAlarms";
-      spanArrow.textContent = arrow;
-
-      div.appendChild(spanLabel);
-      div.appendChild(spanArrow);
-      th.appendChild(div);
-
-      // Click handler for sorting
-      th.addEventListener('click', () => {
-        if (stateAlarms.sortKey === col.key) {
-          stateAlarms.sortDir = stateAlarms.sortDir === 'asc' ? 'desc' : 'asc';
-        } else {
-          stateAlarms.sortKey = col.key;
-          stateAlarms.sortDir = 'asc';
-        }
-        stateAlarms.page = 1;
-        renderAlarms();
-      });
-
-      head.appendChild(th);
-    });
-
-    // Force iOS repaint to enforce select-none (optional but safe)
-    // head.offsetHeight;
   }
 
 
@@ -2703,6 +2766,69 @@ function getFilteredDataAlarms() {
         }
         stateAlarms.page = 1;
         renderAlarms();
+      });
+
+      head.appendChild(th);
+    });
+
+    // Force iOS repaint to enforce select-none (optional but safe)
+    // head.offsetHeight;
+  }
+
+   function renderHeadReports() {
+    const head = document.getElementById("tableRHead");
+
+    // Clear existing headers
+    head.innerHTML = '';
+
+    // Define width classes for each column
+    const widthClasses = {
+      'document_dateUtc': 'w-44 px-4',  // Alarm Date - narrow
+      'event_type': 'w-36 px-4',         // Alarm Type - narrow
+      'tagId': 'w-32 px-4',              // Tag ID - narrowest
+      'object_marque': 'w-auto px-4',    // Artist - auto width
+      'object_model': 'w-auto px-4'      // Title - auto width
+    };
+
+    // Build headers safely
+    columnreports.forEach(col => {
+      const th = document.createElement('th');
+      th.dataset.key = col.key;
+      
+      // Get the width class for this column, with fallback
+      const widthClass = widthClasses[col.key] || 'px-2';
+      th.className = `${widthClass} py-3 text-left font-semibold whitespace-nowrap select-none hover:text-gray-900`;
+
+      // Arrow logic
+      const isActive = stateReports.sortKey === col.key;
+      const arrow = isActive ? (stateReports.sortDir === "asc" ? "▲" : "▼") : "";
+
+      // Inner content
+      const div = document.createElement('div');
+      div.className = "flex items-center gap-2";
+
+      const spanLabel = document.createElement('span');
+      spanLabel.className = "eventscolumnheaderReports";
+      spanLabel.textContent = col.label;
+
+      const spanArrow = document.createElement('span');
+      spanArrow.className = "eventscolumnheaderReports";
+      spanArrow.textContent = arrow;
+
+      div.appendChild(spanLabel);
+      div.appendChild(spanArrow);
+      th.appendChild(div);
+
+      // Click handler for sorting
+      th.addEventListener('click', () => {
+        if (stateReports.sortKey === col.key) {
+          stateReports.sortDir = stateReports.sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          stateReports.sortKey = col.key;
+          stateReports.sortDir = 'asc';
+        }
+        stateReports.page = 1;
+        renderReports();
       });
 
       head.appendChild(th);
@@ -2791,6 +2917,104 @@ function getFilteredDataAlarms() {
       
   }
 
+  
+  function renderBodyReports(rows) {
+    const body = document.getElementById("tableRBody");
+
+    // Store rows globally for event handler access
+    currentReportsRows = rows;
+
+    if (!rows.length) {
+      body.innerHTML = `
+        <tr>
+          <td colspan="${columns.length}" class="px-4 py-10 text-center text-gray-500">
+            No results found
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    body.innerHTML = rows.map((row, index) => {
+      const trClass = getRowClass(row.event_typeId);
+      return `
+      <tr class="${trClass}" data-row-index="${index}"> 
+        ${columnreports.map(col => {
+          let value = row[col.key];
+
+          // format timestamp
+          if (col.key === "createdat") value = new Date(value).toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
+          if (col.key === "status") {
+            if (value === 1) {
+              // ✅ Botón de descarga cuando el reporte ya está listo
+              const btnId = `download-btn-${index}`;
+              value = `
+                <button id="${btnId}" class="inline-flex items-center text-green-600 hover:text-green-800">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="lucide lucide-download">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </button>
+              `;
+              // Asignar evento click al botón
+              setTimeout(() => {
+                document.getElementById(btnId)?.addEventListener('click', () => {
+                  downloadFile(`${window.appState.sitecode}/${row.filename}`);
+                });
+              }, 0);
+            } else {
+              // 🔄 Spinner mientras el reporte está en creación o error
+              value = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-loader text-gray-400 animate-spin">
+                  <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+                  <path d="M22 12a10 10 0 0 1-10 10"/>
+                </svg>
+              `;
+            }
+
+            // envolver en div centrado
+            value = `<div class="flex items-center justify-center w-full h-6">${value}</div>`;
+          }
+
+          if (col.key === "name") {
+              const maxLen = 20; 
+              if (value && value.length > maxLen) {
+                  value = value.substring(0, maxLen) + "…";
+              }
+          }
+          const rawValue = safeStr(row[col.key]);
+
+          return `
+            <td class="px-2 py-3 align-top">
+              <div class="flex items-start gap-2">
+                <span class="text-gray-800 break-all">${safeStr(value)}</span>
+             </div>
+            </td>
+          `;
+        }).join("")}
+            <!-- Celda para eliminar -->
+            <td class="px-2 py-3 align-top">
+              <div class="flex justify-center items-center w-full h-6">
+                <button id="delete-btn-${index}" class="flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-800 rounded hover:bg-red-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2">
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                    <path d="M3 6h18"/>
+                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+    `;}).join("");
+      
+  }
+
   // Add this function to handle what happens when a row is clicked
   function handleAlarmRowClick(rowData, rowElement) {
     showAlarmDetailModal(rowData);
@@ -2860,6 +3084,39 @@ function getFilteredDataAlarms() {
     buildPageButtonsAlarms(totalPages);
   }
 
+  
+  function renderFooterReports(total, filtered) {
+    const rowsRInfo = document.getElementById("rowsRInfo");
+    const prevRBtn = document.getElementById("prevRBtn");
+    const nextRBtn = document.getElementById("nextRBtn");
+
+    const totalPages = Math.max(1, Math.ceil(filtered / stateReports.pageSize));
+    if (stateReports.page > totalPages) stateReports.page = totalPages;
+
+    // Info texto
+    const start = filtered === 0 ? 0 : (stateReports.page - 1) * stateReports.pageSize + 1;
+    const end = Math.min(filtered, stateReports.page * stateReports.pageSize);
+
+    rowsRInfo.textContent = `Showing ${start} - ${end} of ${filtered} (total ${total})`;
+
+    // Prev/Next enable
+    prevRBtn.disabled = stateReports.page <= 1;
+    nextRBtn.disabled = stateReports.page >= totalPages;
+
+    prevRBtn.onclick = () => {
+      stateReports.page--;
+      renderReports();
+    };
+
+    nextRBtn.onclick = () => {
+      stateReports.page++;
+      renderReports();
+    };
+
+ 
+    buildPageButtonsReports(totalPages);
+  }
+
 
   function render() {
     renderHead();
@@ -2882,6 +3139,17 @@ function getFilteredDataAlarms() {
     renderBodyAlarms(pagedRows);
     renderFooterAlarms(alarmsrawData.length, filteredRows.length);
   }
+
+    function renderReports() {
+      renderHeadReports();
+
+      const filteredRows = getFilteredDataReports();
+      const sortedRows = getSortedDataReports(filteredRows);
+      const pagedRows = getPagedDataReports(sortedRows);
+
+      renderBodyReports(pagedRows);
+      renderFooterReports(reportsrawData.length, filteredRows.length);
+    }
 
   // ==========================
   // 6) EVENTS
@@ -2969,6 +3237,71 @@ function getFilteredDataAlarms() {
     container.innerHTML = "";
 
     const current = stateAlarms.page;
+
+    const addBtn = (page) => {
+      const isActive = page === current;
+
+      const btn = document.createElement("button");
+      btn.textContent = page;
+
+      btn.className = `
+        inline-flex items-center justify-center
+        min-w-[38px] h-10 px-3 rounded-xl text-sm border transition
+        whitespace-nowrap
+        ${isActive
+          ? "bg-teal-600 text-white border-teal-600"
+          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"}
+        mr-1
+      `;
+
+      btn.addEventListener("click", () => {
+        stateAlarms.page = page;
+        renderAlarms();
+      });
+
+      container.appendChild(btn);
+    };
+
+    const addDots = () => {
+      const span = document.createElement("span");
+      span.textContent = "...";
+      span.className = "px-2 text-gray-400 select-none";
+      container.appendChild(span);
+    };
+
+
+    const pages = new Set();
+
+    pages.add(1);
+    pages.add(2);
+    pages.add(totalPages);
+    pages.add(totalPages - 1);
+    pages.add(current);
+    pages.add(current - 1);
+    pages.add(current + 1);
+
+    // limpiar inválidos
+    const finalPages = [...pages]
+      .filter(p => p >= 1 && p <= totalPages)
+      .sort((a, b) => a - b);
+
+    // render con dots
+    for (let i = 0; i < finalPages.length; i++) {
+      const p = finalPages[i];
+      addBtn(p);
+
+      const next = finalPages[i + 1];
+      if (next && next !== p + 1) addDots();
+    }
+  }
+
+   function buildPageButtonsReports(totalPages) {
+    const container = document.getElementById("pageRButtons");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const current = stateReports.page;
 
     const addBtn = (page) => {
       const isActive = page === current;
@@ -3501,6 +3834,7 @@ function getFilteredDataAlarms() {
       "/.auth/logout?post_logout_redirect_uri=/loggedout"
     );
   }
+
 
 
 

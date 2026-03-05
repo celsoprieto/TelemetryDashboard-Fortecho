@@ -61,7 +61,7 @@
             <a href="#" class="nav-link  text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="telemetry">Telemetry</a>
           </li>
           <li>
-            <a href="#" class="nav-link  text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="reporting">Reporting</a>
+            <a href="#" class="nav-link  text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="reports">Reporting</a>
           </li>
           <li>
             <a href="#" class="nav-link text-sm leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="tags">Devices</a>
@@ -791,6 +791,174 @@
               <div id="pageAButtons" class="flex items-center gap-3 flex-wrap mx-2"></div>
 
               <button id="nextABtn"
+                class="px-3 py-2 rounded-xl border border-gray-200 text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>   
+  </section>
+
+   <!-- VIEW: REPORTS -->
+  <section id="view-reports" class="view hidden">
+
+    <div class="report-list flex items-center gap-3 max-w-6xl mx-auto p-2" id="ReportsList" >
+
+      <button class="type-button inline-flex items-center" type="button" data-metric="pdf">
+        <span class="report-icon inline-flex flex-col items-center justify-center text-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            fill="none" 
+            stroke="#DA494E" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            class="lucide lucide-file-text">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <line x1="10" y1="9" x2="8" y2="9"/>
+          </svg>pdf
+        </span>
+      </button>
+
+      <button class="type-button inline-flex items-center" type="button" data-metric="excel">
+        <span class="report-icon inline-flex flex-col items-center justify-center text-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            fill="none" 
+            stroke="green" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            class="lucide lucide-file-spreadsheet">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="8" y1="13" x2="16" y2="13"/>
+            <line x1="8" y1="17" x2="16" y2="17"/>
+            <line x1="10" y1="9" x2="8" y2="9"/>
+            <line x1="16" y1="9" x2="14" y2="9"/>
+          </svg>excel
+        </span>
+      </button>
+
+      <!-- <button class="type-button" type="button" data-metric="environment">
+        <span class="type-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            class="lucide lucide-thermometer-snowflake-icon lucide-thermometer-snowflake">
+            <path d="m10 20-1.25-2.5L6 18"/>
+            <path d="M10 4 8.75 6.5 6 6"/>
+            <path d="M10.585 15H10"/><path d="M2 12h6.5L10 9"/><path d="M20 14.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/><path d="m4 10 1.5 2L4 14"/><path d="m7 21 3-6-1.5-3"/><path d="m7 3 3 6h2"/></svg>
+            <path d="M2 12h6.5L10 9"/>
+            <path d="M20 14.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/>
+            <path d="m4 10 1.5 2L4 14"/>
+            <path d="m7 21 3-6-1.5-3"/>
+            <path d="m7 3 3 6h2"/>
+          </svg>
+        </span>
+      </button>
+
+      
+
+      <button class="type-button" type="button" data-metric="reader">
+        <span class="type-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            class="lucide lucide-radio-tower-icon lucide-radio-tower">
+            <path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/>
+            <path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/>
+            <circle cx="12" cy="9" r="2"/>
+            <path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/>
+            <path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/>
+            <path d="M9.5 18h5"/>
+            <path d="m8 22 4-11 4 11"/>
+          </svg>
+        </span>
+      </button> -->
+
+      
+  <!-- the one you want on the right -->
+    <button class="type-button ml-auto" type="button" data-metric="newreport" id="newReportBtn">
+      <span class="report-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" 
+          width="24" 
+          height="24" 
+          fill="none"
+          stroke="currentColor" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"
+          class="lucide lucide-file-plus">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <line x1="9" y1="15" x2="15" y2="15"/>
+        </svg>
+      </span>
+    </button>
+
+    </div>
+
+      <div class="w-full max-w-6xl mx-auto p-2">
+        <div class="rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <!-- Header -->
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border-b border-gray-200">
+            <div>
+              <h2 class="h2 text-lg font-bold">Reports</h2>
+              <!-- <p class="text-sm text-gray-500">Search, sort and paginate events</p> -->
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="overflow-x-auto w-full">
+            <table class="min-w-full w-full text-sm table-auto">
+              <thead class="bg-custom-green text-white">
+                <tr id="tableRHead"></tr>
+              </thead>
+              <tbody id="tableRBody" class="divide-y divide-gray-200"></tbody>
+            </table>
+
+              <!-- Overlay loading -->
+            <div id="loadingOverlayReports" class="hidden absolute inset-0 bg-white/70 flex flex-col items-center justify-center z-50">
+              <div class="spinner"></div>
+              <div class="loading-text mt-2">Loading data…</div>
+            </div>
+
+          </div>
+
+          <!-- Footer / Pagination -->
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border-t border-gray-200">
+            <div class="text-xs text-custom-green" id="rowsRInfo"></div>
+
+            <div class="flex items-center gap-2 flex-wrap">
+              <button id="prevRBtn"
+                class="px-3 py-2 rounded-xl border border-gray-200 text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                Prev
+              </button>
+
+              <!-- Page buttons -->
+              <div id="pageRButtons" class="flex items-center gap-3 flex-wrap mx-2"></div>
+
+              <button id="nextRBtn"
                 class="px-3 py-2 rounded-xl border border-gray-200 text-sm hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
                 Next
               </button>

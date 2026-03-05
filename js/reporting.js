@@ -31,22 +31,6 @@ export async function generateReport(tagIds, from, to, format,currentMetric,titl
     const data = await response.json(); // <-- JSON con { url, expires }
     const sasUrl = data.url;
 
-    // // 2️⃣ Descargar desde Blob usando SAS
-    // const pdfResponse = await fetch(sasUrl);
-    // if (!pdfResponse.ok) throw new Error("Error downloading PDF");
-
-    // const blob = await pdfResponse.blob();
-
-    // // 3️⃣ Descargar automáticamente
-    // const url = window.URL.createObjectURL(blob);
-    // const a = document.createElement("a");
-    // a.href = url;
-    // a.download = `${sanitizeFileName(title)}.pdf`;
-    // document.body.appendChild(a);
-    // a.click();
-    // a.remove();
-    // window.URL.revokeObjectURL(url); 
-
     const a = document.createElement("a");
     a.href = sasUrl;
     a.download = `${sanitizeFileName(title)}.pdf`;
@@ -61,3 +45,30 @@ function sanitizeFileName(name) {
         .replace(/[^a-zA-Z0-9-_ ]/g, "")                  
         .replace(/\s+/g, "_");                            
 }
+
+  export async function downloadFile(fileName) {
+
+    // 1️⃣ pedir SAS URL a tu Azure Function
+    const res = await fetch(`/api/ReportDownload?file=${encodeURIComponent(fileName)}`);
+
+    if (!res.ok) {
+    throw new Error("Error requesting download URL");
+    }
+
+    const data = await res.json();
+    const sasUrl = data.downloadUrl;
+    const title = data.file || fileName;
+
+    // 2️⃣ descargar desde Blob usando SAS
+    // const fileResponse = await fetch(data.downloadUrl);
+    // const blob = await fileResponse.blob();
+
+      const a = document.createElement("a");
+      a.href = sasUrl;
+      a.download = `${sanitizeFileName(title)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+  }
+
+

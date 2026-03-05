@@ -136,6 +136,7 @@ module.exports = {
     "overflow-hidden",
     "-translate-x-[calc(100dvh-40px)]",
     "opacity-70",
+    "animate-spin",
   ],
   theme: {
     extend: {colors: {
