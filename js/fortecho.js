@@ -1,5 +1,6 @@
 import { UserApi } from "./UserApi.js";
-import { selectedIds , getRowClass, closeAlarmDetailModal,showAlarmDetailModal} from "./fsalarms.js";
+import { selectedIds , getRowClass, closeAlarmDetailModal,showAlarmDetailModal,
+  metricToEventTypeIds} from "./fsalarms.js";
 import { generateReport,downloadFile} from "./reporting.js";
 // Replace this with your actual Function App URL:
     //const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
