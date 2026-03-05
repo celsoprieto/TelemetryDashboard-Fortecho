@@ -1,3 +1,4 @@
+import {formatTimestamp} from "./fortecho.js";
 export function getRowClass(eventTypeId) {
   switch (eventTypeId) {
     case 5:  // Alarm
@@ -58,7 +59,7 @@ function toggleIds(selectedIds,idsToToggle) {
   return [...set];
 }
 
-function showAlarmDetailModal(alarmData) {
+export function showAlarmDetailModal(alarmData) {
   const modal = document.getElementById('alarmDetailModal');
   const modalBody = document.getElementById('modalBody');
   const modalTitle = document.getElementById('modalTitle');
