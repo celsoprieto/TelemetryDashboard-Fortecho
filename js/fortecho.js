@@ -2450,7 +2450,7 @@ function hideLoading(el) {
       { key: "createdat", label: "Created at" },
       { key: "type", label: "Type" },
       { key: "status", label: "" },
-      { key: "", label: "" }
+      { key: "enabled", label: "" }
       // ,
       // { key: "id", label: "Id" },
       // { key: "sequenceNumber", label: "Sequence" }
@@ -2981,6 +2981,24 @@ function getFilteredDataReports() {
             value = `<div class="flex items-center justify-center w-full h-6">${value}</div>`;
           }
 
+           if (col.key === "enabled") {
+            if (value === true || value === 1) {
+              value = `
+                      <!-- Celda para eliminar -->
+                          <button id="delete-btn-${index}" class="flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-800 rounded hover:bg-red-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2">
+                              <path d="M10 11v6"/><path d="M14 11v6"/>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                              <path d="M3 6h18"/>
+                              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                          </button>
+                      `;
+            }
+            // envolver en div centrado
+            value = `<div class="flex items-center justify-center w-full h-6">${value}</div>`;
+          }
+
           if (col.key === "name") {
               const maxLen = 20; 
               if (value && value.length > maxLen) {
@@ -2997,19 +3015,6 @@ function getFilteredDataReports() {
             </td>
           `;
         }).join("")}
-            <!-- Celda para eliminar -->
-            <td class="px-2 py-3 align-top">
-              <div class="flex justify-center items-center w-full h-6">
-                <button id="delete-btn-${index}" class="flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-800 rounded hover:bg-red-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2">
-                    <path d="M10 11v6"/><path d="M14 11v6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                    <path d="M3 6h18"/>
-                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                  </svg>
-                </button>
-              </div>
-            </td>
           </tr>
     `;}).join("");
       
