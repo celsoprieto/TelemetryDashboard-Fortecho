@@ -441,7 +441,9 @@ import { generateReport,downloadFile} from "./reporting.js";
                   //reportsLink.click(); // navigate to reports view
                   const reportPromise = generateReport(tagIdList, from, to, "pdf",currentMetric,title);
                   await new Promise(requestAnimationFrame);
-                  reportsLink.click(); 
+                  setTimeout(async () => {
+                    reportsLink.click();  
+                  }, 500); // small delay to ensure UI updates before navigation  
                   await reportPromise;
 
               } catch (err) {
