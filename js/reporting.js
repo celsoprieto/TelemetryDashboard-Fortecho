@@ -22,7 +22,11 @@ export async function generateReport(tagIds, from, to, format,currentMetric,titl
     // 1️⃣ Llamada a la Function que devuelve URL SAS
     const response = await fetch(`/api/TelemetryReport?${params.toString()}`);
     
-    if (!response.ok) throw new Error("Error generando reporte");
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error backend:", errorData);
+        throw new Error(errorData.error || "Error generando reporte");
+    }
 
     const data = await response.json(); // <-- JSON con { url, expires }
     const sasUrl = data.url;
