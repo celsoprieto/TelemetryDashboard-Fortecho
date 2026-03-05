@@ -31,21 +31,28 @@ export async function generateReport(tagIds, from, to, format,currentMetric,titl
     const data = await response.json(); // <-- JSON con { url, expires }
     const sasUrl = data.url;
 
-    // 2️⃣ Descargar desde Blob usando SAS
-    const pdfResponse = await fetch(sasUrl);
-    if (!pdfResponse.ok) throw new Error("Error downloading PDF");
+    // // 2️⃣ Descargar desde Blob usando SAS
+    // const pdfResponse = await fetch(sasUrl);
+    // if (!pdfResponse.ok) throw new Error("Error downloading PDF");
 
-    const blob = await pdfResponse.blob();
+    // const blob = await pdfResponse.blob();
 
-    // 3️⃣ Descargar automáticamente
-    const url = window.URL.createObjectURL(blob);
+    // // 3️⃣ Descargar automáticamente
+    // const url = window.URL.createObjectURL(blob);
+    // const a = document.createElement("a");
+    // a.href = url;
+    // a.download = `${sanitizeFileName(title)}.pdf`;
+    // document.body.appendChild(a);
+    // a.click();
+    // a.remove();
+    // window.URL.revokeObjectURL(url); 
+
     const a = document.createElement("a");
-    a.href = url;
+    a.href = sasUrl;
     a.download = `${sanitizeFileName(title)}.pdf`;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    window.URL.revokeObjectURL(url); 
 }
 
 function sanitizeFileName(name) {
