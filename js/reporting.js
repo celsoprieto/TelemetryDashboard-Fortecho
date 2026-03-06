@@ -34,12 +34,15 @@
         const sasUrl = data.url;
 
         // Trigger download
-        const a = document.createElement("a");
-        a.href = sasUrl;
-        a.download = `${sanitizeFileName(title)}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        // const a = document.createElement("a");
+        // a.href = sasUrl;
+        // a.target = "_blank";   // important
+        // a.download = `${sanitizeFileName(title)}.${format}`;
+
+        // document.body.appendChild(a);
+        // a.click();
+        // a.remove();
+        showToast("Report generation started");
 
         return true;
 
