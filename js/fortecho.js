@@ -475,6 +475,9 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
                     reportsLink.click();  
                   }, 500); // small delay to ensure UI updates before navigation  
                   await reportPromise;
+                  if (reportPromise) {   
+                    renderBodyReports(currentReportsRows); 
+                  }
 
               } catch (err) {
                   alert("Error al generar el reporte");
