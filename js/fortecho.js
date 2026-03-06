@@ -477,7 +477,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
                   }, 500); // small delay to ensure UI updates before navigation  
                   await reportPromise;
                   if (reportPromise) {   
-                    renderBodyReports(currentReportsRows); 
+                    loadReports(); // refresh report list after generation
                   }
 
               } catch (err) {
