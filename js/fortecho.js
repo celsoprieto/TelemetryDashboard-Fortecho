@@ -476,7 +476,8 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
                     reportsLink.click();  
                   }, 500); // small delay to ensure UI updates before navigation  
                   await reportPromise;
-                  if (reportPromise) {   
+                  if (reportPromise) { 
+                    showToast("Report generation completed", "success", 3000);  
                     loadReports(); // refresh report list after generation
                   }
 
@@ -3097,8 +3098,8 @@ function getFilteredDataReports() {
 
         const result = await deleteReport(reportId, siteCode, blobPath,userId);
         if (result.deleted) {
+          showToast("Report deleted successfully", "success", 3000);          
           currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
-
           renderBodyReports(currentReportsRows);
         }
 
