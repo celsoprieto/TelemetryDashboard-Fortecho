@@ -48,7 +48,7 @@ export const metricToEventTypeIds = {
   reader: [7, 17],
 };
 
-function toggleIds(selectedIds,idsToToggle) {
+export function toggleIds(selectedIds,idsToToggle) {
   const set = new Set(selectedIds);
 
   idsToToggle.forEach(id => {
