@@ -153,11 +153,6 @@ module.exports = {
     "-translate-x-1/2",
     "cursor-help",
     "truncate",
-    "tooltip-light",
-    "tooltip-dark",
-    "bg-gray-800",
-    "bg-gray-100",
-    "text-white",
   ],
   theme: {
     extend: {colors: {

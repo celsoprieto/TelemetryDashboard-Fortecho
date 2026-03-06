@@ -48,10 +48,11 @@ export const metricToEventTypeIds = {
   reader: [7, 17],
 };
 
+
 export function toggleIds(selectedIds,idsToToggle) {
   const set = new Set(selectedIds);
-
-  idsToToggle.forEach(id => {
+  const ids = Array.isArray(idsToToggle) ? idsToToggle : [idsToToggle];
+  ids.forEach(id => {
     if (set.has(id)) set.delete(id);
     else set.add(id);
   });

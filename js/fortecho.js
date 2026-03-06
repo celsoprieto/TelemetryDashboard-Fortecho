@@ -102,6 +102,9 @@ import { generateReport,downloadFile} from "./reporting.js";
       const alarmsList = document.getElementById("EventsList");
       const alarmsbuttons = alarmsList?.querySelectorAll(".type-button") || [];
 
+      const reportsList = document.getElementById("ReportsList");
+      const reportButtons = reportsList?.querySelectorAll(".type-button") || [];
+
       const btn_menuT = document.getElementById("menuBtnT");
       const menuT = document.getElementById("mobileMenuT");
       const overlay = document.getElementById("menuOverlay");
@@ -222,6 +225,32 @@ import { generateReport,downloadFile} from "./reporting.js";
             
           }
           renderAlarms();
+        });
+      });
+
+       // ---------------- REPORT BUTTONS ----------------
+      reportButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const isActive = btn.classList.contains("active");
+
+          // If this is the last active button, block turning it off
+          if (isActive) {
+            const activeCount = [...reportButtons].filter(b => b.classList.contains("active")).length;
+            if (activeCount === 1) return; 
+          }
+           btn.classList.toggle("active"); // click again = removes it
+          
+          const metric = btn.dataset.metric;
+          const ids = btn.dataset.metric || [];
+          stateReports.selectedEventTypeIds=  toggleIds(stateReports.selectedEventTypeIds, ids);
+          stateReports.page = 1; // reset to first page on filter change
+          if (btn.classList.contains("active")) {
+            //console.log("ENABLED", btn.dataset.metric);
+          } else {
+            //console.log("DISABLED", btn.dataset.metric);
+            
+          }
+          renderReports();
         });
       });
 
@@ -2480,7 +2509,7 @@ function hideLoading(el) {
 
     let stateReports = {
     search: "",
-    selectedEventTypeIds: [5,6,7,10,11,12,13,14,15,16,17,22,23], // para filtrar por tipo de evento
+    selectedEventTypeIds: ["pdf","excel"], // para filtrar por tipo de evento
     sortKey: "document_dateUtc",
     sortDir: "desc",
     page: 1,
@@ -2574,13 +2603,13 @@ function getFilteredDataReports() {
   const q = stateReports.search.trim().toLowerCase();
 
   // example: allowed event types (put your selected ones here)
-  const allowedEventTypeIds = stateReports.selectedEventTypeIds; // e.g. [5, 6, 7]
+  const allowedEventTypeIds = stateReports.selectedEventTypeIds; // e.g. ["pdf", "excel"]
 
   return reportsrawData.filter(row => {
     // 1) filter by event_typeId
-    // if (allowedEventTypeIds?.length) {
-    //   if (!allowedEventTypeIds.includes(Number(row.event_typeId))) return false;
-    // }
+    if (allowedEventTypeIds?.length) {
+      if (!allowedEventTypeIds.includes(row.type)) return false;
+    }
 
     // 2) filter by search text
     if (!q) return true;
