@@ -42,7 +42,7 @@
         // document.body.appendChild(a);
         // a.click();
         // a.remove();
-        showToast("Report generation started");
+        
 
         return true;
 

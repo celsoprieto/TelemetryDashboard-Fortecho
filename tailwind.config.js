@@ -170,6 +170,10 @@ module.exports = {
     "ease-in-out",
     "opacity-0",
     "opacity-100",
+    "translate-y-4", 
+    "opacity-0", 
+    "opacity-100", 
+    "translate-y-0"
   ],
   theme: {
     extend: {

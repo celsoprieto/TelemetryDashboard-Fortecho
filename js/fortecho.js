@@ -206,7 +206,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       alarmsbuttons.forEach(btn => {
         btn.addEventListener("click", () => {
           const isActive = btn.classList.contains("active");
-
+  
           // If this is the last active button, block turning it off
           if (isActive) {
             const activeCount = [...alarmsbuttons].filter(b => b.classList.contains("active")).length;
@@ -457,6 +457,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         document.getElementById("reportingButton")
           .addEventListener("click", async () => {
 
+              showToast("Report generation started", "info", 3000);
               const btn = document.getElementById("reportingButton");
                const reportsLink = Array.from(document.querySelectorAll("a[data-view]"))
                 .find(link => link.dataset.view === "reports");
@@ -3986,6 +3987,168 @@ function getFilteredDataReports() {
       "/.auth/logout?post_logout_redirect_uri=/loggedout"
     );
   }
+
+  export function showToast(message, type = "success", duration = 3500) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const types = {
+    success: { bg: "bg-emerald-50 border-emerald-200", icon: "text-emerald-600",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>` },
+    error:   { bg: "bg-red-50 border-red-200", icon: "text-red-600",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>` },
+    info:    { bg: "bg-gray-50 border-gray-200", icon: "text-gray-600",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 16v-4M12 8h.01"/>
+            </svg>` },
+    warning: { bg: "bg-amber-50 border-amber-200", icon: "text-amber-600",
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10 3h4l7 12-7 6H10l-7-6 7-12z"/>
+            </svg>` },
+  };
+
+  const config = types[type] || types.info;
+
+  const toast = document.createElement("div");
+  toast.className = `
+    flex items-center gap-3 px-4 py-3 border shadow-lg rounded-xl
+    transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto
+    ${config.bg}
+  `;
+
+  toast.innerHTML = `
+    <div class="${config.icon}">${config.svg}</div>
+    <div class="flex-1 text-sm text-gray-700">${message}</div>
+    <button class="text-gray-400 hover:text-gray-600 close-toast">✕</button>
+  `;
+
+  container.appendChild(toast);
+
+  // Animación de entrada
+  requestAnimationFrame(() => {
+    toast.classList.remove("translate-y-4", "opacity-0");
+  });
+
+  const removeToast = () => {
+    toast.classList.add("translate-y-4", "opacity-0");
+    setTimeout(() => toast.remove(), 250);
+  };
+
+  toast.querySelector(".close-toast").onclick = removeToast;
+
+  setTimeout(removeToast, duration);
+
+  // Limitar máximo 4 toasts visibles
+  while (container.children.length > 4) {
+    container.firstChild.remove();
+  }
+}
+
+// export function showToast(message, type = "success", duration = 3500) {
+
+//   const container = document.getElementById("toast-container");
+
+//   const types = {
+//     success: {
+//       bg: "bg-emerald-50 border-emerald-200",
+//       icon: "text-emerald-600",
+//       svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+//             fill="none" stroke="currentColor" stroke-width="2"
+//             viewBox="0 0 24 24">
+//             <path stroke-linecap="round" stroke-linejoin="round"
+//             d="M5 13l4 4L19 7"/>
+//           </svg>`
+//     },
+
+//     error: {
+//       bg: "bg-red-50 border-red-200",
+//       icon: "text-red-600",
+//       svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+//             fill="none" stroke="currentColor" stroke-width="2"
+//             viewBox="0 0 24 24">
+//             <path stroke-linecap="round" stroke-linejoin="round"
+//             d="M6 18L18 6M6 6l12 12"/>
+//           </svg>`
+//     },
+
+//     info: {
+//       bg: "bg-blue-50 border-blue-200",
+//       icon: "text-blue-600",
+//       svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+//             fill="none" stroke="currentColor" stroke-width="2"
+//             viewBox="0 0 24 24">
+//             <circle cx="12" cy="12" r="10"/>
+//             <path d="M12 16v-4M12 8h.01"/>
+//           </svg>`
+//     },
+
+//     warning: {
+//       bg: "bg-amber-50 border-amber-200",
+//       icon: "text-amber-600",
+//       svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
+//             fill="none" stroke="currentColor" stroke-width="2"
+//             viewBox="0 0 24 24">
+//             <path stroke-linecap="round" stroke-linejoin="round"
+//             d="M12 9v4m0 4h.01M10 3h4l7 12-7 6H10l-7-6 7-12z"/>
+//           </svg>`
+//     }
+//   };
+
+//   const config = types[type] || types.info;
+
+//   const toast = document.createElement("div");
+
+//   toast.className = `
+//   flex items-start gap-3
+//   border shadow-lg rounded-xl
+//   px-4 py-3
+//   bg-white
+//   transform transition-all duration-300
+//   translate-y-4 opacity-0
+//   ${config.bg}
+//   `;
+
+//   toast.innerHTML = `
+//     <div class="${config.icon}">
+//       ${config.svg}
+//     </div>
+
+//     <div class="flex-1 text-sm text-gray-700">
+//       ${message}
+//     </div>
+
+//     <button class="text-gray-400 hover:text-gray-600 close-toast">
+//       ✕
+//     </button>
+//   `;
+
+//   container.appendChild(toast);
+
+//   // animation in
+//   requestAnimationFrame(() => {
+//     toast.classList.remove("translate-y-4", "opacity-0");
+//   });
+
+//   const removeToast = () => {
+//     toast.classList.add("opacity-0", "translate-y-4");
+
+//     setTimeout(() => toast.remove(), 250);
+//   };
+
+//   toast.querySelector(".close-toast").onclick = removeToast;
+
+//   setTimeout(removeToast, duration);
+
+//   // limit visible toasts
+//   if (container.children.length > 4) {
+//     container.firstChild.remove();
+//   }
+// }
 
 
 
