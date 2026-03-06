@@ -206,7 +206,6 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       alarmsbuttons.forEach(btn => {
         btn.addEventListener("click", () => {
           const isActive = btn.classList.contains("active");
-  
           // If this is the last active button, block turning it off
           if (isActive) {
             const activeCount = [...alarmsbuttons].filter(b => b.classList.contains("active")).length;
@@ -3995,21 +3994,27 @@ function getFilteredDataReports() {
 
   const types = {
     success: { bg: "bg-emerald-50 border-emerald-200", icon: "text-emerald-600",
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-500 animate-pulse drop-shadow-[0_0_4px_rgba(34,197,94,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/>
             </svg>` },
     error:   { bg: "bg-red-50 border-red-200", icon: "text-red-600",
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500 animate-pulse drop-shadow-[0_0_4px_rgba(239,68,68,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/>
+              <line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/>
             </svg>` },
     info:    { bg: "bg-gray-50 border-gray-200", icon: "text-gray-600",
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500 animate-[pulse_2s_ease-in-out_infinite] motion-safe:animate-bounce drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
-              <path d="M12 16v-4M12 8h.01"/>
+              <line x1="12" y1="16" x2="12" y2="12" stroke-linecap="round"/>
+              <circle cx="12" cy="9" r="1" fill="currentColor"/>
             </svg>` },
     warning: { bg: "bg-amber-50 border-amber-200", icon: "text-amber-600",
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10 3h4l7 12-7 6H10l-7-6 7-12z"/>
+      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500 animate-pulse drop-shadow-[0_0_4px_rgba(234,179,8,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 3h4l7 12-7 6H10l-7-6 7-12z"/>
+              <line x1="12" y1="9" x2="12" y2="16" stroke-linecap="round"/>
+              <circle cx="12" cy="18" r="1" fill="currentColor"/>
             </svg>` },
   };
 

@@ -173,7 +173,30 @@ module.exports = {
     "translate-y-4", 
     "opacity-0", 
     "opacity-100", 
-    "translate-y-0"
+    "translate-y-0",
+    "animate-pulse",
+    // Colores de iconos
+    "text-blue-500",
+    "text-yellow-500",
+    "text-red-500",
+    "text-green-500",
+    // Tamaños de iconos
+    "w-5", "h-5",
+    "w-6", "h-6",
+    "w-8", "h-8",
+    // Animaciones
+    "animate-pulse",
+    "motion-safe:animate-bounce",
+    "animate-[pulse_2s_ease-in-out_infinite]",
+    // Glow / sombras
+    "drop-shadow-[0_0_4px_rgba(59,130,246,0.8)]",
+    "drop-shadow-[0_0_4px_rgba(234,179,8,0.8)]",
+    "drop-shadow-[0_0_4px_rgba(239,68,68,0.8)]",
+    "drop-shadow-[0_0_4px_rgba(34,197,94,0.8)]",
+    "drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]",
+    "drop-shadow-[0_0_6px_rgba(234,179,8,0.8)]",
+    "drop-shadow-[0_0_6px_rgba(239,68,68,0.8)]",
+    "drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]",
   ],
   theme: {
     extend: {
