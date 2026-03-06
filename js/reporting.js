@@ -71,4 +71,39 @@ function sanitizeFileName(name) {
       a.remove();
   }
 
+  export async function deleteReport(reportId, siteCode, blobPath, userId) {
+    const url = "/api/reports/delete";
+
+    const payload = {
+        ReportId: reportId,
+        SiteCode: siteCode,
+        BlobPath: blobPath,
+        userId: userId
+    };
+
+    try {
+        const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+            // Add authorization header if your function is not anonymous
+            // "x-functions-key": "<your-function-key>"
+        },
+        body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`Error ${response.status}: ${text}`);
+        }
+
+        const result = await response.json(); // your function returns a string
+        //console.log("Success:", result);
+        return result;
+    } catch (err) {
+        console.error("Failed to delete report:", err);
+        throw err;
+    }
+    }
+
 

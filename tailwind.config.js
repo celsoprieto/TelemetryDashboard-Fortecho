@@ -153,13 +153,32 @@ module.exports = {
     "-translate-x-1/2",
     "cursor-help",
     "truncate",
+    "text-custom-red",
+    "text-custom-green",
+    "text-custom-blue",
+    "text-custom-red-light",
+    "text-custom-red-dark",
+    "text-custom-blue-light",
+    "text-custom-yellow",
+    "text-custom-yellow-light",
+    "text-custom-orange",
+    "inset-y-0",
+    "inset-x-0",
+    "mx-auto",
+    "transition-opacity",
+    "duration-300",
+    "ease-in-out",
+    "opacity-0",
+    "opacity-100",
   ],
   theme: {
-    extend: {colors: {
+    extend: {
+      colors: {
         "custom-green-light": "#56B2AD",  /* soft pastel green */
         "custom-green": "#157372",
         "custom-red": "#DA494E",
         "custom-red-light": "#F8C9CB",
+        "custom-red-dark": "#B2222B",
         "custom-blue": "#35AADF",
         "custom-blue-light": "#A3C9FF",  /* soft pastel blue */
         "custom-blue1": "#3366CC",        /* darker base blue */

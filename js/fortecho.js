@@ -1,7 +1,7 @@
 import { UserApi } from "./UserApi.js";
 import { selectedIds , getRowClass, closeAlarmDetailModal,showAlarmDetailModal,
   metricToEventTypeIds,toggleIds} from "./fsalarms.js";
-import { generateReport,downloadFile} from "./reporting.js";
+import { generateReport,downloadFile,deleteReport} from "./reporting.js";
 // Replace this with your actual Function App URL:
     //const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
     const API_BASE = '';
@@ -2950,118 +2950,7 @@ function getFilteredDataReports() {
   }
 
   
-  // function renderBodyReports(rows) {
-  //   const body = document.getElementById("tableRBody");
-
-  //   // Store rows globally for event handler access
-  //   currentReportsRows = rows;
-
-  //   if (!rows.length) {
-  //     body.innerHTML = `
-  //       <tr>
-  //         <td colspan="${columns.length}" class="px-4 py-10 text-center text-gray-500">
-  //           No results found
-  //         </td>
-  //       </tr>
-  //     `;
-  //     return;
-  //   }
-
-  //   body.innerHTML = rows.map((row, index) => {
-  //     const trClass = getRowClass(row.event_typeId);
-  //     return `
-  //     <tr class="${trClass}" data-row-index="${index}"> 
-  //       ${columnreports.map(col => {
-  //         let value = row[col.key];
-
-  //         // format timestamp
-  //         if (col.key === "createdat") value = new Date(value).toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
-  //         if (col.key === "status") {
-  //           if (value === 1) {
-  //             // ✅ Botón de descarga cuando el reporte ya está listo
-  //             const btnId = `download-btn-${index}`;
-  //             value = `
-  //               <button id="${btnId}" class="inline-flex items-center text-green-600 hover:text-green-800">
-  //                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-  //                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-  //                     class="lucide lucide-download">
-  //                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-  //                   <polyline points="7 10 12 15 17 10"/>
-  //                   <line x1="12" y1="15" x2="12" y2="3"/>
-  //                 </svg>
-  //               </button>
-  //             `;
-  //             // Asignar evento click al botón
-  //             setTimeout(() => {
-  //               document.getElementById(btnId)?.addEventListener('click', () => {
-  //                 downloadFile(`${window.appState.sitecode}/${row.filename}`);
-  //               });
-  //             }, 0);
-  //           } else {
-  //             // 🔄 Spinner mientras el reporte está en creación o error
-  //             value = `
-  //               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-  //                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-  //                   class="lucide lucide-loader text-gray-400 animate-spin">
-  //                 <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-  //                 <path d="M22 12a10 10 0 0 1-10 10"/>
-  //               </svg>
-  //             `;
-  //           }
-
-  //           // envolver en div centrado
-  //           value = `<div class="flex items-center justify-center w-full h-6">${value}</div>`;
-  //         }
-
-  //          if (col.key === "enabled") {
-  //           if (value === true || value === 1) {
-  //             value = `
-  //                     <!-- Celda para eliminar -->
-  //                         <button id="delete-btn-${index}" class="flex items-center justify-center w-8 h-8 text-red-600 hover:text-red-800 rounded hover:bg-red-100">
-  //                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2">
-  //                             <path d="M10 11v6"/><path d="M14 11v6"/>
-  //                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-  //                             <path d="M3 6h18"/>
-  //                             <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-  //                           </svg>
-  //                         </button>
-  //                     `;
-  //           }
-  //           // envolver en div centrado
-  //           value = `<div class="flex items-center justify-center w-full h-6">${value}</div>`;
-  //         }
-
-
-
-  //         if (col.key === "name") {
-  //             const maxLen = 20; 
-  //             const fullValue = value;
-  //             if (value && value.length > maxLen) {
-  //                 value = value.substring(0, maxLen) + "…";
-  //             }
-  //              value = `
-  //             <span class="cursor-help" title="${fullValue}">
-  //                  ${value.substring(0, maxLen)}…
-  //             </span>
-  //           `;
-  //         }
-
-  //         const rawValue = safeStr(row[col.key]);
-
-  //         return `
-  //           <td class="px-2 py-3 align-top">
-  //             <div class="flex items-start gap-2">
-  //               <span class="text-gray-800 break-all">${value ?? ""}</span>
-  //            </div>
-  //           </td>
-  //         `;
-  //       }).join("")}
-  //         </tr>
-  //   `;}).join("");
-      
-  // }
-
-  function renderBodyReports(rows) {
+   function renderBodyReports(rows) {
 
     const body = document.getElementById("tableRBody");
     currentReportsRows = rows;
@@ -3078,7 +2967,7 @@ function getFilteredDataReports() {
 
     body.innerHTML = rows.map((row, index) => {
 
-      const trClass = getRowClass(row.event_typeId);
+      const trClass = "hover:bg-gray-50 transition-colors";
 
       const cells = columnreports.map(col => {
 
@@ -3107,9 +2996,9 @@ function getFilteredDataReports() {
 
             return `
               <td class="px-2 py-3 text-center">
-                <button class="download-btn text-green-600 hover:text-green-800"
+                <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
                         data-file="${window.appState.sitecode}/${row.filename}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                       stroke="currentColor" stroke-width="2" stroke-linecap="round"
                       stroke-linejoin="round" class="lucide lucide-download">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -3122,7 +3011,7 @@ function getFilteredDataReports() {
 
           return `
             <td class="px-2 py-3 text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                 stroke="currentColor" stroke-width="2"
                 class="lucide lucide-loader animate-spin text-gray-400">
                 <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
@@ -3136,25 +3025,33 @@ function getFilteredDataReports() {
 
           return `
             <td class="px-2 py-3 text-center">
-              <button class="delete-btn text-red-600 hover:text-red-800"
-                      data-id="${row.id}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                    fill="none" stroke="currentColor" stroke-width="2"
-                    class="lucide lucide-trash-2">
+              <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
+                      data-id="${row.id}" >
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
+
                   <path d="M3 6h18"/>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
                   <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                   <line x1="10" y1="11" x2="10" y2="17"/>
                   <line x1="14" y1="11" x2="14" y2="17"/>
+
                 </svg>
+
               </button>
             </td>`;
         }
 
         // ---------- DEFAULT ----------
         return `
-          <td class="px-2 py-3 align-top">
-            <span class="text-gray-800 break-all">${value}</span>
+          <td class="px-2 py-3 align-top text-gray-800 break-all">
+            ${value}
           </td>`;
 
       }).join("");
@@ -3177,6 +3074,45 @@ function getFilteredDataReports() {
 
     });
 
+    body.querySelectorAll(".delete-btn").forEach(btn => {
+
+      btn.addEventListener("click", async () => {
+
+        const reportId = btn.dataset.id;
+        const reportRow = currentReportsRows.find(r => r.id === reportId);
+
+        if (!reportRow) {
+          console.warn("Report not found in currentReportsRows:", reportId);
+          return;
+        }
+
+        
+        const siteCode = reportRow.sitecode;
+        const blobPath = sanitizeUrlRemoveQuery(reportRow.blobUrl);
+        const userId = reportRow.userId;
+
+        const result = await deleteReport(reportId, siteCode, blobPath,userId);
+        if (result.deleted) {
+          currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
+
+          renderBodyReports(currentReportsRows);
+        }
+
+      });
+
+    });
+
+  }
+
+  export function sanitizeUrlRemoveQuery(input) {
+    try {
+      const url = new URL(input);
+      url.search = "";
+      url.hash = "";
+      return url.toString();
+    } catch {
+      return input.split("?")[0];
+    }
   }
 
   function escapeHtml(text) {
@@ -3205,18 +3141,21 @@ function getFilteredDataReports() {
   return `
     <div class="relative group inline-block max-w-[200px]">
       
-      <span class="truncate block cursor-help">
+      <span class="truncate block max-w-[200px] cursor-help">
         ${short}
       </span>
 
       <div class="
-        absolute z-20 hidden group-hover:block
+        absolute z-50
+        opacity-0 group-hover:opacity-100
+        transition-opacity duration-150
         bottom-full left-0 mb-2
         px-2 py-1
         text-xs text-white
         bg-gray-900 rounded
         whitespace-nowrap
         shadow-lg
+        pointer-events-none
       ">
         ${safe}
       </div>
@@ -3364,11 +3303,11 @@ function getFilteredDataReports() {
   // ==========================
   // 6) EVENTS
   // ==========================
-  // document.getElementById("searchInput").addEventListener("input", (e) => {
-  //   state.search = e.target.value;
-  //   state.page = 1;
-  //   render();
-  // });
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    stateReports.search = e.target.value;
+    stateReports.page = 1;
+    renderReports();
+  });
 
   // ==========================
   // 7) INIT

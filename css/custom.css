@@ -29,6 +29,15 @@
       background-color: #157372
   }
 
+  button:focus,
+  input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    caret-color: transparent !important; /* oculta el caret */
+  }
+
+  
+
 
     .page-center {
       /* optional: card-style wrapper */
