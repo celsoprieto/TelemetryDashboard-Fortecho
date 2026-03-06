@@ -10,7 +10,7 @@ module.exports = {
     // Use regex patterns to match classes
     {
       pattern: /^w-/,
-      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-', 'mr-', 'p-'], // Optional: include responsive variants
+      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-', 'mr-', 'p-' , 'ms-', 'ps-'], // Optional: include responsive variants
     },
     // Or be more specific
     {
@@ -197,6 +197,23 @@ module.exports = {
     "drop-shadow-[0_0_6px_rgba(234,179,8,0.8)]",
     "drop-shadow-[0_0_6px_rgba(239,68,68,0.8)]",
     "drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]",
+    "border-s",
+    "border-default",
+    // Width
+    { pattern: /^w-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
+    // Height
+    { pattern: /^h-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
+    // Padding
+    { pattern: /^p[trblxy]?-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
+    // Margin
+    { pattern: /^m[trblxy]?-(\d+(\.5)?|0|auto|px|full|min|max|fit)$/ },
+    // Gap
+    { pattern: /^gap-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
+    // Text sizes (opcional)
+    { pattern: /^text-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl)$/ },
+    // Padding start / end
+    { pattern: /^ps-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
+    { pattern: /^pe-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
   ],
   theme: {
     extend: {

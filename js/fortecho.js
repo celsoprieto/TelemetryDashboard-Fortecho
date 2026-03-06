@@ -206,6 +206,10 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       alarmsbuttons.forEach(btn => {
         btn.addEventListener("click", () => {
           const isActive = btn.classList.contains("active");
+          // showToast("Loading alarms...", "info", 10000);
+          // showToast("Cargando alarmas...", "error", 10000);
+          // showToast("Chargement des alarmes...", "success", 10000);
+          // showToast("Alarmen werden geladen...", "warning", 10000);
           // If this is the last active button, block turning it off
           if (isActive) {
             const activeCount = [...alarmsbuttons].filter(b => b.classList.contains("active")).length;
@@ -4029,7 +4033,7 @@ function getFilteredDataReports() {
 
   toast.innerHTML = `
     <div class="${config.icon}">${config.svg}</div>
-    <div class="flex-1 text-sm text-gray-700">${message}</div>
+    <div class="flex-1 text-sm ms-2.5 border-s border-default text-gray-700 ps-3.5">${message}</div>
     <button class="text-gray-400 hover:text-gray-600 close-toast">✕</button>
   `;
 
