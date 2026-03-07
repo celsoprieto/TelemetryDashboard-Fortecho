@@ -2905,7 +2905,7 @@ function getFilteredDataReports() {
           return `
             <td class="px-4 py-3 align-top">
               <div class="flex items-start gap-2">
-                <span class="text-gray-800 break-all">${safeStr(value)}</span>
+                <span class="text-gray-800 whitespace-nowrap">${safeStr(value)}</span>
              </div>
             </td>
           `;
@@ -2947,7 +2947,7 @@ function getFilteredDataReports() {
           return `
             <td class="px-4 py-3 align-top">
               <div class="flex items-start gap-2">
-                <span class="text-gray-800 break-all">${safeStr(value)}</span>
+                <span class="text-gray-800 whitespace-nowrap">${safeStr(value)}</span>
              </div>
             </td>
           `;
@@ -3058,7 +3058,7 @@ function getFilteredDataReports() {
 
         // ---------- DEFAULT ----------
         return `
-          <td class="px-2 py-3 align-top text-gray-800 break-all">
+          <td class="px-2 py-3 align-top text-gray-800 whitespace-nowrap">
             ${value}
           </td>`;
 
