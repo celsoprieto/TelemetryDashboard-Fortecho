@@ -2516,7 +2516,7 @@ const columnalarms = [
 ];
 
 const columnreports = [
-  { key: "title", label: "Title", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "300px", maxLen: 60 },
+  { key: "title", label: "Title", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "250px", maxLen: 40 },
   { key: "period", label: "Period", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "140px" , maxLen: 50 },
   { key: "name", label: "Created by", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "100px", maxLen: 20 },
   { key: "createdat", label: "Created at", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "160px" },
