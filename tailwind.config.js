@@ -180,6 +180,8 @@ module.exports = {
     "text-yellow-500",
     "text-red-500",
     "text-green-500",
+    "text-white",
+    "bg-gray-900",
     // Tamaños de iconos
     "w-5", "h-5",
     "w-6", "h-6",
@@ -199,6 +201,16 @@ module.exports = {
     "drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]",
     "border-s",
     "border-default",
+    "text-heading",
+    "bg-custom-green-light",
+    "bg-custom-green",
+    "bg-custom-red",
+    "bg-custom-red-light",
+    "bg-custom-red-dark",
+    "bg-custom-blue",
+    "bg-custom-blue-light",
+    "bg-custom-yellow-light",
+    "bg-custom-yellow",
     // Width
     { pattern: /^w-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
     // Height
@@ -230,6 +242,8 @@ module.exports = {
         "custom-yellow": "#FFE066",       /* slightly stronger on hover */
         "custom-orange-light": "#FFDAB3",  /* soft pastel orange */
         "custom-orange": "#FFA64D",        /* slightly stronger on hover */
+        heading: "#111827",
+        body: "#6B7280"
       } ,
       width: {
         '45': '11.25rem',  // 180px

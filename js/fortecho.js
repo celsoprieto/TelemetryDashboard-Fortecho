@@ -2463,38 +2463,67 @@ function hideLoading(el) {
   // 2) GRID CONFIG
   // ==========================
   const columnsevents = [
-    { key: "timestamp", label: "Timestamp" },
-    { key: "deviceId", label: "Device" },
-    { key: "eventType", label: "Event Type" },
-    { key: "hubName", label: "Hub" }
-    // ,
-    // { key: "id", label: "Id" },
-    // { key: "sequenceNumber", label: "Sequence" }
-  ];
 
-    const columnalarms = [
-      { key: "document_dateUtc", label: "Alarm Date" },
-      { key: "event_type", label: "Alarm Type" },
-      { key: "tagId", label: "Device ID" },
-      { key: "object_marque", label: "Artist" },
-      { key: "object_model", label: "Title" }
-      // ,
-      // { key: "id", label: "Id" },
-      // { key: "sequenceNumber", label: "Sequence" }
-    ];
+  { 
+    key: "timestamp",
+    label: "Timestamp",
+    nowrap: true,
+    truncate: true,
+    textSize: "text-sm",
+    maxWidth: "160px"
+  },
 
-    const columnreports = [
-      { key: "title", label: "Title" },
-      { key: "period", label: "Period" },
-      { key: "name", label: "Created by" },
-      { key: "createdat", label: "Created at" },
-      { key: "type", label: "Type" },
-      { key: "status", label: "" },
-      { key: "enabled", label: "" }
-      // ,
-      // { key: "id", label: "Id" },
-      // { key: "sequenceNumber", label: "Sequence" }
-    ];
+  { 
+    key: "deviceId",
+    label: "Device",
+    nowrap: true,
+    truncate: true,
+    textSize: "text-sm",
+    maxWidth: "120px"
+  },
+
+  { 
+    key: "eventType",
+    label: "Event Type",
+    nowrap: true,
+    truncate: true,
+    textSize: "font-medium text-heading",
+    maxWidth: "140px"
+  },
+
+  { 
+    key: "hubName",
+    label: "Hub",
+    nowrap: true,
+    truncate: true,
+    textSize: "text-sm",
+    maxWidth: "200px"
+  }
+
+];
+
+  const eventRowColors = {
+    "Microsoft.Devices.DeviceConnected": "bg-custom-green-light hover:bg-custom-green",
+    "Microsoft.Devices.DeviceDisconnected": "bg-custom-red-light hover:bg-custom-red"
+  };
+
+const columnalarms = [
+  { key: "document_dateUtc", label: "Alarm Date", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "160px" },
+  { key: "event_type", label: "Alarm Type", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "140px" },
+  { key: "tagId", label: "Device ID", nowrap: true, truncate: true, textSize: "text-sm", maxWidth: "120px" },
+  { key: "object_marque", label: "Artist", nowrap: true, truncate: true, textSize: "text-sm", maxWidth: "200px", maxLen: 60  },
+  { key: "object_model", label: "Title", nowrap: true, truncate: true, textSize: "text-sm", maxWidth: "200px", maxLen: 60 },
+];
+
+const columnreports = [
+  { key: "title", label: "Title", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "200px", maxLen: 60 },
+  { key: "period", label: "Period", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "140px" , maxLen: 50 },
+  { key: "name", label: "Created by", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "100px", maxLen: 20 },
+  { key: "createdat", label: "Created at", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "160px" },
+  { key: "type", label: "Type", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "140px" },
+  { key: "status", label: "", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "100px" },
+  { key: "enabled", label: "", nowrap: true, truncate: true, textSize: "text-sm", maxWidth: "100px" }
+];
 
   //let data = [...deviceeventsrawData]; // datos crudos, sin filtrar ni paginar
 
@@ -2879,12 +2908,13 @@ function getFilteredDataReports() {
   }
 
   function renderBody(rows) {
+
     const body = document.getElementById("tableBody");
 
     if (!rows.length) {
       body.innerHTML = `
         <tr>
-          <td colspan="${columns.length}" class="px-4 py-10 text-center text-gray-500">
+          <td colspan="${columnsevents.length}" class="px-4 py-10 text-center text-gray-500">
             No results found
           </td>
         </tr>
@@ -2892,39 +2922,59 @@ function getFilteredDataReports() {
       return;
     }
 
-    body.innerHTML = rows.map(row => `
-      <tr class="hover:bg-gray-50">
-        ${columnsevents.map(col => {
-          let value = row[col.key];
+    let html = "";
 
-          // format timestamp
-          if (col.key === "timestamp") value = formatTimestamp(value);
+    for (const row of rows) {
 
-          const rawValue = safeStr(row[col.key]);
+      const rowClass = eventRowColors[row.eventType] || "hover:bg-gray-50";
 
-          return `
-            <td class="px-4 py-3 align-top">
-              <div class="flex items-start gap-2">
-                <span class="text-gray-800 whitespace-nowrap">${safeStr(value)}</span>
-             </div>
-            </td>
-          `;
-        }).join("")}
-      </tr>
-    `).join("");
+      html += `<tr class="${rowClass} cursor-pointer">`;
+
+      for (const col of columnsevents) {
+
+        let value = row[col.key];
+
+        if (col.key === "timestamp") {
+          value = formatTimestamp(value);
+        }
+
+        const safeValue = safeStr(value);
+
+        const textSize = col.textSize || "text-sm";
+        const nowrap = col.nowrap ? "whitespace-nowrap" : "";
+        const truncate = col.truncate ? "truncate block" : "";
+        const maxWidth = col.maxWidth ? `max-w-[${col.maxWidth}]` : "";
+
+        html += `
+          <td class="px-4 py-3 align-top ${maxWidth}">
+            <div class="flex items-start gap-2">
+
+              <span 
+                class="text-gray-800 ${textSize} ${nowrap} ${truncate}"
+                ${col.truncate ? `title="${safeValue}"` : ""}
+              >
+                ${safeValue}
+              </span>
+
+            </div>
+          </td>
+        `;
+      }
+
+      html += `</tr>`;
+    }
+
+    body.innerHTML = html;
   }
-
 
   function renderBodyAlarms(rows) {
     const body = document.getElementById("tableABody");
-
-    // Store rows globally for event handler access
     currentAlarmsRows = rows;
 
     if (!rows.length) {
       body.innerHTML = `
         <tr>
-          <td colspan="${columns.length}" class="px-4 py-10 text-center text-gray-500">
+          <td colspan="${columnalarms.length}" class="px-4 py-10 text-center text-gray-500">
             No results found
           </td>
         </tr>
@@ -2934,183 +2984,283 @@ function getFilteredDataReports() {
 
     body.innerHTML = rows.map((row, index) => {
       const trClass = getRowClass(row.event_typeId);
-      return `
-      <tr class="${trClass} cursor-pointer" data-row-index="${index}"> 
-        ${columnalarms.map(col => {
-          let value = row[col.key];
 
-          // format timestamp
-          if (col.key === "document_dateUtc") value = formatTimestamp(value);
-
-          const rawValue = safeStr(row[col.key]);
-
-          return `
-            <td class="px-4 py-3 align-top">
-              <div class="flex items-start gap-2">
-                <span class="text-gray-800 whitespace-nowrap">${safeStr(value)}</span>
-             </div>
-            </td>
-          `;
-        }).join("")}
-      </tr>
-    `;}).join("");
-      
-  }
-
-  
-   function renderBodyReports(rows) {
-
-    const body = document.getElementById("tableRBody");
-    currentReportsRows = rows;
-
-    if (!rows.length) {
-      body.innerHTML = `
-        <tr>
-          <td colspan="${columnreports.length}" class="px-4 py-10 text-center text-gray-500">
-            No results found
-          </td>
-        </tr>`;
-      return;
-    }
-
-    body.innerHTML = rows.map((row, index) => {
-
-      const trClass = "hover:bg-gray-50 transition-colors";
-
-      const cells = columnreports.map(col => {
-
+      const cells = columnalarms.map(col => {
         let value = row[col.key];
 
-        // ---------- DATE ----------
-        if (col.key === "createdat") {
-          value = new Date(value).toLocaleDateString(
-            'en-GB',
-            { day: '2-digit', month: 'long', year: 'numeric' }
-          );
+        // ---------- DATE ---------- 
+        if (col.key === "document_dateUtc" && value) {
+          value = formatTimestamp(value);
         }
 
-        // ---------- NAME (truncate + tooltip) ----------
-        if (col.key === "name") {
-          value = truncateWithTooltip(value, 20);
-        }
-        if (col.key === "title") {
-          value = truncateWithTooltip(value, 60);
-        }
-
-        // ---------- STATUS ----------
-        if (col.key === "status") {
-
-          if (value === 1) {
-
-            return `
-              <td class="px-2 py-3 text-center">
-                <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
-                        data-file="${window.appState.sitecode}/${row.filename}">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                      stroke-linejoin="round" class="lucide lucide-download">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                  </svg>
-                </button>
-              </td>`;
-          }
-
-          return `
-            <td class="px-2 py-3 text-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                stroke="currentColor" stroke-width="2"
-                class="lucide lucide-loader animate-spin text-gray-400">
-                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-                <path d="M22 12a10 10 0 0 1-10 10"/>
-              </svg>
-            </td>`;
-        }
-
-        // ---------- DELETE ----------
-        if (col.key === "enabled" && (value === true || value === 1)) {
-
-          return `
-            <td class="px-2 py-3 text-center">
-              <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
-                      data-id="${row.id}" >
-
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
-
-                  <path d="M3 6h18"/>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                  <line x1="10" y1="11" x2="10" y2="17"/>
-                  <line x1="14" y1="11" x2="14" y2="17"/>
-
-                </svg>
-
-              </button>
-            </td>`;
+        // ---------- TRUNCATE + TOOLTIP ----------
+        let cellContent = value;
+        if (col.truncate && typeof value === "string") {
+          const maxLen = col.maxLen || 20;
+          const maxWidth = col.maxWidth || "200px";
+          const textSizeClass = col.textSize || "text-sm";
+          cellContent = truncateWithTooltip(value, maxLen, textSizeClass, maxWidth);
         }
 
         // ---------- DEFAULT ----------
+        const nowrapClass = col.nowrap ? "whitespace-nowrap" : "";
         return `
-          <td class="px-2 py-3 align-top text-gray-800 whitespace-nowrap">
-            ${value}
-          </td>`;
-
+          <td class="px-4 py-3 align-top text-gray-800 ${nowrapClass}">
+            ${cellContent}
+          </td>
+        `;
       }).join("");
 
-      return `<tr class="${trClass}" data-row-index="${index}">${cells}</tr>`;
-
+      return `<tr class="${trClass} cursor-pointer" data-row-index="${index}">${cells}</tr>`;
     }).join("");
+  }
+
+  //  function renderBodyReports(rows) {
+
+  //   const body = document.getElementById("tableRBody");
+  //   currentReportsRows = rows;
+
+  //   if (!rows.length) {
+  //     body.innerHTML = `
+  //       <tr>
+  //         <td colspan="${columnreports.length}" class="px-4 py-10 text-center text-gray-500">
+  //           No results found
+  //         </td>
+  //       </tr>`;
+  //     return;
+  //   }
+
+  //   body.innerHTML = rows.map((row, index) => {
+
+  //     const trClass = "hover:bg-gray-50 transition-colors";
+
+  //     const cells = columnreports.map(col => {
+
+  //       let value = row[col.key];
+
+  //       // ---------- DATE ----------
+  //       if (col.key === "createdat") {
+  //         value = new Date(value).toLocaleDateString(
+  //           'en-GB',
+  //           { day: '2-digit', month: 'long', year: 'numeric' }
+  //         );
+  //       }
+
+  //       // ---------- NAME (truncate + tooltip) ----------
+  //       // if (col.key === "name") {
+  //       //   value = truncateWithTooltip(value, 20);
+  //       // }
+  //       // if (col.key === "title") {
+  //       //   value = truncateWithTooltip(value, 60);
+  //       // }
+
+  //       let cellContent = value;
+  //       if (col.truncate && typeof value === "string") {
+  //         const maxLen = col.maxLen || 20;
+  //         value = truncateWithTooltip(value, maxLen); // tooltip negro, texto blanco
+  //       }
+
+  //       // ---------- STATUS ----------
+  //       if (col.key === "status") {
+
+  //         if (value === 1) {
+
+  //           return `
+  //             <td class="px-2 py-3 text-center">
+  //               <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
+  //                       data-file="${window.appState.sitecode}/${row.filename}">
+  //                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+  //                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+  //                     stroke-linejoin="round" class="lucide lucide-download">
+  //                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+  //                   <polyline points="7 10 12 15 17 10"/>
+  //                   <line x1="12" y1="15" x2="12" y2="3"/>
+  //                 </svg>
+  //               </button>
+  //             </td>`;
+  //         }
+
+  //         return `
+  //           <td class="px-2 py-3 text-center">
+  //             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+  //               stroke="currentColor" stroke-width="2"
+  //               class="lucide lucide-loader animate-spin text-gray-400">
+  //               <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+  //               <path d="M22 12a10 10 0 0 1-10 10"/>
+  //             </svg>
+  //           </td>`;
+  //       }
+
+  //       // ---------- DELETE ----------
+  //       if (col.key === "enabled" && (value === true || value === 1)) {
+
+  //         return `
+  //           <td class="px-2 py-3 text-center">
+  //             <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
+  //                     data-id="${row.id}" >
+
+  //               <svg xmlns="http://www.w3.org/2000/svg"
+  //                   width="24"
+  //                   height="24"
+  //                   fill="none"
+  //                   stroke="currentColor"
+  //                   stroke-width="2"
+  //                   class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
+
+  //                 <path d="M3 6h18"/>
+  //                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+  //                 <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+  //                 <line x1="10" y1="11" x2="10" y2="17"/>
+  //                 <line x1="14" y1="11" x2="14" y2="17"/>
+
+  //               </svg>
+
+  //             </button>
+  //           </td>`;
+  //       }
+
+  //       // ---------- DEFAULT ----------
+  //       return `
+  //         <td class="px-2 py-3 align-top text-gray-800 whitespace-nowrap">
+  //           ${value}
+  //         </td>`;
+
+  //     }).join("");
+
+  //     return `<tr class="${trClass}" data-row-index="${index}">${cells}</tr>`;
+
+  //   }).join("");
+
+function renderBodyReports(rows) {
+  const body = document.getElementById("tableRBody");
+  currentReportsRows = rows;
+
+  if (!rows.length) {
+    body.innerHTML = `
+      <tr>
+        <td colspan="${columnreports.length}" class="px-4 py-10 text-center text-gray-500">
+          No results found
+        </td>
+      </tr>`;
+    return;
+  }
+
+  body.innerHTML = rows.map((row, index) => {
+    const trClass = "hover:bg-gray-50 transition-colors";
+
+    const cells = columnreports.map(col => {
+      let value = row[col.key];
+
+      // ---------- DATE ----------
+      if (col.key === "createdat" && value) {
+        value = new Date(value).toLocaleDateString('en-GB', {
+          day: '2-digit', month: 'long', year: 'numeric'
+        });
+      }
+
+      // ---------- TRUNCATE + TOOLTIP ----------
+      let cellContent = value;
+      if (col.truncate && typeof value === "string") {
+        const maxLen = col.maxLen || 20;
+        const maxWidth = col.maxWidth || "200px";
+        const textSizeClass = col.textSize || "text-sm";
+        cellContent = truncateWithTooltip(value, maxLen, textSizeClass, maxWidth);
+      }
+
+      // ---------- STATUS ----------
+      if (col.key === "status") {
+        if (value === 1) {
+          return `
+            <td class="px-2 py-3 text-center">
+              <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
+                      data-file="${window.appState.sitecode}/${row.filename}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="lucide lucide-download">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+              </button>
+            </td>`;
+        }
+        return `
+          <td class="px-2 py-3 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+              stroke="currentColor" stroke-width="2"
+              class="lucide lucide-loader animate-spin text-gray-400">
+              <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+              <path d="M22 12a10 10 0 0 1-10 10"/>
+            </svg>
+          </td>`;
+      }
+
+      // ---------- DELETE ----------
+      if (col.key === "enabled" && (value === true || value === 1)) {
+        return `
+          <td class="px-2 py-3 text-center">
+            <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
+                    data-id="${row.id}">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                  width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                  class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
+                <path d="M3 6h18"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                <line x1="10" y1="11" x2="10" y2="17"/>
+                <line x1="14" y1="11" x2="14" y2="17"/>
+              </svg>
+            </button>
+          </td>`;
+      }
+
+      // ---------- DEFAULT ----------
+      //const nowrapClass = col.nowrap ? "whitespace-nowrap" : "";
+      const nowrapClass = "";
+      const textSizeClass = col.textSize || "text-sm";
+      const maxWidthClass = col.maxWidth ? `max-w-[${col.maxWidth}]` : "";
+      const truncateClass = col.truncate ? "truncate block" : "";
+
+      return `
+        <td class="px-2 py-3 align-center text-gray-800 ${nowrapClass}">
+            ${cellContent}
+        </td>`;
+    }).join("");
+
+    return `<tr class="${trClass}" data-row-index="${index}">${cells}</tr>`;
+  }).join("");
+
+  // ---------- EVENTOS ----------
+  body.querySelectorAll(".download-btn").forEach(btn =>
+    btn.addEventListener("click", () => downloadFile(btn.dataset.file))
+  );
+
+  body.querySelectorAll(".delete-btn").forEach(btn =>
+    btn.addEventListener("click", async () => {
+      const reportId = btn.dataset.id;
+      const reportRow = currentReportsRows.find(r => r.id === reportId);
+      if (!reportRow) return;
+
+      const siteCode = reportRow.sitecode;
+      const blobPath = sanitizeUrlRemoveQuery(reportRow.blobUrl);
+      const userId = reportRow.userId;
+      const result = await deleteReport(reportId, siteCode, blobPath, userId);
+
+      if (result.deleted) {
+        showToast("Report deleted successfully", "success", 3000);
+        currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
+        renderBodyReports(currentReportsRows);
+      }
+    })
+  );
+}
+
+  
+  
 
     // ---------- EVENTS (SIN setTimeout) ----------
 
-    body.querySelectorAll(".download-btn").forEach(btn => {
 
-      btn.addEventListener("click", () => {
-
-        const file = btn.dataset.file;
-
-        downloadFile(file);
-
-      });
-
-    });
-
-    body.querySelectorAll(".delete-btn").forEach(btn => {
-
-      btn.addEventListener("click", async () => {
-
-        const reportId = btn.dataset.id;
-        const reportRow = currentReportsRows.find(r => r.id === reportId);
-
-        if (!reportRow) {
-          console.warn("Report not found in currentReportsRows:", reportId);
-          return;
-        }
-
-        
-        const siteCode = reportRow.sitecode;
-        const blobPath = sanitizeUrlRemoveQuery(reportRow.blobUrl);
-        const userId = reportRow.userId;
-
-        const result = await deleteReport(reportId, siteCode, blobPath,userId);
-        if (result.deleted) {
-          showToast("Report deleted successfully", "success", 3000);          
-          currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
-          renderBodyReports(currentReportsRows);
-        }
-
-      });
-
-    });
-
-  }
 
   export function sanitizeUrlRemoveQuery(input) {
     try {
@@ -3134,25 +3284,22 @@ function getFilteredDataReports() {
       .replace(/'/g, "&#039;");
   }
 
- function truncateWithTooltip(text, maxLen = 20) {
-
+ function truncateWithTooltip(text, maxLen = 20, textSizeClass = "text-sm", maxWidth = "200px") {
   if (!text) return "";
 
   const safe = escapeHtml(text);
 
   if (text.length <= maxLen) {
-    return safe;
+    return `<span class="${textSizeClass}">${safe}</span>`;
   }
 
   const short = escapeHtml(text.substring(0, maxLen)) + "…";
 
   return `
-    <div class="relative group inline-block max-w-[200px]">
-      
-      <span class="truncate block max-w-[200px] cursor-help">
+    <div class="relative group inline-block max-w-[${maxWidth}]">
+      <span class="truncate block cursor-help ${textSizeClass}">
         ${short}
       </span>
-
       <div class="
         absolute z-50
         opacity-0 group-hover:opacity-100
@@ -3167,7 +3314,6 @@ function getFilteredDataReports() {
       ">
         ${safe}
       </div>
-
     </div>
   `;
 }
@@ -3209,7 +3355,7 @@ function getFilteredDataReports() {
     buildPageButtons(totalPages);
   }
 
-    function renderFooterAlarms(total, filtered) {
+  function renderFooterAlarms(total, filtered) {
     const rowsAInfo = document.getElementById("rowsAInfo");
     const prevABtn = document.getElementById("prevABtn");
     const nextABtn = document.getElementById("nextABtn");
@@ -3477,8 +3623,8 @@ function getFilteredDataReports() {
       `;
 
       btn.addEventListener("click", () => {
-        stateAlarms.page = page;
-        renderAlarms();
+        stateReports.page = page;
+        renderReports();
       });
 
       container.appendChild(btn);
