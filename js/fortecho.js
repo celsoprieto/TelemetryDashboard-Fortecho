@@ -2516,7 +2516,7 @@ const columnalarms = [
 ];
 
 const columnreports = [
-  { key: "title", label: "Title", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "200px", maxLen: 60 },
+  { key: "title", label: "Title", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "300px", maxLen: 60 },
   { key: "period", label: "Period", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "140px" , maxLen: 50 },
   { key: "name", label: "Created by", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "100px", maxLen: 20 },
   { key: "createdat", label: "Created at", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "160px" },
@@ -3215,14 +3215,9 @@ function renderBodyReports(rows) {
       }
 
       // ---------- DEFAULT ----------
-      //const nowrapClass = col.nowrap ? "whitespace-nowrap" : "";
-      const nowrapClass = "";
-      const textSizeClass = col.textSize || "text-sm";
-      const maxWidthClass = col.maxWidth ? `max-w-[${col.maxWidth}]` : "";
-      const truncateClass = col.truncate ? "truncate block" : "";
-
+      const nowrapClass = col.nowrap ? "whitespace-nowrap" : "";
       return `
-        <td class="px-2 py-3 align-center text-gray-800 ${nowrapClass}">
+        <td class="px-2 py-3 align-middle text-gray-800 ${nowrapClass}">
             ${cellContent}
         </td>`;
     }).join("");
@@ -3284,22 +3279,23 @@ function renderBodyReports(rows) {
       .replace(/'/g, "&#039;");
   }
 
- function truncateWithTooltip(text, maxLen = 20, textSizeClass = "text-sm", maxWidth = "200px") {
+ function truncateWithTooltip(text, maxLen = 20, textClass = "", maxWidth="200px") {
+
   if (!text) return "";
 
   const safe = escapeHtml(text);
-
-  if (text.length <= maxLen) {
-    return `<span class="${textSizeClass}">${safe}</span>`;
-  }
-
-  const short = escapeHtml(text.substring(0, maxLen)) + "…";
+  const short = text.length > maxLen
+      ? escapeHtml(text.substring(0, maxLen)) + "…"
+      : safe;
 
   return `
     <div class="relative group inline-block max-w-[${maxWidth}]">
-      <span class="truncate block cursor-help ${textSizeClass}">
+
+      <span class="truncate block cursor-help ${textClass}">
         ${short}
       </span>
+
+      ${text.length > maxLen ? `
       <div class="
         absolute z-50
         opacity-0 group-hover:opacity-100
@@ -3313,7 +3309,8 @@ function renderBodyReports(rows) {
         pointer-events-none
       ">
         ${safe}
-      </div>
+      </div>` : ""}
+
     </div>
   `;
 }
