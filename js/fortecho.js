@@ -19,6 +19,11 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
     let lastLights = {};
     let currentMetric = 'temp-humidity'; // or 'humidity'
     let tagsById = {};   // <--- stores full objects by tagId
+    let allTags = {};
+    let allTagsArray = [];      // Todos los tags como array
+    let tagCardsMap = new Map(); // Mapa tagId → card DOM
+    let currentSearch = "";
+    let searchTimeout;
     let reloadTimer;
     let isSyncingInputs = false;
     window.appState.sitecode = 0; // hardcoded for now, can be dynamic if needed
@@ -153,6 +158,10 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           overlay.classList.add("hidden");         
           closeMenuTBtn.classList.add("-translate-x-full");
           closeMenuTBtn.classList.remove("translate-x-0");
+          const searchInput = document.getElementById("tagSearch");
+          if (searchInput) searchInput.value = "";
+          currentSearch = "";
+          initTagsGrid(tagsById, "tagsGridT"); // reset grid to show all tags
         }
 
         btn_menuT.addEventListener("click", () => {
@@ -423,7 +432,16 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           }
         });
 
-        
+        //-------------------SEARCH BUTTON MENU
+        document.getElementById("tagSearch").addEventListener("input", (e) => {
+
+          clearTimeout(searchTimeout);
+
+          searchTimeout = setTimeout(() => {
+            filterTags(e.target.value);
+          }, 200);
+
+        });
 
 
 
@@ -664,6 +682,8 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           if (firstKey) tagsById[firstKey].isSelected = true; 
           refreshTagSelect();   
         }
+
+      allTags = structuredClone(tagsById); // keep a copy of all tags for search/filtering
 
       } catch (err) {
         console.error('Error loading devices:', err);
@@ -2299,7 +2319,7 @@ function applyXAxisRange() {
         // console.log("tagsById =", tagsById);
         // console.log("isArray =", Array.isArray(tagsById));
 
-        renderTagsGrid(tagsById, "tagsGrid");          // optional: refresh tags list
+        renderTagsGrid(allTags, "tagsGrid");          // optional: refresh tags list
       }
 
       if (viewName === "alarms") {
@@ -2347,7 +2367,8 @@ function applyXAxisRange() {
         //await loadTags();
         setLast24Hours();
         await loadData(1);
-        renderTagsGrid(tagsById, "tagsGridT"); 
+        //renderTagsGrid(allTags, "tagsGridT"); 
+        initTagsGrid(tagsById, "tagsGridT");
       }
       const menuBtnT = document.getElementById("menuBtnT");
       if (menuBtnT) {
@@ -3172,26 +3193,75 @@ function renderBodyReports(rows) {
         if (value === 1) {
           return `
             <td class="px-2 py-3 text-center">
-              <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
-                      data-file="${window.appState.sitecode}/${row.filename}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" class="lucide lucide-download">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-              </button>
+              <div class="flex items-center justify-center">
+                <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
+                        data-file="${window.appState.sitecode}/${row.filename}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" class="lucide lucide-download">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </button>
+              </div>
             </td>`;
         }
         return `
           <td class="px-2 py-3 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-              stroke="currentColor" stroke-width="2"
-              class="lucide lucide-loader animate-spin text-gray-400">
-              <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-              <path d="M22 12a10 10 0 0 1-10 10"/>
-            </svg>
+            <div class="flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                stroke="currentColor" stroke-width="2"
+                class="lucide lucide-loader animate-spin text-gray-400">
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+                <path d="M22 12a10 10 0 0 1-10 10"/>
+              </svg>
+            </div>
+          </td>`;
+      }
+
+      // ---------- TYPE (PDF / EXCEL ICON) ----------
+      if (col.key === "type") {
+        const type = (value || "").toString().trim().toLowerCase();
+
+        const tdClass = "px-2 py-3";
+        const wrapClass = "flex items-center justify-center";
+
+        if (type === "pdf") {
+          return `
+            <td class="${tdClass}">
+              <div class="${wrapClass}">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24" height="24"
+                    fill="currentColor"
+                    class="text-[#DA494E]"
+                    aria-label="PDF" role="img">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7zm0 2.5L18.5 9H14zM8 13h2.2c1.3 0 2.3 1 2.3 2.3S11.5 17.6 10.2 17.6H9.2V19H8zm2.1 3.1c.5 0 .9-.4.9-.9s-.4-.9-.9-.9H9.2v1.8zM13 13h2.1c1.5 0 2.7 1.2 2.7 2.7S16.6 18.4 15.1 18.4H13zm2 3.9c.8 0 1.4-.6 1.4-1.4S15.8 14 15 14h-.7v2.9zM18 13h3v1.3h-1.7v1.1H21v1.3h-1.7V19H18z"/>
+                </svg>
+              </div>
+            </td>`;
+        }
+
+        if (type === "excel" || type === "xlsx" || type === "xls") {
+          return `
+            <td class="${tdClass}">
+              <div class="${wrapClass}">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24" height="24"
+                    fill="currentColor"
+                    class="text-[#107C41]"
+                    aria-label="Excel" role="img">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7zm0 2.5L18.5 9H14zM8 12h2l1 1.7L12 12h2l-2 3.1L14 18h-2l-1-1.8L10 18H8l2-2.9zm7 0h4v6h-4zm1.2 1.2v.9H18v-.9zm0 2v.9H18v-.9zm-1.2-2v.9h.8v-.9zm0 2v.9h.8v-.9z"/>
+                </svg>
+              </div>
+            </td>`;
+        }
+
+        return `
+          <td class="px-2 py-3 align-middle text-gray-800">
+            ${value ?? ""}
           </td>`;
       }
 
@@ -3199,18 +3269,20 @@ function renderBodyReports(rows) {
       if (col.key === "enabled" && (value === true || value === 1)) {
         return `
           <td class="px-2 py-3 text-center">
-            <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
-                    data-id="${row.id}">
-              <svg xmlns="http://www.w3.org/2000/svg"
-                  width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
-                  class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
-                <path d="M3 6h18"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                <line x1="10" y1="11" x2="10" y2="17"/>
-                <line x1="14" y1="11" x2="14" y2="17"/>
-              </svg>
-            </button>
+            <div class="flex items-center justify-center">
+              <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
+                      data-id="${row.id}">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </button>
+            </div>
           </td>`;
       }
 
@@ -3289,7 +3361,7 @@ function renderBodyReports(rows) {
       : safe;
 
   return `
-    <div class="relative group inline-block max-w-[${maxWidth}]">
+    <div class="relative group inline-block max-w-[${maxWidth}] flex items-center">
 
       <span class="truncate block cursor-help ${textClass}">
         ${short}
@@ -3660,6 +3732,121 @@ function renderBodyReports(rows) {
     }
   }
 
+  function highlight(text, search) {
+    if (!search) return escapeHtml(text);
+
+    const safe = escapeHtml(text);
+    const regex = new RegExp(`(${search})`, "gi");
+
+    return safe.replace(regex, `<span class="bg-yellow-200">$1</span>`);
+  }
+
+  function filterTags(searchText) {
+    currentSearch = searchText.toLowerCase();
+
+    allTagsArray.forEach(tag => {
+      const card = tagCardsMap.get(tag.tagId);
+      if (!card) return;
+
+      const title = `${tag.marque || ""} ${tag.model || ""}`.toLowerCase();
+      const sub1 = `Device ID: ${tag.tagId}`.toLowerCase();
+      const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`.toLowerCase();
+
+      const match = title.includes(currentSearch) || sub1.includes(currentSearch) || sub2.includes(currentSearch);
+
+      card.style.display = match ? "block" : "none";
+
+      if (match) {
+        // resaltar coincidencia
+        card.querySelector(".font-bold").innerHTML = highlight(`${tag.marque || "Unknown"} ${tag.model || ""}`, currentSearch);
+        card.querySelector(".text-sm").innerHTML = highlight(`Device ID: ${tag.tagId}`, currentSearch);
+        card.querySelector(".text-xs").innerHTML = highlight(`Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`, currentSearch);
+      }
+    });
+  }
+  function updateCardHighlight(tag) {
+    const card = tagCardsMap.get(tag.tagId);
+    if (!card) return;
+
+    const bar = card.querySelector(".absolute.left-0");
+    const textXs = card.querySelector(".text-xs");
+
+    bar.className = `absolute left-0 top-0 h-full w-1.5 ${tag.isSelected ? "bg-custom-green" : "bg-custom-blue"} rounded-l-xl pointer-events-none`;
+    textXs.className = `text-xs ${tag.isSelected ? "text-custom-green" : "text-custom-blue"}`;
+    card.querySelector("button[data-tagid]").title = tag.isSelected ? "Deselect" : "Select";
+  }
+
+  function initTagsGrid(tagsById, gridId = "tagsGrid") {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+
+    // Convertir a array
+    allTagsArray = Object.values(tagsById || {});
+
+    grid.innerHTML = "";
+    tagCardsMap.clear();
+
+    allTagsArray.forEach(tag => {
+      const card = document.createElement("div");
+      card.className = `card relative bg-white rounded-xl shadow-sm border border-gray-200 p-4`;
+
+      const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-blue";
+      const textColorClass = tag.isSelected ? "text-custom-green" : "text-custom-blue";
+
+      const title = `${tag.marque || "Unknown"} ${tag.model || ""}`.trim();
+      const sub1 = `Device ID: ${tag.tagId}`;
+      const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
+
+      card.innerHTML = `
+        <button
+          type="button"
+          class="absolute inset-0 w-full h-full cursor-pointer z-10 rounded-md"
+          data-tagid="${tag.tagId}"
+          title="${tag.isSelected ? 'Deselect' : 'Select'}"
+        ></button>
+
+        <div class="absolute left-0 top-0 h-full w-1.5 ${barClass} rounded-l-xl pointer-events-none"></div>
+
+        <div class="flex items-start justify-between gap-3 pointer-events-none">
+          <div class="min-w-0">
+            <div class="font-bold text-sky-600 truncate">
+              ${title}
+            </div>
+            <div class="text-sm text-sky-600 font-medium">
+              ${sub1}
+            </div>
+            <div class="text-xs ${textColorClass}">
+              ${sub2}
+            </div>
+          </div>
+        </div>
+      `;
+
+      grid.appendChild(card);
+      tagCardsMap.set(tag.tagId, card);
+
+      // Botón click
+      const button = card.querySelector('button[data-tagid]');
+      button.addEventListener('click', function() {
+        const selectedCount = allTagsArray.filter(t => t.isSelected).length;
+        if (tag.isSelected && selectedCount === 1) return;
+
+        if (currentMetric === "temp-humidity") {
+          allTagsArray.forEach(t => t.isSelected = false);
+        }
+
+        if (!tag.isSelected && selectedCount >= 10) {
+          alert("Cannot select more than 10 tags");
+          return;
+        }
+
+        tag.isSelected = !tag.isSelected;
+        refreshTagSelect(); // tu función de actualización
+        updateCardHighlight(tag); // actualizar UI del card
+      });
+    });
+  }
+
   function renderTagsGrid(tagsById,gridId = "tagsGrid") {
     const grid = document.getElementById(gridId);
     if (!grid) return;
@@ -3669,10 +3856,15 @@ function renderBodyReports(rows) {
 
     grid.innerHTML = "";
 
+    tagsArray.sort((a, b) => b.isSelected - a.isSelected);
     tagsArray.forEach(tag => {
       const title = `${tag.marque || "Unknown"} ${tag.model || ""}`.trim();
       const sub1 = `Device ID: ${tag.tagId}`;
       const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
+
+      const titleHtml = highlight(title, currentSearch);
+      const sub1Html = highlight(sub1, currentSearch);
+      const sub2Html = highlight(sub2, currentSearch);
 
       const card = document.createElement("div");
       const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-blue";
@@ -3696,15 +3888,15 @@ function renderBodyReports(rows) {
         <div class="flex items-start justify-between gap-3 pointer-events-none">
           <div class="min-w-0">
             <div class="font-bold text-sky-600 truncate">
-              ${escapeHtml(title)}
+              ${titleHtml}
             </div>
 
             <div class="text-sm text-sky-600 font-medium">
-              ${escapeHtml(sub1)}
+              ${escapeHtml(sub1Html)}
             </div>
 
             <div class="text-xs ${textColorClass}">
-              ${escapeHtml(sub2)}
+              ${escapeHtml(sub2Html)}
             </div>
           </div>
         </div>
@@ -3743,6 +3935,8 @@ function renderBodyReports(rows) {
 
     });
   }
+
+
 
     async function loadAlarms() {
     //console.log("Loading events from Azure Function...");
