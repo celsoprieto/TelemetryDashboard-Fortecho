@@ -215,10 +215,10 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       alarmsbuttons.forEach(btn => {
         btn.addEventListener("click", () => {
           const isActive = btn.classList.contains("active");
-          // showToast("Loading alarms...", "info", 10000);
-          // showToast("Cargando alarmas...", "error", 10000);
-          // showToast("Chargement des alarmes...", "success", 10000);
-          // showToast("Alarmen werden geladen...", "warning", 10000);
+          //showToast("Archivo descargado con éxito", "success", 3500, "top-left");
+          //showToast("Ocurrió un error", "error", 4000, "top-right");
+          //showToast("Información importante", "info", 3000, "bottom-left");
+          //showToast("Advertencia crítica", "warning", 5000, "bottom-right");
           // If this is the last active button, block turning it off
           if (isActive) {
             const activeCount = [...alarmsbuttons].filter(b => b.classList.contains("active")).length;
@@ -478,7 +478,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         document.getElementById("reportingButton")
           .addEventListener("click", async () => {
 
-              showToast("Report generation started", "info", 3000);
+              showToast("Report generation started", "info", 3000, "top-right");
               const btn = document.getElementById("reportingButton");
                const reportsLink = Array.from(document.querySelectorAll("a[data-view]"))
                 .find(link => link.dataset.view === "reports");
@@ -498,7 +498,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
                   }, 500); // small delay to ensure UI updates before navigation  
                   await reportPromise;
                   if (reportPromise) { 
-                    showToast("Report generation completed", "success", 3000);  
+                     
                     loadReports(); // refresh report list after generation
                   }
 
@@ -2532,7 +2532,7 @@ function hideLoading(el) {
 const columnalarms = [
   { key: "document_dateUtc", label: "Alarm Date", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "160px" },
   { key: "event_type", label: "Alarm Type", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "140px" },
-  { key: "tagId", label: "Device ID", nowrap: true, truncate: true, textSize: "text-sm", maxWidth: "120px" },
+  { key: "tagId", label: "ID", nowrap: true, truncate: true, textSize: "text-sm", maxWidth: "120px" },
   { key: "object_marque", label: "Artist", nowrap: true, truncate: true, textSize: "text-sm", maxWidth: "200px", maxLen: 60  },
   { key: "object_model", label: "Title", nowrap: true, truncate: true, textSize: "text-sm", maxWidth: "200px", maxLen: 60 },
 ];
@@ -3037,122 +3037,7 @@ function getFilteredDataReports() {
     }).join("");
   }
 
-  //  function renderBodyReports(rows) {
-
-  //   const body = document.getElementById("tableRBody");
-  //   currentReportsRows = rows;
-
-  //   if (!rows.length) {
-  //     body.innerHTML = `
-  //       <tr>
-  //         <td colspan="${columnreports.length}" class="px-4 py-10 text-center text-gray-500">
-  //           No results found
-  //         </td>
-  //       </tr>`;
-  //     return;
-  //   }
-
-  //   body.innerHTML = rows.map((row, index) => {
-
-  //     const trClass = "hover:bg-gray-50 transition-colors";
-
-  //     const cells = columnreports.map(col => {
-
-  //       let value = row[col.key];
-
-  //       // ---------- DATE ----------
-  //       if (col.key === "createdat") {
-  //         value = new Date(value).toLocaleDateString(
-  //           'en-GB',
-  //           { day: '2-digit', month: 'long', year: 'numeric' }
-  //         );
-  //       }
-
-  //       // ---------- NAME (truncate + tooltip) ----------
-  //       // if (col.key === "name") {
-  //       //   value = truncateWithTooltip(value, 20);
-  //       // }
-  //       // if (col.key === "title") {
-  //       //   value = truncateWithTooltip(value, 60);
-  //       // }
-
-  //       let cellContent = value;
-  //       if (col.truncate && typeof value === "string") {
-  //         const maxLen = col.maxLen || 20;
-  //         value = truncateWithTooltip(value, maxLen); // tooltip negro, texto blanco
-  //       }
-
-  //       // ---------- STATUS ----------
-  //       if (col.key === "status") {
-
-  //         if (value === 1) {
-
-  //           return `
-  //             <td class="px-2 py-3 text-center">
-  //               <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
-  //                       data-file="${window.appState.sitecode}/${row.filename}">
-  //                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-  //                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
-  //                     stroke-linejoin="round" class="lucide lucide-download">
-  //                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-  //                   <polyline points="7 10 12 15 17 10"/>
-  //                   <line x1="12" y1="15" x2="12" y2="3"/>
-  //                 </svg>
-  //               </button>
-  //             </td>`;
-  //         }
-
-  //         return `
-  //           <td class="px-2 py-3 text-center">
-  //             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-  //               stroke="currentColor" stroke-width="2"
-  //               class="lucide lucide-loader animate-spin text-gray-400">
-  //               <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
-  //               <path d="M22 12a10 10 0 0 1-10 10"/>
-  //             </svg>
-  //           </td>`;
-  //       }
-
-  //       // ---------- DELETE ----------
-  //       if (col.key === "enabled" && (value === true || value === 1)) {
-
-  //         return `
-  //           <td class="px-2 py-3 text-center">
-  //             <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
-  //                     data-id="${row.id}" >
-
-  //               <svg xmlns="http://www.w3.org/2000/svg"
-  //                   width="24"
-  //                   height="24"
-  //                   fill="none"
-  //                   stroke="currentColor"
-  //                   stroke-width="2"
-  //                   class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
-
-  //                 <path d="M3 6h18"/>
-  //                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
-  //                 <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-  //                 <line x1="10" y1="11" x2="10" y2="17"/>
-  //                 <line x1="14" y1="11" x2="14" y2="17"/>
-
-  //               </svg>
-
-  //             </button>
-  //           </td>`;
-  //       }
-
-  //       // ---------- DEFAULT ----------
-  //       return `
-  //         <td class="px-2 py-3 align-top text-gray-800 whitespace-nowrap">
-  //           ${value}
-  //         </td>`;
-
-  //     }).join("");
-
-  //     return `<tr class="${trClass}" data-row-index="${index}">${cells}</tr>`;
-
-  //   }).join("");
-
+  
 function renderBodyReports(rows) {
   const body = document.getElementById("tableRBody");
   currentReportsRows = rows;
@@ -3208,6 +3093,19 @@ function renderBodyReports(rows) {
               </div>
             </td>`;
         }
+        if (value === 2) {
+        return `
+          <td class="px-2 py-3 text-center">
+            <div class="flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" class="lucide lucide-x text-red-600">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+          </td>`;
+      }
         return `
           <td class="px-2 py-3 text-center">
             <div class="flex items-center justify-center">
@@ -3315,7 +3213,7 @@ function renderBodyReports(rows) {
       const result = await deleteReport(reportId, siteCode, blobPath, userId);
 
       if (result.deleted) {
-        showToast("Report deleted successfully", "success", 3000);
+        showToast("Report deleted successfully", "success", 3000, "top-right");
         currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
         renderBodyReports(currentReportsRows);
       }
@@ -3784,7 +3682,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
 
       const title = `${tag.model || ""}`.toLowerCase();
       const artist = `${tag.marque || ""}`.toLowerCase();
-      const sub1 = `Device ID: ${tag.tagId}`.toLowerCase();
+      const sub1 = `ID: ${tag.tagId}`.toLowerCase();
       const sub2 = `Serial: ${tag.serialNumber || "-"}`.toLowerCase();
 
       const match = title.includes(currentSearch) || artist.includes(currentSearch) || sub1.includes(currentSearch) || sub2.includes(currentSearch);
@@ -3795,7 +3693,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
         // resaltar coincidencia
         card.querySelector(".title").innerHTML = highlight(` ${tag.model || ""}`, currentSearch);
         card.querySelector(".artist").innerHTML = highlight(`${tag.marque || "Unknown"}`, currentSearch);
-        card.querySelector(".sub1").innerHTML = highlight(`Device ID: ${tag.tagId}`, currentSearch);
+        card.querySelector(".sub1").innerHTML = highlight(`ID: ${tag.tagId}`, currentSearch);
         card.querySelector(".sub2").innerHTML = highlight(`Serial: ${tag.serialNumber || "-"}`, currentSearch);
       }
     });
@@ -3831,7 +3729,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
 
       const title = `${tag.model || ""}`.trim();
       const artist = `${tag.marque || "Unknown"}`.trim();
-      const sub1 = `Device ID: ${tag.tagId}`;
+      const sub1 = `ID: ${tag.tagId}`;
       const sub2 = `Serial: ${tag.serialNumber || "-"}`;
 
       card.innerHTML = `
@@ -3880,7 +3778,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
         }
 
         tag.isSelected = !tag.isSelected;
-        refreshTagSelect(); // tu función de actualización
+        refreshTagSelected(); // tu función de actualización
         updateCardHighlight(tag); // actualizar UI del card
       });
     });
@@ -3899,7 +3797,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
     tagsArray.forEach(tag => {
       const title = ` ${tag.model || ""}`.trim();
       const artist = `${tag.marque || "Unknown"}`.trim();
-      const sub1 = `Device ID: ${tag.tagId}`;
+      const sub1 = `ID: ${tag.tagId}`;
       const sub2 = `Serial: ${tag.serialNumber || "-"}`;
 
       const titleHtml = highlight(title, currentSearch);
@@ -3908,8 +3806,8 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       const sub2Html = highlight(sub2, currentSearch);
 
       const card = document.createElement("div");
-      const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-blue";
-      const textColorClass = tag.isSelected ? "text-custom-green" : "text-custom-blue";
+      const barClass = tag.Selectable ? "bg-custom-green" : "bg-custom-blue";
+      const textColorClass = tag.Selectable ? "text-custom-green" : "text-custom-blue";
       card.className = `card
         relative bg-white rounded-xl shadow-sm border border-gray-200 p-4
       `;
@@ -3954,21 +3852,21 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       // Add event listener after setting innerHTML
       const button = card.querySelector('button[data-tagid]');
       button.addEventListener('click', function() {
-        const selectedCount = tagsArray.filter(t => t.isSelected).length;
-        if (tag.isSelected && selectedCount === 1) {
+        const selectedCount = tagsArray.filter(t => t.Selectable).length;
+        if (tag.Selectable && selectedCount === 1) {
           return; 
         }
 
         // single-select: unselect everyone first
-        if (currentMetric === "temp-humidity") {
-          tagsArray.forEach(t => { t.isSelected = false; });
-        }
+        // if (currentMetric === "temp-humidity") {
+        //   tagsArray.forEach(t => { t.isSelected = false; });
+        // }
 
-        if (!tag.isSelected && selectedCount >= 10) {
-          alert("Cannot select more than 10 tags"); // opcional
-          return;
-        }
-        tag.isSelected = !tag.isSelected;
+        // if (!tag.isSelected && selectedCount >= 10) {
+        //   alert("Cannot select more than 10 tags"); // opcional
+        //   return;
+        // }
+        tag.Selectable = !tag.Selectable;
         
         if (tag) {
           
@@ -4017,14 +3915,53 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
 
 
 
-  // function escapeHtml(str) {
-  //   return String(str ?? "")
-  //     .replaceAll("&", "&amp;")
-  //     .replaceAll("<", "&lt;")
-  //     .replaceAll(">", "&gt;")
-  //     .replaceAll('"', "&quot;")
-  //     .replaceAll("'", "&#039;");
-  // }
+  function refreshTagSelected() {
+
+        const buttons = document.querySelectorAll('button[data-tagid]');
+        const tagsArray = Object.values(tagsById);
+
+        buttons.forEach(btn => {
+
+          const tagId = btn.dataset.tagid;
+          const tag = tagsArray.find(t => t.tagId == tagId);
+
+
+        const card = btn.closest(".card");
+        const bar = card.querySelector("div.absolute");
+        const textElements = card.querySelector("div.text-xs");
+
+          // Reset classes
+          bar.classList.remove("bg-custom-green", "bg-custom-blue");
+          textElements.classList.remove("text-custom-green", "text-custom-blue");
+
+          if (tag.isSelected) {
+            bar.classList.add("bg-custom-green");
+            textElements.classList.add("text-custom-green");
+          } else {
+            bar.classList.add("bg-custom-blue");
+            textElements.classList.add("text-custom-blue");
+          }
+
+        });
+
+      // Filter and add only selected tags
+      const selectedTags = Object.values(tagsById).filter(tag => tag.isSelected === true);
+      
+      if (selectedTags.length === 0) {
+        return;
+      }
+      
+
+      if (selectedTags.length > 0) {
+        // Select first available tag
+        // select.value = selectedTags[0].tagId;
+        showTagDetails(selectedTags[0].tagId);
+      }
+
+      if (currentView === "telemetry") {
+        loadData(filtereddays); 
+      }
+    }
 
   function refreshTagSelect() {
 
@@ -4045,7 +3982,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
         bar.classList.remove("bg-custom-green", "bg-custom-blue");
         textElements.classList.remove("text-custom-green", "text-custom-blue");
 
-        if (tag.isSelected) {
+        if (tag.Selectable) {
           bar.classList.add("bg-custom-green");
           textElements.classList.add("text-custom-green");
         } else {
@@ -4056,7 +3993,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       });
 
     // Filter and add only selected tags
-    const selectedTags = Object.values(tagsById).filter(tag => tag.isSelected === true);
+    const selectedTags = Object.values(tagsById).filter(tag => tag.Selectable === true);
     
     if (selectedTags.length === 0) {
       return;
@@ -4069,9 +4006,9 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       showTagDetails(selectedTags[0].tagId);
     }
 
-    if (currentView === "telemetry") {
-      loadData(filtereddays); 
-    }
+    // if (currentView === "telemetry") {
+    //   loadData(filtereddays); 
+    // }
   }
 
   function updateWeatherCheckboxes() {
@@ -4372,174 +4309,85 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
     );
   }
 
-  export function showToast(message, type = "success", duration = 3500) {
-  const container = document.getElementById("toast-container");
-  if (!container) return;
+export function showToast(message, type = "success", duration = 3500, position = "top-right") {
+  // Contenedor único por posición
+  const containerId = `toast-container-${position}`;
+  let container = document.getElementById(containerId);
 
-  const types = {
-    success: { bg: "bg-emerald-50 border-emerald-200", icon: "text-emerald-600",
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-500 animate-pulse drop-shadow-[0_0_4px_rgba(34,197,94,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/>
-            </svg>` },
-    error:   { bg: "bg-red-50 border-red-200", icon: "text-red-600",
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500 animate-pulse drop-shadow-[0_0_4px_rgba(239,68,68,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/>
-              <line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/>
-            </svg>` },
-    info:    { bg: "bg-gray-50 border-gray-200", icon: "text-gray-600",
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500 animate-[pulse_2s_ease-in-out_infinite] motion-safe:animate-bounce drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="16" x2="12" y2="12" stroke-linecap="round"/>
-              <circle cx="12" cy="9" r="1" fill="currentColor"/>
-            </svg>` },
-    warning: { bg: "bg-amber-50 border-amber-200", icon: "text-amber-600",
-      svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500 animate-pulse drop-shadow-[0_0_4px_rgba(234,179,8,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M10 3h4l7 12-7 6H10l-7-6 7-12z"/>
-              <line x1="12" y1="9" x2="12" y2="16" stroke-linecap="round"/>
-              <circle cx="12" cy="18" r="1" fill="currentColor"/>
-            </svg>` },
+  if (!container) {
+    container = document.createElement("div");
+    container.id = containerId;
+    container.className = "fixed z-50 flex flex-col gap-2 pointer-events-none";
+
+    switch (position) {
+      case "top-left":     container.classList.add("top-4", "left-4"); break;
+      case "top-right":    container.classList.add("top-4", "right-4"); break;
+      case "bottom-left":  container.classList.add("bottom-4", "left-4"); break;
+      case "bottom-right": container.classList.add("bottom-4", "right-4"); break;
+    }
+
+    document.body.appendChild(container);
+  }
+
+    const types = {
+      success: { bg: "bg-emerald-50 border-emerald-200", icon: "text-emerald-600",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-500 animate-pulse drop-shadow-[0_0_4px_rgba(34,197,94,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/>
+              </svg>` },
+      error:   { bg: "bg-red-50 border-red-200", icon: "text-red-600",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-500 animate-pulse drop-shadow-[0_0_4px_rgba(239,68,68,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15" stroke-linecap="round"/>
+                <line x1="9" y1="9" x2="15" y2="15" stroke-linecap="round"/>
+              </svg>` },
+      info:    { bg: "bg-gray-50 border-gray-200", icon: "text-gray-600",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-500 animate-[pulse_2s_ease-in-out_infinite] motion-safe:animate-bounce drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12" stroke-linecap="round"/>
+                <circle cx="12" cy="9" r="1" fill="currentColor"/>
+              </svg>` },
+      warning: { bg: "bg-amber-50 border-amber-200", icon: "text-amber-600",
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500 animate-pulse drop-shadow-[0_0_4px_rgba(234,179,8,0.8)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 3h4l7 12-7 6H10l-7-6 7-12z"/>
+                <line x1="12" y1="9" x2="12" y2="16" stroke-linecap="round"/>
+                <circle cx="12" cy="18" r="1" fill="currentColor"/>
+              </svg>` },
   };
 
-  const config = types[type] || types.info;
-
+  // Crear toast
   const toast = document.createElement("div");
-  toast.className = `
-    flex items-center gap-3 px-4 py-3 border shadow-lg rounded-xl
-    transform transition-all duration-300 translate-y-4 opacity-0 pointer-events-auto
-    ${config.bg}
-  `;
+  toast.className = `flex items-center justify-between gap-3 p-3 border rounded-lg pointer-events-auto transform transition-all duration-800 ease-out opacity-0 translate-y-[-10px] ${types[type]?.bg || types.success.bg}`;
 
   toast.innerHTML = `
-    <div class="${config.icon}">${config.svg}</div>
-    <div class="flex-1 text-sm ms-2.5 border-s border-default text-gray-700 ps-3.5">${message}</div>
-    <button class="text-gray-400 hover:text-gray-600 close-toast">✕</button>
+    <div class="flex items-center gap-3">
+      ${types[type]?.svg || types.success.svg}
+      <span>${message}</span>
+    </div>
+    <button class="ml-2 text-gray-500 hover:text-gray-700 font-bold" style="pointer-events:auto;">&times;</button>
   `;
 
   container.appendChild(toast);
 
   // Animación de entrada
   requestAnimationFrame(() => {
-    toast.classList.remove("translate-y-4", "opacity-0");
+    toast.classList.remove("opacity-0", "translate-y-[-10px]");
+    toast.classList.add("opacity-100", "translate-y-0");
   });
 
-  const removeToast = () => {
-    toast.classList.add("translate-y-4", "opacity-0");
-    setTimeout(() => toast.remove(), 250);
-  };
+  // Cierre automático
+  const timeoutId = setTimeout(() => removeToast(), duration);
 
-  toast.querySelector(".close-toast").onclick = removeToast;
+  // Cierre con botón
+  toast.querySelector("button").addEventListener("click", () => {
+    clearTimeout(timeoutId);
+    removeToast();
+  });
 
-  setTimeout(removeToast, duration);
-
-  // Limitar máximo 4 toasts visibles
-  while (container.children.length > 4) {
-    container.firstChild.remove();
+  function removeToast() {
+    toast.classList.add("opacity-0", "translate-y-[-10px]");
+    toast.addEventListener("transitionend", () => toast.remove());
   }
 }
-
-// export function showToast(message, type = "success", duration = 3500) {
-
-//   const container = document.getElementById("toast-container");
-
-//   const types = {
-//     success: {
-//       bg: "bg-emerald-50 border-emerald-200",
-//       icon: "text-emerald-600",
-//       svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
-//             fill="none" stroke="currentColor" stroke-width="2"
-//             viewBox="0 0 24 24">
-//             <path stroke-linecap="round" stroke-linejoin="round"
-//             d="M5 13l4 4L19 7"/>
-//           </svg>`
-//     },
-
-//     error: {
-//       bg: "bg-red-50 border-red-200",
-//       icon: "text-red-600",
-//       svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
-//             fill="none" stroke="currentColor" stroke-width="2"
-//             viewBox="0 0 24 24">
-//             <path stroke-linecap="round" stroke-linejoin="round"
-//             d="M6 18L18 6M6 6l12 12"/>
-//           </svg>`
-//     },
-
-//     info: {
-//       bg: "bg-blue-50 border-blue-200",
-//       icon: "text-blue-600",
-//       svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
-//             fill="none" stroke="currentColor" stroke-width="2"
-//             viewBox="0 0 24 24">
-//             <circle cx="12" cy="12" r="10"/>
-//             <path d="M12 16v-4M12 8h.01"/>
-//           </svg>`
-//     },
-
-//     warning: {
-//       bg: "bg-amber-50 border-amber-200",
-//       icon: "text-amber-600",
-//       svg: `<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5"
-//             fill="none" stroke="currentColor" stroke-width="2"
-//             viewBox="0 0 24 24">
-//             <path stroke-linecap="round" stroke-linejoin="round"
-//             d="M12 9v4m0 4h.01M10 3h4l7 12-7 6H10l-7-6 7-12z"/>
-//           </svg>`
-//     }
-//   };
-
-//   const config = types[type] || types.info;
-
-//   const toast = document.createElement("div");
-
-//   toast.className = `
-//   flex items-start gap-3
-//   border shadow-lg rounded-xl
-//   px-4 py-3
-//   bg-white
-//   transform transition-all duration-300
-//   translate-y-4 opacity-0
-//   ${config.bg}
-//   `;
-
-//   toast.innerHTML = `
-//     <div class="${config.icon}">
-//       ${config.svg}
-//     </div>
-
-//     <div class="flex-1 text-sm text-gray-700">
-//       ${message}
-//     </div>
-
-//     <button class="text-gray-400 hover:text-gray-600 close-toast">
-//       ✕
-//     </button>
-//   `;
-
-//   container.appendChild(toast);
-
-//   // animation in
-//   requestAnimationFrame(() => {
-//     toast.classList.remove("translate-y-4", "opacity-0");
-//   });
-
-//   const removeToast = () => {
-//     toast.classList.add("opacity-0", "translate-y-4");
-
-//     setTimeout(() => toast.remove(), 250);
-//   };
-
-//   toast.querySelector(".close-toast").onclick = removeToast;
-
-//   setTimeout(removeToast, duration);
-
-//   // limit visible toasts
-//   if (container.children.length > 4) {
-//     container.firstChild.remove();
-//   }
-// }
-
-
 
 

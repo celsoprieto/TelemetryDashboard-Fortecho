@@ -1,4 +1,4 @@
-    import { redTones, blueTones, lightTones } from "./fortecho.js";
+    import { redTones, blueTones, lightTones ,showToast} from "./fortecho.js";
 
     export async function generateReport(tagIds, from, to, format, currentMetric, title) {
 
@@ -26,7 +26,8 @@
 
         if (!response.ok) {
             const errorData = await response.json();
-            console.error("Backend error:", errorData);
+            showToast("Error generating report: " + (errorData.message || response.statusText), "error", 5000, "top-right");
+            //console.error("Backend error:", errorData);
             return false;
         }
 
@@ -43,7 +44,7 @@
         // a.click();
         // a.remove();
         
-
+        showToast("Report generation completed", "success", 3000, "top-right"); 
         return true;
 
     } catch (err) {
@@ -65,7 +66,8 @@ function sanitizeFileName(name) {
     const res = await fetch(`/api/ReportDownload?file=${encodeURIComponent(fileName)}`);
 
     if (!res.ok) {
-    throw new Error("Error requesting download URL");
+        showToast("Error requesting download URL: " + res.statusText, "error", 5000, "top-right");
+        throw new Error("Error requesting download URL");
     }
 
     const data = await res.json();

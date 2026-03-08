@@ -10,12 +10,11 @@ module.exports = {
     // Use regex patterns to match classes
     {
       pattern: /^w-/,
-      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-', 'mr-', 'p-' , 'ms-', 'ps-'], // Optional: include responsive variants
+      variants: ['sm', 'md', 'lg', 'xl', '2xl', 'top-' , 'right-', 'left-', 'bottom-', 'mr-', 'p-' , 'ms-', 'ps-', 'duration-'], // Optional: include responsive variants
     },
     // Or be more specific
     {
       pattern: /^w-(0|1|2|3|4|5|6|8|10|11|12|14|16|20|24|28|32|36|40|44|45|46|48|52|56|60|64|72|80|96|auto|px|full|screen|min|max|fit)$/,
-      pattern: /max-w-\[\d+ch\]/,
     },
     // Padding classes
     'px-4',
@@ -212,6 +211,16 @@ module.exports = {
     "bg-custom-blue-light",
     "bg-custom-yellow-light",
     "bg-custom-yellow",
+    "translate-y-[-10px]",
+    "translate-y-[-20px]",
+    "translate-y-[-30px]",
+    "translate-y-[-40px]",
+    "translate-y-[-50px]",
+    "translate-y-[-60px]",
+    "translate-y-[-70px]",
+    "translate-y-[-80px]",
+    "translate-y-[-90px]",
+    "translate-y-[-100px]",
     // Width
     { pattern: /^w-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
     // Height
@@ -227,6 +236,14 @@ module.exports = {
     // Padding start / end
     { pattern: /^ps-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
     { pattern: /^pe-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
+    "max-w-[40ch]",
+    "max-w-[50ch]",
+    "max-w-[60ch]",
+    "max-w-[70ch]",
+    "max-w-[80ch]",
+    "max-w-[90ch]",
+    "max-w-[100ch]",
+    "max-w-[32ch]",
   ],
   theme: {
     extend: {
