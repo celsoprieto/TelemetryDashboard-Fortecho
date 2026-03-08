@@ -671,6 +671,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           tag.isSelected = false;   // 👈 new boolean default
           // save full object in memory
           tagsById[tag.tagId] = tag;
+          tag.Selectable= true
         }
 
 
@@ -2319,7 +2320,7 @@ function applyXAxisRange() {
         // console.log("tagsById =", tagsById);
         // console.log("isArray =", Array.isArray(tagsById));
 
-        renderTagsGrid(allTags, "tagsGrid");          // optional: refresh tags list
+        renderTagsGrid(tagsById, "tagsGrid");          // optional: refresh tags list
       }
 
       if (viewName === "alarms") {
@@ -3387,6 +3388,39 @@ function renderBodyReports(rows) {
   `;
 }
 
+function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", maxWidth="200px") {
+
+  const short = plainText.length > maxLen
+    ? html.substring(0, maxLen) + "…"
+    : html;
+
+  return `
+    <div class="relative group inline-block flex items-center" style="max-width:${maxWidth};">
+
+      <span class="truncate block cursor-help ${textClass}">
+        ${short}
+      </span>
+
+      ${plainText.length > maxLen ? `
+      <div class="
+        absolute z-50
+        opacity-0 group-hover:opacity-100
+        transition-opacity duration-150
+        bottom-full left-0 mb-2
+        px-2 py-1
+        text-xs text-white
+        bg-gray-900 rounded
+        whitespace-nowrap
+        shadow-lg
+        pointer-events-none
+      ">
+        ${plainText}
+      </div>` : ""}
+
+    </div>
+  `;
+}
+
   // Add this function to handle what happens when a row is clicked
   function handleAlarmRowClick(rowData, rowElement) {
     showAlarmDetailModal(rowData);
@@ -3748,7 +3782,8 @@ function renderBodyReports(rows) {
       const card = tagCardsMap.get(tag.tagId);
       if (!card) return;
 
-      const title = `${tag.marque || ""} ${tag.model || ""}`.toLowerCase();
+      const title = `${tag.model || ""}`.toLowerCase();
+      const artist = `${tag.marque || ""}`.toLowerCase();
       const sub1 = `Device ID: ${tag.tagId}`.toLowerCase();
       const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`.toLowerCase();
 
@@ -3758,7 +3793,8 @@ function renderBodyReports(rows) {
 
       if (match) {
         // resaltar coincidencia
-        card.querySelector(".font-bold").innerHTML = highlight(`${tag.marque || "Unknown"} ${tag.model || ""}`, currentSearch);
+        card.querySelector(".font-bold").innerHTML = highlight(` ${tag.model || ""}`, currentSearch);
+        card.querySelector(".text-sm").innerHTML = highlight(`${tag.marque || "Unknown"}`, currentSearch);
         card.querySelector(".text-sm").innerHTML = highlight(`Device ID: ${tag.tagId}`, currentSearch);
         card.querySelector(".text-xs").innerHTML = highlight(`Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`, currentSearch);
       }
@@ -3788,12 +3824,13 @@ function renderBodyReports(rows) {
 
     allTagsArray.forEach(tag => {
       const card = document.createElement("div");
-      card.className = `card relative bg-white rounded-xl shadow-sm border border-gray-200 p-4`;
+      card.className = `card relative bg-white rounded-xl shadow-sm border border-gray-200 p-4 group`;
 
       const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-blue";
       const textColorClass = tag.isSelected ? "text-custom-green" : "text-custom-blue";
 
-      const title = `${tag.marque || "Unknown"} ${tag.model || ""}`.trim();
+      const title = `${tag.model || ""}`.trim();
+      const artist = `${tag.marque || "Unknown"}`.trim();
       const sub1 = `Device ID: ${tag.tagId}`;
       const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
 
@@ -3802,15 +3839,17 @@ function renderBodyReports(rows) {
           type="button"
           class="absolute inset-0 w-full h-full cursor-pointer z-10 rounded-md"
           data-tagid="${tag.tagId}"
-          title="${tag.isSelected ? 'Deselect' : 'Select'}"
         ></button>
 
         <div class="absolute left-0 top-0 h-full w-1.5 ${barClass} rounded-l-xl pointer-events-none"></div>
 
         <div class="flex items-start justify-between gap-3 pointer-events-none">
           <div class="min-w-0">
-            <div class="font-bold text-sky-600 truncate">
+            <div class="font-bold text-sky-600 truncate max-w-[32ch]">
               ${title}
+            </div>
+            <div class="font-sm text-sky-600 truncate max-w-[32ch]">
+             ${artist}
             </div>
             <div class="text-sm text-sky-600 font-medium">
               ${sub1}
@@ -3858,11 +3897,13 @@ function renderBodyReports(rows) {
 
     tagsArray.sort((a, b) => b.isSelected - a.isSelected);
     tagsArray.forEach(tag => {
-      const title = `${tag.marque || "Unknown"} ${tag.model || ""}`.trim();
+      const title = ` ${tag.model || ""}`.trim();
+      const artist = `${tag.marque || "Unknown"}`.trim();
       const sub1 = `Device ID: ${tag.tagId}`;
       const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
 
       const titleHtml = highlight(title, currentSearch);
+      const artistHtml = highlight(artist, currentSearch);
       const sub1Html = highlight(sub1, currentSearch);
       const sub2Html = highlight(sub2, currentSearch);
 
@@ -3879,7 +3920,6 @@ function renderBodyReports(rows) {
           type="button"
           class="absolute inset-0 w-full h-full cursor-pointer z-10 rounded-md"
           data-tagid="${tag.tagId}"
-          title="${tag.isSelected ? 'Deselect' : 'Select'}"
         ></button>
 
         <!-- left red bar -->
@@ -3889,6 +3929,9 @@ function renderBodyReports(rows) {
           <div class="min-w-0">
             <div class="font-bold text-sky-600 truncate">
               ${titleHtml}
+            </div>
+            <div class="font-sm text-sky-600 truncate">
+              ${artistHtml}
             </div>
 
             <div class="text-sm text-sky-600 font-medium">

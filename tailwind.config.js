@@ -15,6 +15,7 @@ module.exports = {
     // Or be more specific
     {
       pattern: /^w-(0|1|2|3|4|5|6|8|10|11|12|14|16|20|24|28|32|36|40|44|45|46|48|52|56|60|64|72|80|96|auto|px|full|screen|min|max|fit)$/,
+      pattern: /max-w-\[\d+ch\]/,
     },
     // Padding classes
     'px-4',
