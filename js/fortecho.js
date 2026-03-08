@@ -3785,18 +3785,18 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       const title = `${tag.model || ""}`.toLowerCase();
       const artist = `${tag.marque || ""}`.toLowerCase();
       const sub1 = `Device ID: ${tag.tagId}`.toLowerCase();
-      const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`.toLowerCase();
+      const sub2 = `Serial: ${tag.serialNumber || "-"}`.toLowerCase();
 
-      const match = title.includes(currentSearch) || sub1.includes(currentSearch) || sub2.includes(currentSearch);
+      const match = title.includes(currentSearch) || artist.includes(currentSearch) || sub1.includes(currentSearch) || sub2.includes(currentSearch);
 
       card.style.display = match ? "block" : "none";
 
       if (match) {
         // resaltar coincidencia
-        card.querySelector(".font-bold").innerHTML = highlight(` ${tag.model || ""}`, currentSearch);
-        card.querySelector(".text-sm").innerHTML = highlight(`${tag.marque || "Unknown"}`, currentSearch);
-        card.querySelector(".text-sm").innerHTML = highlight(`Device ID: ${tag.tagId}`, currentSearch);
-        card.querySelector(".text-xs").innerHTML = highlight(`Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`, currentSearch);
+        card.querySelector(".title").innerHTML = highlight(` ${tag.model || ""}`, currentSearch);
+        card.querySelector(".artist").innerHTML = highlight(`${tag.marque || "Unknown"}`, currentSearch);
+        card.querySelector(".sub1").innerHTML = highlight(`Device ID: ${tag.tagId}`, currentSearch);
+        card.querySelector(".sub2").innerHTML = highlight(`Serial: ${tag.serialNumber || "-"}`, currentSearch);
       }
     });
   }
@@ -3832,7 +3832,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       const title = `${tag.model || ""}`.trim();
       const artist = `${tag.marque || "Unknown"}`.trim();
       const sub1 = `Device ID: ${tag.tagId}`;
-      const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
+      const sub2 = `Serial: ${tag.serialNumber || "-"}`;
 
       card.innerHTML = `
         <button
@@ -3845,16 +3845,16 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
 
         <div class="flex items-start justify-between gap-3 pointer-events-none">
           <div class="min-w-0">
-            <div class="font-bold text-sky-600 truncate max-w-[32ch]">
+            <div class="font-bold text-sky-600 truncate max-w-[32ch] title">
               ${title}
             </div>
-            <div class="font-sm text-sky-600 truncate max-w-[32ch]">
-             ${artist}
+            <div class="text-sm text-sky-600 font-medium truncate max-w-[32ch] artist">
+              ${artist}
             </div>
-            <div class="text-sm text-sky-600 font-medium">
+            <div class="text-sm text-sky-600 font-medium sub1">
               ${sub1}
             </div>
-            <div class="text-xs ${textColorClass}">
+            <div class="text-xs ${textColorClass} sub2">
               ${sub2}
             </div>
           </div>
@@ -3900,7 +3900,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       const title = ` ${tag.model || ""}`.trim();
       const artist = `${tag.marque || "Unknown"}`.trim();
       const sub1 = `Device ID: ${tag.tagId}`;
-      const sub2 = `Site: ${tag.sitecode} · Serial: ${tag.serialNumber || "-"}`;
+      const sub2 = `Serial: ${tag.serialNumber || "-"}`;
 
       const titleHtml = highlight(title, currentSearch);
       const artistHtml = highlight(artist, currentSearch);
