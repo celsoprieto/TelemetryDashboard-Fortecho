@@ -652,7 +652,9 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       tagsById = {}; // reset
 
       try {
-        const res = await fetch(`/api/tags`);
+        const params = new URLSearchParams();
+        params.set("sitecode", window.appState.sitecode);
+        const res = await fetch(`/api/tags?${params.toString()}`);
         if (!res.ok) {
           const text = await res.text();
           console.error('Error fetching devices:', text);
