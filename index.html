@@ -32,137 +32,196 @@
 </head>
 <body class="pt-8">
   <nav class="fixed top-0 w-full bg-white shadow z-50">
-    <div id="menuOverlayMenu"
-        class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-40 lg:hidden">
-    </div>
 
-    <div class="navbar-container px-4 sm:px-6 lg:px-8 ">
-      <div class="flex items-center justify-between h-8">
+  <div class="px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-10">
 
-        <!-- Logo / Title -->
-        <div class="text-lg font-bold text-custom-green ">
-          CP - System Dashboard
-        </div>
+      <!-- Logo -->
+      <div class="text-lg font-bold text-custom-green">
+        CP - System Dashboard
+      </div>
 
-        <!-- Desktop menu -->
-        <ul class="hidden md:flex items-center list-none p-0 m-0">
-          <li>
-            <a href="#" class="nav-link active text-base leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="alarms">Alarms</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link  text-base leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="telemetry">Telemetry</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link  text-base leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="reports">Reporting</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link text-base leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="tags">Devices</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link text-base leading-[14px] text-gray-700 hover:text-teal-600 font-medium" data-view="events">ESP-TCP Events</a>
-          </li>
-          <li id="userLi" class="relative group">
-            <a href="#"
-              class="nav-link flex items-center gap-2 text-base leading-none text-gray-700 hover:text-teal-600 font-medium"
-              data-view="es">
-              
-             <span class="user-text"></span>
-            </a>
+      <!-- Desktop menu -->
+      <ul id="menuDesktop"
+          class="hidden lg:flex items-center gap-6 text-gray-700 font-medium">
 
+        <li><a class="nav-link hover:text-teal-600" data-view="alarms">Alarms</a></li>
+        <li><a class="nav-link hover:text-teal-600" data-view="telemetry">Telemetry</a></li>
+        <li><a class="nav-link hover:text-teal-600" data-view="reports">Reporting</a></li>
+        <li><a class="nav-link hover:text-teal-600" data-view="tags">Devices</a></li>
+        <li><a class="nav-link hover:text-teal-600" data-view="events">ESP-TCP Events</a></li>
 
-            <!-- Submenú -->
-            <ul id="userMenu" class="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg hidden z-10">
-               <!-- Settings -->
-              <li>
-                <a  class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium close-menu" href="#" id="settingsBtn">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53" />
-                  </svg>
-                  Settings
-                </a>
-              </li>
+        <!-- User -->
+        <li class="relative">
 
-              <!-- Logout -->
-              <li>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium" id="MenuBtnLogout" >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-                  </svg>
-                  Logout
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
+        <button id="userBtn"
+          class="flex items-center gap-2 text-gray-700 hover:text-teal-600 cursor-pointer">
 
-        <!-- Mobile button -->
-        <button id="menuBtn"
-          class="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-teal-600 hover:bg-gray-100 focus:outline-none"
-          aria-label="Open menu">
-          <!-- Icon -->
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"
+          <!-- Avatar -->
+          <div class="w-7 h-7 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-bold">
+            CP
+          </div>
+
+          <span class="user-text"></span>
+
+          <!-- Flecha -->
+          <svg id="userArrow"
+            class="w-4 h-4 transition-transform duration-200"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M4 6h16M4 12h16M4 18h16"></path>
+
+            <path stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"/>
           </svg>
+
         </button>
 
-      </div>
+      <ul id="userMenu"
+          class="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg hidden">
 
-      <!-- Mobile menu -->
-      <!-- Mobile menu popup from right -->
-      <div id="mobileMenu" class="fixed top-10 right-0 h-[calc(100vh-40px)] w-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50">
-        <ul class="flex flex-col gap-6 mt-16 p-4">
-          <li>
-            <a href="#" class="nav-link active block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="alarms">Alarms</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="telemetry">Telemetry</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="reports">Reporting</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="tags">Devices</a>
-          </li>
-          <li>
-            <a href="#" class="nav-link block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="events">ESP-TCP Events</a>
-          </li>
-          <li id="userLiMobile" class="relative group">
-            <a href="#" class="nav-link flex items-center gap-2block py-2 text-gray-700 hover:text-teal-600 font-medium" data-view="es">
-              <span class="user-text">Español</span></a>
-            <!-- Submenú móvil -->
-            <ul id="userMenuMobile" class="absolute left-0 mt-2 w-40 bg-white border rounded shadow-lg hidden z-10">
-               <!-- Settings -->
-              <li>
-                <a  class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium close-menu"  href="#" id="settingsBtnMobile">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53" />
-                  </svg>
-                  Settings
-                </a>
-              </li>
+        <li>
+          <a id="settingsBtn"
+            class="flex items-center px-4 py-2 hover:bg-teal-50">
 
-              <!-- Logout -->
-              <li>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-teal-50 hover:text-teal-600 font-medium" id="MenuBtnLogoutMobile" >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-                  </svg>
-                  Logout
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </div>
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5 mr-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+
+              <path stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53"/>
+            </svg>
+
+            Settings
+          </a>
+        </li>
+
+        <li>
+          <a id="MenuBtnLogout"
+            class="flex items-center px-4 py-2 hover:bg-teal-50">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5 mr-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+
+              <path stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
+            </svg>
+
+            Logout
+          </a>
+        </li>
+
+      </ul>
+        </li>
+
+      </ul>
+
+      <!-- Mobile button -->
+      <button id="menuBtn"
+        class="lg:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100">
+
+        <svg class="h-6 w-6" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+
+      </button>
 
     </div>
-  </nav>
+  </div>
+
+  <!-- Mobile panel -->
+  <div id="mobileMenu"
+       class="fixed top-10 right-0 h-[calc(100vh-40px)] w-72 bg-white shadow-lg
+              transform translate-x-full transition-transform duration-300 lg:hidden">
+
+    <ul class="flex flex-col gap-5 p-6 text-gray-700 font-medium">
+
+      <li><a class="nav-link" data-view="alarms">Alarms</a></li>
+      <li><a class="nav-link" data-view="telemetry">Telemetry</a></li>
+      <li><a class="nav-link" data-view="reports">Reporting</a></li>
+      <li><a class="nav-link" data-view="tags">Devices</a></li>
+      <li><a class="nav-link" data-view="events">ESP-TCP Events</a></li>
+
+      <hr>
+      <li class="relative">
+        <button id="userBtnMobile"
+          class="flex items-center gap-2 text-gray-700 hover:text-teal-600 cursor-pointer">
+
+          <!-- Avatar -->
+          <div class="w-7 h-7 rounded-full bg-teal-600 text-white flex items-center justify-center text-xs font-bold">
+            CP
+          </div>
+
+          <span class="user-text"></span>
+
+          <!-- Flecha -->
+          <svg id="userArrowMobile"
+            class="w-4 h-4 transition-transform duration-200"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24">
+
+            <path stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"/>
+          </svg>
+
+        </button>
+
+        
+        <ul id="userMenuMobile"
+          class="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg hidden">
+
+          <li><a id="settingsBtnMobile" class="flex items-center px-4 py-2 hover:bg-teal-50">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 mr-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53"/>
+                </svg>
+            Settings</a></li>
+          <li><a id="MenuBtnLogoutMobile"   class="flex items-center px-4 py-2 hover:bg-teal-50">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 mr-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+
+                  <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/>
+                </svg>
+            Logout</a></li>
+          </li>
+        </ul>
+      </li>
+
+    </ul>
+
+  </div>
+
+</nav>
 
 
   <main class="mainclass">

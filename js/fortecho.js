@@ -118,17 +118,61 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
 
 
       // ---------------- MENU ----------------
+
+      const userBtn = document.getElementById("userBtn");
+      const userMenu = document.getElementById("userMenu");
+      const arrow = document.getElementById("userArrow");
+      const userBtnMobile = document.getElementById("userBtnMobile");
+      const arrowMobile = document.getElementById("userArrowMobile");
+      const userMenuMobile = document.getElementById("userMenuMobile");
+
+      // Asegurar que esté oculto al cargar
+      userMenu.classList.add("hidden");
+      userMenuMobile.classList.add("hidden");
+
+      // Toggle al click
+      userBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        userMenu.classList.toggle("hidden");
+        arrow.classList.toggle("rotate-180");
+      });
+      userBtnMobile.addEventListener("click", (e) => {  
+        e.preventDefault();
+        userMenuMobile.classList.toggle("hidden");
+        arrowMobile.classList.toggle("rotate-180");
+      });
+
+      // Cerrar al clicar fuera
+      document.addEventListener("click", (e) => {
+        if (!userBtn.parentElement.contains(e.target)) {
+          userMenu.classList.add("hidden");
+        }
+      });
+      document.addEventListener("click", (e) => {
+        if (!userBtn.parentElement.contains(e.target)) {
+          userMenu.classList.add("hidden");
+        }
+      });
+      document.addEventListener("click", (e) => {
+        if (!userBtnMobile.parentElement.contains(e.target)) {
+          userMenuMobile.classList.add("hidden");
+        }
+      });
+
+
       if (btn_menu && mobileMenu) {
         function openMenu() {
           mobileMenu.classList.remove("translate-x-full");
-          overlayMenu.classList.remove("hidden");
+          // overlayMenu.classList.remove("hidden");
           mobileMenu.classList.add("translate-x-0");
+          arrow.classList.add("rotate-180");
         }
 
         function closeMenu() {
           mobileMenu.classList.add("translate-x-full");
-          overlayMenu.classList.add("hidden");
+          // overlayMenu.classList.add("hidden");
           mobileMenu.classList.remove("translate-x-0");
+          arrow.classList.add("rotate-180");
         }
 
         btn_menu.addEventListener("click", () => {
@@ -142,14 +186,14 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           }
         });
 
-        overlayMenu.addEventListener("click", closeMenu);
+        // overlayMenu.addEventListener("click", closeMenu);
       }
 
-      window.addEventListener("resize", () => {
-        if (window.innerWidth >= 1024) {
-          closeMenu();
-        }
-      });
+      // window.addEventListener("resize", () => {
+      //   if (window.innerWidth >= 1024) {
+      //     closeMenu();
+      //   }
+      // });
 
       if (btn_menuT && menuT) {
 
@@ -308,8 +352,8 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         await loaduserdetails();
           if (!userInfo) return; // Asegurarse que userInfo ya existe
           const nameClaim = userInfo.claims.find(c => c.typ === "name");
-          const textEl = document.querySelector('#userLi .user-text');
-          const textElMobile = document.querySelector('#userLiMobile .user-text');
+          const textEl = document.querySelector('#userBtn .user-text');
+          const textElMobile = document.querySelector('#userBtnMobile .user-text');
 
           if (textEl && nameClaim) textEl.textContent = nameClaim.val;
           if (textElMobile && nameClaim) textElMobile.textContent = nameClaim.val;

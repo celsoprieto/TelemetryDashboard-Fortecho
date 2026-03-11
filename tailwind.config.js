@@ -221,6 +221,10 @@ module.exports = {
     "translate-y-[-80px]",
     "translate-y-[-90px]",
     "translate-y-[-100px]",
+    "opacity-0",
+    "scale-95",
+    "pointer-events-none",
+    "rotate-180",
     // Width
     { pattern: /^w-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
     // Height
@@ -244,6 +248,12 @@ module.exports = {
     "max-w-[90ch]",
     "max-w-[100ch]",
     "max-w-[32ch]",
+    "lg:flex",
+    "lg:hidden",
+    "opacity-100",
+    "scale-100",
+    "pointer-events-auto",
+    "rotate-0",
   ],
   theme: {
     extend: {
