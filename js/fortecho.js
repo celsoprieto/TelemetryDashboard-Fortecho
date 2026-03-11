@@ -99,7 +99,8 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       const rangeButtons = document.querySelectorAll('.range-button');
 
       const btn_menu = document.getElementById("menuBtn");
-      const menu = document.getElementById("mobileMenu");
+      const mobileMenu  = document.getElementById("mobileMenu");
+      const overlayMenu = document.getElementById("menuOverlayMenu");
 
       const fromInput = document.getElementById("fromInput");
       const toInput = document.getElementById("toInput");
@@ -117,28 +118,38 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
 
 
       // ---------------- MENU ----------------
-      if (btn_menu && menu) {
+      if (btn_menu && mobileMenu) {
         function openMenu() {
-          menu.classList.remove("translate-x-full");
-          menu.classList.add("translate-x-0");
+          mobileMenu.classList.remove("translate-x-full");
+          overlayMenu.classList.remove("hidden");
+          mobileMenu.classList.add("translate-x-0");
         }
 
         function closeMenu() {
-          menu.classList.add("translate-x-full");
-          menu.classList.remove("translate-x-0");
+          mobileMenu.classList.add("translate-x-full");
+          overlayMenu.classList.add("hidden");
+          mobileMenu.classList.remove("translate-x-0");
         }
 
         btn_menu.addEventListener("click", () => {
-          if (menu.classList.contains("translate-x-full")) openMenu();
+          if (mobileMenu.classList.contains("translate-x-full")) openMenu();
           else closeMenu();
         });
 
-        menu.querySelectorAll("a.nav-link").forEach(link => {
+        mobileMenu.querySelectorAll("a.nav-link").forEach(link => {
           if (!link.closest("#userLiMobile")) { // exclude the language link
             link.addEventListener("click", closeMenu);
           }
         });
+
+        overlayMenu.addEventListener("click", closeMenu);
       }
+
+      window.addEventListener("resize", () => {
+        if (window.innerWidth >= 1024) {
+          closeMenu();
+        }
+      });
 
       if (btn_menuT && menuT) {
 
@@ -785,7 +796,7 @@ function showTagDetails() {
     }
 
     const span = document.createElement('span');
-    span.className = 'sensor-value font-semibold';
+    span.className = 'sensor-value font-semibold truncate max-w-[32ch]';
     span.textContent = (tag.model || '').trim();
 
     button.appendChild(pointsContainer);
