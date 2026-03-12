@@ -90,9 +90,9 @@ function sanitizeFileName(name) {
     const url = "/api/reports/delete";
 
     const payload = {
-        ReportId: reportId,
-        SiteCode: siteCode,
-        BlobPath: blobPath,
+        id: reportId,
+        sitecode: siteCode,
+        blobUrl: blobPath,
         userId: userId
     };
 

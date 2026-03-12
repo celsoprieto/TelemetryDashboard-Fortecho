@@ -543,7 +543,12 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
                   const tagIdList = Object.keys(tagsById).filter(key => tagsById[key].isSelected);
                   const from = document.getElementById('fromInput').value;
                   const to   = document.getElementById('toInput').value;
-                  const title = `Express_Report_${tagIdList.join("_")}_${getNowForFile()}`;
+                  const tagPart =
+                    tagIdList.length === 1
+                      ? tagIdList[0]
+                      : `${tagIdList[0]}_to_${tagIdList[tagIdList.length - 1]}`;
+
+                  const title = `Express_Report_${tagPart}_${getNowForFile()}`;
 
                   //reportsLink.click(); // navigate to reports view
                   const reportPromise = generateReport(tagIdList, from, to, "pdf",currentMetric,title);
@@ -3800,10 +3805,10 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
 
         <div class="flex items-start justify-between gap-3 pointer-events-none">
           <div class="min-w-0">
-            <div class="font-bold text-sky-600 truncate max-w-[32ch] title">
+            <div class="font-bold text-sky-600 truncate max-w-[40ch] title">
               ${title}
             </div>
-            <div class="text-sm text-sky-600 font-medium truncate max-w-[32ch] artist">
+            <div class="text-sm text-sky-600 font-medium truncate max-w-[40ch] artist">
               ${artist}
             </div>
             <div class="text-sm text-sky-600 font-medium sub1">
