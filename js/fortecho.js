@@ -3143,7 +3143,7 @@ function renderBodyReports(rows) {
             <td class="px-2 py-3 text-center">
               <div class="flex items-center justify-center">
                 <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
-                        data-file="${window.appState.sitecode}/${row.filename}">
+                        data-file="${row.blobUrl}">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                       stroke="currentColor" stroke-width="2" stroke-linecap="round"
                       stroke-linejoin="round" class="lucide lucide-download">
