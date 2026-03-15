@@ -1,57 +1,61 @@
     import { redTones, blueTones, lightTones ,showToast} from "./fortecho.js";
 
-    export async function generateReport(tagIds, from, to, format, currentMetric, title) {
-
+export async function generateReport(tagIds, from, to, format, currentMetric, title) {
     try {
 
         const sitecode = window.appState.sitecode;
 
         const options = {
-        Metric: currentMetric,
-        Title: title,
-        JoinedGraph: currentMetric !== "temp-humidity"
+            Metric: currentMetric,
+            Title: title,
+            JoinedGraph: currentMetric !== "temp-humidity"
         };
 
+        const optionsBase64 = btoa(
+            new TextEncoder().encode(JSON.stringify(options))
+                .reduce((data, byte) => data + String.fromCharCode(byte), "")
+            );
+
         const params = new URLSearchParams({
-        deviceIds: tagIds.join(","),
-        from: from,
-        to: to,
-        format: format,
-        sitecode: sitecode,
-        options: JSON.stringify(options)
+            deviceIds: tagIds.join(","),
+            from: from,
+            to: to,
+            format: format,
+            sitecode: sitecode,
+            options: optionsBase64
         });
 
-        // Call Azure Function
         const response = await fetch(`/api/TelemetryReport?${params.toString()}`);
 
         if (!response.ok) {
-            const errorData = await response.json();
-            showToast("Error generating report: " + (errorData.message || response.statusText), "error", 5000, "top-right");
-            //console.error("Backend error:", errorData);
+
+            let message;
+
+            try {
+                const errorData = await response.json();
+                message = errorData.message;
+            } catch {
+                message = await response.text();
+            }
+
+            showToast(`Error generating report: ${message || response.statusText}`, "error", 5000, "top-right");
             return false;
         }
 
         const data = await response.json();
         const sasUrl = data.url;
 
-        // Trigger download
-        // const a = document.createElement("a");
-        // a.href = sasUrl;
-        // a.target = "_blank";   // important
-        // a.download = `${sanitizeFileName(title)}.${format}`;
+        window.open(sasUrl, "_blank");
 
-        // document.body.appendChild(a);
-        // a.click();
-        // a.remove();
-        
-        showToast("Report generation completed", "success", 3000, "top-right"); 
+        showToast("Report generation completed", "success", 3000, "top-right");
         return true;
 
     } catch (err) {
-        //console.error("generateReport error:", err);
+        console.error("generateReport error:", err);
+        showToast("Unexpected error generating report", "error", 5000, "top-right");
         return false;
     }
-    }
+}
 
 function sanitizeFileName(name) {
     return name

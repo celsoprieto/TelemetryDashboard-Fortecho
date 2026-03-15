@@ -3275,7 +3275,7 @@ function renderBodyReports(rows) {
       const result = await deleteReport(reportId, siteCode, blobPath, userId);
 
       if (result.deleted) {
-        showToast("Report deleted successfully", "success", 3000, "top-right");
+        showToast(result.message, "success", 3000, "top-right");
         currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
         renderBodyReports(currentReportsRows);
       }
