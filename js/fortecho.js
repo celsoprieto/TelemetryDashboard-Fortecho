@@ -533,7 +533,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         document.getElementById("reportingButton")
           .addEventListener("click", async () => {
 
-              showToast("Report generation started", "info", 3000, "top-right");
+              // showToast("Report generation started", "info", 3000, "top-right");
               const btn = document.getElementById("reportingButton");
                const reportsLink = Array.from(document.querySelectorAll("a[data-view]"))
                 .find(link => link.dataset.view === "reports");
@@ -551,16 +551,18 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
                   const title = `Express_Report_${tagPart}_${getNowForFile()}`;
 
                   //reportsLink.click(); // navigate to reports view
-                  const reportPromise = generateReport(tagIdList, from, to, "pdf",currentMetric,title);
-                  await new Promise(requestAnimationFrame);
-                  setTimeout(async () => {
-                    reportsLink.click();  
-                  }, 500); // small delay to ensure UI updates before navigation  
-                  await reportPromise;
-                  if (reportPromise) { 
+                  // const reportPromise = generateReport(tagIdList, from, to, "pdf",currentMetric,title);
+                  // await new Promise(requestAnimationFrame);
+                  // setTimeout(async () => {
+                  //   reportsLink.click();  
+                  // }, 500); // small delay to ensure UI updates before navigation  
+                  // await reportPromise;
+                  // if (reportPromise) { 
                      
-                    loadReports(); // refresh report list after generation
-                  }
+                  //   loadReports(); // refresh report list after generation
+                  // }
+                  generateReport(tagIdList, from, to, "pdf", currentMetric, title);
+                  reportsLink.click();
 
               } catch (err) {
                   alert("Error al generar el reporte");
@@ -2506,7 +2508,7 @@ function hideLoading(el) {
 
   }
 
-    async function loadReports() {
+   export async function loadReports() {
     //console.log("Loading events from Azure Function...");
     try {
       // Aquí harías la llamada a tu Azure Function para obtener los eventos

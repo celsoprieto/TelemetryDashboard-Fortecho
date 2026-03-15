@@ -1,8 +1,64 @@
-    import { redTones, blueTones, lightTones ,showToast} from "./fortecho.js";
+    import { redTones, blueTones, lightTones ,showToast,loadReports} from "./fortecho.js";
+
+// export async function generateReport(tagIds, from, to, format, currentMetric, title) {
+//     try {
+
+//         const sitecode = window.appState.sitecode;
+
+//         const options = {
+//             Metric: currentMetric,
+//             Title: title,
+//             JoinedGraph: currentMetric !== "temp-humidity"
+//         };
+
+//         const optionsBase64 = btoa(
+//             new TextEncoder().encode(JSON.stringify(options))
+//                 .reduce((data, byte) => data + String.fromCharCode(byte), "")
+//             );
+
+//         const params = new URLSearchParams({
+//             deviceIds: tagIds.join(","),
+//             from: from,
+//             to: to,
+//             format: format,
+//             sitecode: sitecode,
+//             options: optionsBase64
+//         });
+
+//         const response = await fetch(`/api/TelemetryReport?${params.toString()}`);
+
+//         if (!response.ok) {
+
+//             let message;
+
+//             try {
+//                 const errorData = await response.json();
+//                 message = errorData.message;
+//             } catch {
+//                 message = await response.text();
+//             }
+
+//             showToast(`Error generating report: ${message || response.statusText}`, "error", 5000, "top-right");
+//             return false;
+//         }
+
+//         const data = await response.json();
+//         const sasUrl = data.url;
+
+//         // window.open(sasUrl, "_blank");
+
+//         showToast("Report generation completed", "success", 3000, "top-right");
+//         return true;
+
+//     } catch (err) {
+//         console.error("generateReport error:", err);
+//         showToast("Unexpected error generating report", "error", 5000, "top-right");
+//         return false;
+//     }
+// }
 
 export async function generateReport(tagIds, from, to, format, currentMetric, title) {
     try {
-
         const sitecode = window.appState.sitecode;
 
         const options = {
@@ -14,44 +70,79 @@ export async function generateReport(tagIds, from, to, format, currentMetric, ti
         const optionsBase64 = btoa(
             new TextEncoder().encode(JSON.stringify(options))
                 .reduce((data, byte) => data + String.fromCharCode(byte), "")
-            );
+        );
 
         const params = new URLSearchParams({
-            deviceIds: tagIds.join(","),
-            from: from,
-            to: to,
-            format: format,
-            sitecode: sitecode,
+            deviceIds: tagIds.join(","),  // Durable function espera "tagsIds"
+            from,
+            to,
+            format,
+            sitecode,
             options: optionsBase64
         });
 
-        const response = await fetch(`/api/TelemetryReport?${params.toString()}`);
-
-        if (!response.ok) {
-
+        // 1️⃣ Lanzamos la orquestación
+        const startResponse = await fetch(`/api/TelemetryReport?${params.toString()}`, {
+            method: "GET"
+        });
+        await loadReports(); // Refrescar lista de reportes
+        if (!startResponse.ok) {
             let message;
-
             try {
-                const errorData = await response.json();
-                message = errorData.message;
+                const errorData = await startResponse.json();
+                message = errorData.message || JSON.stringify(errorData);
             } catch {
-                message = await response.text();
+                message = await startResponse.text();
             }
-
-            showToast(`Error generating report: ${message || response.statusText}`, "error", 5000, "top-right");
+            showToast(`Error starting report: ${message}`, "error", 5000, "top-right");
             return false;
         }
 
-        const data = await response.json();
-        const sasUrl = data.url;
+        const statusData = await startResponse.json();
+        const statusUrl = statusData.statusQueryGetUri; // URL para chequear estado
 
-        window.open(sasUrl, "_blank");
+        showToast("Report generation started...", "info", 3000, "top-right");
 
-        showToast("Report generation completed", "success", 3000, "top-right");
+        // 2️⃣ Polling cada 10 segundos hasta que el reporte esté listo
+        let reportReady = false;
+        let reportOutput = null;
+
+        while (!reportReady) {
+            await new Promise(resolve => setTimeout(resolve, 10000)); // 10s
+
+            const statusRes = await fetch(statusUrl);
+            const status = await statusRes.json();
+
+            switch(status.runtimeStatus) {
+                case "Completed":
+                    reportReady = true;
+                    reportOutput = status.output;
+                    break;
+                case "Failed":
+                case "Terminated":
+                    showToast(`Report generation failed: ${status.output?.error || "unknown error"}`, "error", 5000, "top-right");
+                    return false;
+                case "Running":
+                case "Pending":
+                    //console.log("Report still running...");
+                    break;
+                default:
+                    //console.warn("Unknown status:", status.runtimeStatus);
+                    break;
+            }
+        }
+
+        // 3️⃣ Abrir enlace del reporte
+        if (reportReady ) {
+            // window.open(reportOutput.url, "_blank");
+            loadReports(); // Refrescar lista de reportes para mostrar el nuevo
+            showToast("Report generation completed!", "success", 3000, "top-right");
+        }
+
         return true;
 
     } catch (err) {
-        console.error("generateReport error:", err);
+        //console.error("generateReport error:", err);
         showToast("Unexpected error generating report", "error", 5000, "top-right");
         return false;
     }
