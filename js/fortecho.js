@@ -499,6 +499,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         });
 
 
+        //-----------------USER SETTINGS HANDLER----------------------
 
         async function getOffice() {
           //const user = await fetch("/.auth/me").then(r => r.json());
@@ -523,10 +524,17 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
               Theme: "light",
               Language: browserLang,
               SiteCode: window.appState.sitecode
-            }
-          });
+            },
+            lastLogin: new Date().toISOString()
+        });
+
         }else{
+ 
           window.appState.sitecode = data.Settings?.SiteCode || window.appState.sitecode; // use existing siteCode if available
+          const patchBody = {
+              lastLogin: new Date().toISOString()
+          };
+          const result = await UserApi.patchUser(patchBody);
         }
 
         //--------------------REPORTING INDIVIDUAL BUTTON----------------------
@@ -4374,8 +4382,6 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
                 Language: browserLang,
                 SiteCode: window.appState.sitecode
             },
-            updatedAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString()
         };
 
         const data = await UserApi.patchUser(patchBody); 
