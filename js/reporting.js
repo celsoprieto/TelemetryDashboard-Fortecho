@@ -102,7 +102,7 @@ export async function generateReport(tagIds, from, to, format, currentMetric, ti
         //const statusUrl = (`/api/TelemetryReportStatus?${statusData.instanceId}`); ; // URL para chequear estado
         const statusUrl = statusData.statusUrl;
 
-        showToast("Report generation started...", "info", 3000, "top-right");
+        //showToast("Report generation started...", "info", 3000, "top-right");
 
         // 2️⃣ Polling cada 10 segundos hasta que el reporte esté listo
         let reportReady = false;

@@ -533,7 +533,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         document.getElementById("reportingButton")
           .addEventListener("click", async () => {
 
-              // showToast("Report generation started", "info", 3000, "top-right");
+              showToast("Report generation started", "info", 3000, "top-right");
               const btn = document.getElementById("reportingButton");
                const reportsLink = Array.from(document.querySelectorAll("a[data-view]"))
                 .find(link => link.dataset.view === "reports");
@@ -565,7 +565,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
                   reportsLink.click();
 
               } catch (err) {
-                  alert("Error al generar el reporte");
+                  showToast("Error al generar el reporte", "error", 5000, "top-right");
               } finally {
                   btn.disabled = false;
                   btn.classList.remove("opacity-70");
