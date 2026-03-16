@@ -2512,6 +2512,7 @@ function hideLoading(el) {
     //console.log("Loading events from Azure Function...");
     try {
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
+    showSkeletonRows(5); // muestra 5 filas de skeleton mientras cargas
     const params = new URLSearchParams();
     params.set("sitecode", window.appState.sitecode);
     // fetch(...) to your function
