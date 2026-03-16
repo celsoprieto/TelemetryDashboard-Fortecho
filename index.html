@@ -804,11 +804,6 @@
 
       <div class="w-full max-w-6xl mx-auto p-4">
         <div class="rounded-2xl border border-gray-200 bg-white shadow-sm">
-          <!-- Overlay loading -->
-          <div id="loadingOverlayAlarms" class="hidden absolute inset-0 bg-white/70 flex flex-col items-center justify-center z-50">
-            <div class="spinner"></div>
-            <div class="loading-text mt-2">Loading data…</div>
-          </div>
           <!-- Header -->
           <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between p-4 border-b border-gray-200">
             <div>
@@ -826,7 +821,11 @@
               <tbody id="tableABody" class="divide-y divide-gray-200"></tbody>
             </table>
 
-            
+            <!-- Overlay loading -->
+            <div id="loadingOverlayAlarms" class="hidden absolute inset-0 bg-white/70 flex flex-col items-center justify-center z-50">
+              <div class="spinner"></div>
+              <div class="loading-text mt-2">Loading data…</div>
+            </div>
 
           </div>
 
