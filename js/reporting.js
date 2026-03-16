@@ -99,7 +99,7 @@ export async function generateReport(tagIds, from, to, format, currentMetric, ti
         }
 
         const statusData = await startResponse.json();
-        const statusUrl = (`/api/TelemetryReportStatus?instanceId=${statusData.id}`); ; // URL para chequear estado
+        const statusUrl = (`/api/TelemetryReportStatus?instanceId=${statusData.instanceId}`); ; // URL para chequear estado
 
         showToast("Report generation started...", "info", 3000, "top-right");
 
