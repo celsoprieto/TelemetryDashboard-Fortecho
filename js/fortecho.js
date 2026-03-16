@@ -4373,7 +4373,9 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
                 Theme: "dark",
                 Language: browserLang,
                 SiteCode: window.appState.sitecode
-            }
+            },
+            updatedAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
         };
 
         const data = await UserApi.patchUser(patchBody); 
