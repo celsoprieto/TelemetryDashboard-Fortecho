@@ -3990,7 +3990,6 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       showLoading("loadingOverlayAlarms");
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
     const params = new URLSearchParams();
-    params.set("sitecode", window.appState.sitecode);
     params.set("eventType", selectedIds.join(","));
     // fetch(...) to your function
     const url = `/api/alarmsbysitecode?${params.toString()}`;
