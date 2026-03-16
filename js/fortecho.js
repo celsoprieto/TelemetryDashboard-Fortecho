@@ -3942,10 +3942,42 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
   }
 
 
+  function showSkeletonRows(rows = 6) {
+
+    const tbody = document.getElementById("tableABody");
+    const thead = document.getElementById("tableAHead");
+
+    const cols = thead.children.length || 6; // fallback si aún no hay header
+
+    tbody.innerHTML = "";
+
+    for (let i = 0; i < rows; i++) {
+
+        const tr = document.createElement("tr");
+
+        for (let j = 0; j < cols; j++) {
+
+            const td = document.createElement("td");
+
+            td.className = "px-4 py-3";
+
+            const widths = ["w-3/4","w-1/2","w-2/3","w-5/6"];
+
+            td.innerHTML = `
+                <div class="h-4 bg-gray-200 rounded animate-pulse ${widths[Math.floor(Math.random()*widths.length)]}"></div>
+            `;
+
+            tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+    }
+}
 
     async function loadAlarms() {
     //console.log("Loading events from Azure Function...");
     try {
+      showSkeletonRows(6);
       showLoading("loadingOverlayAlarms");
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
     const params = new URLSearchParams();
