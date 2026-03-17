@@ -87,6 +87,12 @@ module.exports = {
     "right-2",
     "left-3",
     "top-1/2",
+    "top-12",
+    "top-16",
+    "top-20",
+    "bottom-12",
+    "bottom-16",
+    "bottom-20",
     "transform",
     "-translate-y-1/2",
     "-translate-x-full",
@@ -254,6 +260,12 @@ module.exports = {
     "scale-100",
     "pointer-events-auto",
     "rotate-0",
+    "fixed",
+     "inset-0",
+     "bg-black/30",
+     "backdrop-blur-sm",
+     "hidden",
+     "z-40"
   ],
   theme: {
     extend: {

@@ -392,21 +392,51 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
             e.preventDefault();
             try {
                 callSettings();
+                openSettings();
+                arrow.classList.toggle("rotate-180");
+                userMenu.classList.toggle("hidden");
             } catch (err) {
                 console.error(err);
                 alert("Error calling backend");
             }
         });
 
+        
+
         document.getElementById("settingsBtnMobile").addEventListener("click", async (e) => {
             e.preventDefault();
             try {
                 callSettings();
+                openSettings();
+                arrow.classList.toggle("rotate-180");
+                userMenu.classList.toggle("hidden");
             } catch (err) {
                 console.error(err);
                 alert("Error calling backend");
             }
         });
+
+        document.getElementById("closeSettings").addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                closeSettings();
+            } catch (err) {
+                console.error(err);
+                alert("Error calling backend");
+            }
+        });
+
+          document.getElementById("settingsOverlay").addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                closeSettings();
+            } catch (err) {
+                console.error(err);
+                alert("Error calling backend");
+            }
+        });
+
+        
 
         //-------------------Buttons logout handlers-----------------------
         document.getElementById("MenuBtnLogout").addEventListener("click", (e) => {
@@ -4494,4 +4524,24 @@ export function showToast(message, type = "success", duration = 3500, position =
   }
 }
 
+//------SETTINGS & UTILS END------
 
+function openSettings() {
+  document.getElementById("settingsPanel")
+    .classList.remove("translate-x-full");
+
+  document.getElementById("settingsOverlay")
+    .classList.remove("hidden");
+
+  
+
+  //loadSettings();
+}
+
+function closeSettings() {
+  document.getElementById("settingsPanel")
+    .classList.add("translate-x-full");
+
+  document.getElementById("settingsOverlay")
+    .classList.add("hidden");
+}
