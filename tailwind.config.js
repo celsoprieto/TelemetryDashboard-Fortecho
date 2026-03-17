@@ -231,6 +231,16 @@ module.exports = {
     "scale-95",
     "pointer-events-none",
     "rotate-180",
+     "grid-cols-1",
+    "sm:grid-cols-2",
+    "flex",
+    "flex-col",
+    "mt-auto",
+    "justify-end",
+    "w-1/2",
+     "w-full",
+     "w-2/3",
+     "w-1/2",
     // Width
     { pattern: /^w-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
     // Height

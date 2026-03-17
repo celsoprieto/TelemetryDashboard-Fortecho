@@ -1,3 +1,4 @@
+import { showToast} from "./fortecho.js";
 // ------------------------
 // UserApi.js
 // ------------------------
@@ -77,7 +78,7 @@ export const UserApi = {
   // =========================
   // PATCH /api/user
   // =========================
-  async patchUser(patchData) {
+  async patchUser(patchData, showSuccessToast = true) {
     try {
       const res = await fetch("/api/user", {
         method: "PATCH",
@@ -86,14 +87,16 @@ export const UserApi = {
       });
 
       if (res.ok) {
-        console.log("User patched successfully");
+        if (showSuccessToast) {
+          showToast("User patched successfully", "success", 3000, "top-right");
+        }
         return true;
       } else {
-        console.error("Error patching user:", res.status);
+        showToast("Error patching user: " + res.status, "error", 3000, "top-right");
         return false;
       }
     } catch (err) {
-      console.error("Fetch error:", err);
+      showToast("Fetch error: " + err, "error", 3000, "top-right");
       return false;
     }
   },

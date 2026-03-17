@@ -43,6 +43,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
     let isFetching = false;
     let currentView ; // or "alarms"
     let userInfo = null;
+    let currentSettings = {};
 
     const cBUFFER_MS = 24 * 60 * 60 * 1000; // 24h
     const cEDGE_MS   = 60 * 60 * 1000;     // 1h (cuando te acercas al borde, recarga)
@@ -100,7 +101,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
 
       const btn_menu = document.getElementById("menuBtn");
       const mobileMenu  = document.getElementById("mobileMenu");
-      const overlayMenu = document.getElementById("menuOverlayMenu");
+      const mobileoverlayMenu = document.getElementById("mobileOverlay");
 
       const fromInput = document.getElementById("fromInput");
       const toInput = document.getElementById("toInput");
@@ -111,6 +112,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       const reportsList = document.getElementById("ReportsList");
       const reportButtons = reportsList?.querySelectorAll(".type-button") || [];
 
+      //-----Telemetry menu elements------
       const btn_menuT = document.getElementById("menuBtnT");
       const menuT = document.getElementById("mobileMenuT");
       const overlay = document.getElementById("menuOverlay");
@@ -148,11 +150,11 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           userMenu.classList.add("hidden");
         }
       });
-      document.addEventListener("click", (e) => {
-        if (!userBtn.parentElement.contains(e.target)) {
-          userMenu.classList.add("hidden");
-        }
-      });
+      // document.addEventListener("click", (e) => {
+      //   if (!userBtn.parentElement.contains(e.target)) {
+      //     userMenu.classList.add("hidden");
+      //   }
+      // });
       document.addEventListener("click", (e) => {
         if (!userBtnMobile.parentElement.contains(e.target)) {
           userMenuMobile.classList.add("hidden");
@@ -163,16 +165,18 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       if (btn_menu && mobileMenu) {
         function openMenu() {
           mobileMenu.classList.remove("translate-x-full");
-          // overlayMenu.classList.remove("hidden");
+          mobileOverlay.classList.remove("hidden", "opacity-0", "pointer-events-none");
           mobileMenu.classList.add("translate-x-0");
           arrow.classList.add("rotate-180");
         }
 
+        mobileoverlayMenu.addEventListener("click", closeMenu);
+
         function closeMenu() {
           mobileMenu.classList.add("translate-x-full");
-          // overlayMenu.classList.add("hidden");
+          mobileOverlay.classList.add("hidden", "opacity-0", "pointer-events-none");
           mobileMenu.classList.remove("translate-x-0");
-          arrow.classList.add("rotate-180");
+          arrow.classList.remove("rotate-180");
         }
 
         btn_menu.addEventListener("click", () => {
@@ -224,21 +228,39 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         else closeMenuT();
         });
 
-        closeMenuTBtn.addEventListener("click", () => {
-        if (menuT.classList.contains("-translate-x-full")) openMenuT();
-        else closeMenuT();
+        closeMenuTBtn?.addEventListener("click", closeMenuT);
+        overlay?.addEventListener("click", closeMenuT);
 
-          });
+        menuT.querySelectorAll("a.nav-link").forEach(link => {
+          link.addEventListener("click", closeMenuT);
+        });
+      }
 
-      
-      overlay.addEventListener("click", closeMenuT);
+      //------SETTINGS & UTILS END------
 
-      
-      menuT.querySelectorAll("a.nav-link").forEach(link => {
-        link.addEventListener("click", closeMenuT);
-      });
+      function openSettings() {
+        document.getElementById("settingsPanel")
+          .classList.remove("translate-x-full");
 
-}
+        document.getElementById("settingsOverlay")
+          .classList.remove("hidden");
+
+        mobileMenu.classList.add("translate-x-full");
+        mobileOverlay.classList.add("hidden", "opacity-0", "pointer-events-none");
+        mobileMenu.classList.remove("translate-x-0");
+        arrow.classList.remove("rotate-180");
+
+        //loadSettings();
+      }
+
+      function closeSettings() {
+        document.getElementById("settingsPanel")
+          .classList.add("translate-x-full");
+
+        document.getElementById("settingsOverlay")
+          .classList.add("hidden");
+      }
+
 
       // ---------------- SENSOR BUTTONS ----------------
       buttons.forEach(btn => {
@@ -436,6 +458,17 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
             }
         });
 
+          document.getElementById("saveSettings").addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                closeSettings();
+                updateSettings(); // Forcing English for now, can be dynamic later
+            } catch (err) {
+                console.error(err);
+                alert("Error calling backend");
+            }
+        });
+
         
 
         //-------------------Buttons logout handlers-----------------------
@@ -553,18 +586,27 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
             settings: {
               Theme: "light",
               Language: browserLang,
-              SiteCode: window.appState.sitecode
+              SiteCode: window.appState.sitecode,
+              Timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
             },
             lastLogin: new Date().toISOString()
         });
+        currentSettings = {
+              Theme: "light",
+              Language: browserLang,
+              SiteCode: window.appState.sitecode,
+              Timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+            }
 
         }else{
+
+          currentSettings = data.Settings || {};
  
           window.appState.sitecode = data.Settings?.SiteCode || window.appState.sitecode; // use existing siteCode if available
           const patchBody = {
               lastLogin: new Date().toISOString()
           };
-          const result = await UserApi.patchUser(patchBody);
+          const result = await UserApi.patchUser(patchBody,false);
         }
 
         //--------------------REPORTING INDIVIDUAL BUTTON----------------------
@@ -619,6 +661,19 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       // setLast24Hours();
       // await loadData(); // moved to switchView() to ensure it runs when telemetry view is active
       //await loadAlarms(); 
+
+      //---------------TIME ZONES LOAD----------------------
+      const timezoneSelect = document.getElementById("timezone");
+
+
+      const timezones = Intl.supportedValuesOf("timeZone"); // requiere navegador moderno
+
+      timezones.forEach(tz => {
+        const option = document.createElement("option");
+        option.value = tz;
+        option.textContent = tz;
+        timezoneSelect.appendChild(option);
+      });
 
       
 
@@ -4402,34 +4457,61 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
     mainChart.update();
   }
 
-  async function updateLanguageToEN() {
+  async function updateSettings() {
     try {
         const browserLang = navigator.language || navigator.languages?.[0] || "en";
         const patchBody = {
             Settings: {
-                Theme: "dark",
-                Language: browserLang,
-                SiteCode: window.appState.sitecode
+                Theme: document.getElementById("theme").value,
+                Language: document.getElementById("language").value,
+                Timezone: document.getElementById("timezone").value
             },
+            updatedAt: new Date().toISOString()
         };
 
         const data = await UserApi.patchUser(patchBody); 
 
 
         if (data) {
-            console.log("Language updated successfully!");
+            showToast("Language updated successfully!", "success",5000,"top-right");
         } else {
-            console.error("Error updating language:", response.status, await response.text());
+           showToast("Error updating language:", "error",5000,"top-right");
         }
     } catch (err) {
-        console.error("Error calling API:", err);
+        showToast("Error calling API:", "error",5000,"top-right");
     }
 }
 
   async function callSettings() {
       try {
           const data = await UserApi.getUser(); 
-          updateLanguageToEN();
+          const settings = data.Settings || {};
+           // Theme
+          const theme = settings.Theme || "light";
+          document.getElementById("theme").value = theme;
+          //applyTheme(theme);
+
+          // Language
+          document.getElementById("language").value = settings.Language || "en";
+
+          // SiteCode (readonly)
+          document.getElementById("sitecode").value = settings.SiteCode || "";
+
+          // Timezone (asegurar que existe antes)
+          const tzSelect = document.getElementById("timezone");
+
+          if (tzSelect.options.length === 0) {
+            Intl.supportedValuesOf("timeZone").forEach(tz => {
+              const opt = document.createElement("option");
+              opt.value = tz;
+              opt.textContent = tz;
+              tzSelect.appendChild(opt);
+            });
+          }
+
+          tzSelect.value = settings.Timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+          //updateLanguageToEN();
+
       } catch (err) {
           console.error(err);
           alert("Error calling backend");
@@ -4524,24 +4606,3 @@ export function showToast(message, type = "success", duration = 3500, position =
   }
 }
 
-//------SETTINGS & UTILS END------
-
-function openSettings() {
-  document.getElementById("settingsPanel")
-    .classList.remove("translate-x-full");
-
-  document.getElementById("settingsOverlay")
-    .classList.remove("hidden");
-
-  
-
-  //loadSettings();
-}
-
-function closeSettings() {
-  document.getElementById("settingsPanel")
-    .classList.add("translate-x-full");
-
-  document.getElementById("settingsOverlay")
-    .classList.add("hidden");
-}

@@ -144,9 +144,12 @@
   </div>
 
   <!-- Mobile panel -->
+   <div id="mobileOverlay"
+      class="fixed inset-0 bg-black/30 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-40 lg:hidden">
+  </div>
   <div id="mobileMenu"
        class="fixed top-10 right-0 h-[calc(100vh-40px)] w-72 bg-white shadow-lg
-              transform translate-x-full transition-transform duration-300 lg:hidden">
+              transform translate-x-full transition-transform rounded-l-xl rounded-tl-xl rounded-bl-xl duration-300 z-50 lg:hidden">
 
     <ul class="flex flex-col gap-5 p-6 text-gray-700 font-medium">
 
@@ -230,7 +233,7 @@
   <section id="view-telemetry" class="view hidden">
 
     <!-- Overlay -->
-    <div id="menuOverlay" class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden z-40"></div>
+    <div id="menuOverlay" class="fixed inset-0 bg-black/30  hidden z-40"></div>
 
     <div id="mobileMenuT" class="fixed left-0 top-12 h-[calc(100dvh-4rem)] bg-white shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out z-50 rounded-tr-xl rounded-br-xl pb-4 flex flex-col overflow-hidden">
       <!-- Header con Search -->
@@ -989,56 +992,75 @@
 
   <!-- VIEW: SETTINGS -->
   <!-- Overlay -->
-<div id="settingsOverlay"
-     class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden z-40">
-</div>
+  <div id="settingsOverlay"
+      class="fixed inset-0 bg-black/30 backdrop-blur-sm hidden z-40">
+  </div>
 
-<!-- Drawer -->
+  <!-- Drawer -->
 <div id="settingsPanel"
-    class="fixed top-12 bottom-4 right-0 
-           w-full md:w-2/3 lg:w-1/2 
-           bg-white shadow-xl 
-           rounded-l-xl rounded-tl-xl rounded-bl-xl
-           transform translate-x-full transition-transform duration-300 
-           z-50 flex flex-col">
-     <!-- class="fixed top-12 bottom-12 right-0 h-full w-80 bg-white shadow-xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col"> -->
-     
+     class="fixed top-12 bottom-4 right-0 
+            w-11/12 md:w-2/3 lg:w-1/2 
+            bg-white shadow-xl 
+            rounded-l-xl rounded-tl-xl rounded-bl-xl
+            transform translate-x-full transition-transform duration-300 
+            z-50">
 
   <!-- Header -->
   <div class="flex items-center justify-between p-4 border-b">
-    <h3 class="font-semibold text-lg text-custom-green">Settings</h3>
+    <h3 class="font-bold text-lg text-custom-green">Settings</h3>
     <button id="closeSettings" class="text-gray-500 hover:text-black">✖</button>
   </div>
 
-  <!-- Content -->
-  <div class="p-4 flex flex-col gap-4">
+  <!-- Grid de inputs y botón -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-6 flex-1 overflow-y-auto">
 
-    <div>
-      <label class="text-sm text-custom-green">Theme</label>
-      <select id="theme" class="w-full mt-1 border rounded px-2 py-1">
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
+    <!-- Columna izquierda -->
+    <div class="flex flex-col gap-4">
+      <div>
+        <label class="text-sm text-custom-green">Theme</label>
+        <select id="theme" class="mt-1 border rounded px-2 py-1 w-full">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-sm text-gray-400">Site Code</label>
+        <input id="sitecode" type="text" readonly
+               class="mt-1 border rounded px-2 py-1 w-full bg-gray-100 text-gray-500 cursor-not-allowed">
+      </div>
     </div>
 
-    <div>
-      <label class="text-sm text-custom-green">Language</label>
-      <select id="language" class="w-full mt-1 border rounded px-2 py-1">
-        <option value="es">Español</option>
-        <option value="en">English</option>
-      </select>
-    </div>
+    <!-- Columna derecha -->
+    <div class="flex flex-col gap-4 h-full">
+      <div>
+        <label class="text-sm text-custom-green">Language</label>
+        <select id="language" class="mt-1 border rounded px-2 py-1 w-full">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+      </div>
 
-    <button onclick="saveSettings()"
-            class="mt-4 bg-custom-green text-white rounded px-4 py-2 hover:bg-custom-green-dark transition-colors">
-      Save
-    </button>
+      <div>
+        <label class="text-sm text-custom-green">Timezone</label>
+        <select id="timezone" class="mt-1 border rounded px-2 py-1 w-full">
+        </select>
+      </div>
+
+      <!-- Botón Save abajo de columna derecha -->
+      <div class="mt-auto flex justify-end">
+        <button id="saveSettings"
+                class="bg-custom-green text-white rounded px-6 py-2 hover:bg-custom-green-dark transition-colors w-1/2">
+          Save
+        </button>
+      </div>
+    </div>
 
   </div>
 </div>
 
   <!-- Alarm Detail Modal -->
-  <div id="alarmDetailModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+  <div id="alarmDetailModal" class="hidden fixed inset-0 bg-black/30 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-6 border w-full max-w-6xl shadow-lg rounded-md bg-white mb-20">
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-4 border-b border-gray-200 ">
