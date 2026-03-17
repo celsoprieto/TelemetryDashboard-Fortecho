@@ -2573,6 +2573,7 @@ function hideLoading(el) {
     //console.log("Loading events from Azure Function...");
     try {
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
+    showSkeletonRows("table",5); // muestra 5 filas de skeleton mientras cargas
     const params = new URLSearchParams();
     params.set("deviceId", deviceIdForEvents);
     // fetch(...) to your function
@@ -2605,7 +2606,7 @@ function hideLoading(el) {
     //console.log("Loading events from Azure Function...");
     try {
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
-    showSkeletonRows(5); // muestra 5 filas de skeleton mientras cargas
+    showSkeletonRows("tableR",5); // muestra 5 filas de skeleton mientras cargas
     const params = new URLSearchParams();
     params.set("sitecode", window.appState.sitecode);
     // fetch(...) to your function
@@ -4036,10 +4037,10 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
   }
 
 
-  function showSkeletonRows(rows = 6) {
+  function showSkeletonRows(tableId,rows = 6) {
 
-    const tbody = document.getElementById("tableABody");
-    const thead = document.getElementById("tableAHead");
+    const tbody = document.getElementById(`${tableId}Body`);
+    const thead = document.getElementById(`${tableId}Head`);
 
     const cols = thead.children.length || 6; // fallback si aún no hay header
 
@@ -4071,7 +4072,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
     async function loadAlarms() {
     //console.log("Loading events from Azure Function...");
     try {
-      showSkeletonRows(6);
+      showSkeletonRows("tableA",6);
       showLoading("loadingOverlayAlarms");
       // Aquí harías la llamada a tu Azure Function para obtener los eventos
     const params = new URLSearchParams();
