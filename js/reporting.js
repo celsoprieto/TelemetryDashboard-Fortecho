@@ -64,7 +64,7 @@ export async function generateReport(tagIds, from, to, format, currentMetric, ti
         const options = {
             Metric: currentMetric,
             Title: title,
-            TimeZone: currentSettings.Timezone || "UTC",
+            Timezone: currentSettings.Timezone || "UTC",
             JoinedGraph: currentMetric !== "temp-humidity"
         };
 
