@@ -1,4 +1,4 @@
-    import { redTones, blueTones, lightTones ,showToast,loadReports} from "./fortecho.js";
+    import { redTones, blueTones, currentSettings ,showToast,loadReports} from "./fortecho.js";
 
 // export async function generateReport(tagIds, from, to, format, currentMetric, title) {
 //     try {
@@ -64,6 +64,7 @@ export async function generateReport(tagIds, from, to, format, currentMetric, ti
         const options = {
             Metric: currentMetric,
             Title: title,
+            TimeZone: currentSettings.Timezone || "UTC",
             JoinedGraph: currentMetric !== "temp-humidity"
         };
 

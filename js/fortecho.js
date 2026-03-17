@@ -43,7 +43,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
     let isFetching = false;
     let currentView ; // or "alarms"
     let userInfo = null;
-    let currentSettings = {};
+    export let currentSettings = {};
 
     const cBUFFER_MS = 24 * 60 * 60 * 1000; // 24h
     const cEDGE_MS   = 60 * 60 * 1000;     // 1h (cuando te acercas al borde, recarga)
@@ -4486,6 +4486,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       try {
           const data = await UserApi.getUser(); 
           const settings = data.Settings || {};
+          currentSettings = settings; // guarda para uso futuro
            // Theme
           const theme = settings.Theme || "light";
           document.getElementById("theme").value = theme;
