@@ -280,9 +280,10 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
                 tag.isSelected = false; 
               }
             }
-
+            
             refreshTagSelect(); 
           }
+          filterTags(currentSearch);
           renderChart();
           showTagDetails();
         });
@@ -3844,7 +3845,21 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
       const sub1 = `ID: ${tag.tagId}`.toLowerCase();
       const sub2 = `Serial: ${tag.serialNumber || "-"}`.toLowerCase();
 
-      const match = title.includes(currentSearch) || artist.includes(currentSearch) || sub1.includes(currentSearch) || sub2.includes(currentSearch);
+      const textMatch  = title.includes(currentSearch) || artist.includes(currentSearch) || sub1.includes(currentSearch) || sub2.includes(currentSearch);
+
+      let metricMatch = true;
+      if (currentMetric === "temp-humidity") {
+        metricMatch = tag.last_telemetry_value_t != null && tag.last_telemetry_value_rh != null;
+      } else if (currentMetric === "temperature") {
+        metricMatch = tag.last_telemetry_value_t != null;
+      } else if (currentMetric === "humidity") {
+        metricMatch = tag.last_telemetry_value_rh != null;
+      } else if (currentMetric === "light") {
+        metricMatch = tag.last_telemetry_value_lum != null;
+      }
+
+      const match = textMatch && metricMatch;
+      tag.isSelected = match && tag.isSelected; // deseleccionar si no coincide
 
       card.style.display = match ? "block" : "none";
 
@@ -3920,6 +3935,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
 
       grid.appendChild(card);
       tagCardsMap.set(tag.tagId, card);
+      filterTags(currentSearch); // re-aplicar filtro para actualizar resaltado
 
       // Botón click
       const button = card.querySelector('button[data-tagid]');
