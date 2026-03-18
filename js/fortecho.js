@@ -582,17 +582,21 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         const data = await UserApi.getUser(); 
         if (!data) { 
           await getOffice();
+          if (window.appState.sitecode == 0) {
+            return;
+          }
           const browserLang = navigator.language || navigator.languages?.[0] || "en";
           await UserApi.createUser({
-            settings: {
-              Theme: "light",
-              Language: browserLang,
-              SiteCode: window.appState.sitecode,
-              Timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
-            },
-            lastLogin: new Date().toISOString()
-        });
-        currentSettings = {
+              settings: {
+                Theme: "light",
+                Language: browserLang,
+                SiteCode: window.appState.sitecode,
+                Timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+              },
+              lastLogin: new Date().toISOString(),
+              email: data?.email || ""
+          });
+          currentSettings = {
               Theme: "light",
               Language: browserLang,
               SiteCode: window.appState.sitecode,
