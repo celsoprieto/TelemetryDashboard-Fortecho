@@ -583,6 +583,37 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         if (!data) { 
           await getOffice();
           if (window.appState.sitecode == 0) {
+            // const modal = document.getElementById('sitecode-modal');
+            // const closeBtn = document.getElementById('close-modal');
+
+            // // Mostrar modal si sitecode === 0
+            // //if (sitecode === 0) {
+            //   modal.classList.remove('hidden');
+            // //}
+
+            // // Cerrar modal
+            // closeBtn.addEventListener('click', () => {
+
+            //   modal.classList.add('hidden');
+            // });
+
+          const overlay = document.getElementById('sitecode-toast-overlay');
+          const content = document.getElementById('toast-content');
+          const closeBtn = document.getElementById('close-toast');
+
+          if (window.appState.sitecode === 0) {
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+              content.classList.remove('translate-y-[-20px]', 'opacity-0');
+            }, 10);
+          }
+
+          closeBtn.addEventListener('click', () => {
+            content.classList.add('translate-y-[-20px]', 'opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+            logout();
+          });
+
             return;
           }
           const browserLang = navigator.language || navigator.languages?.[0] || "en";

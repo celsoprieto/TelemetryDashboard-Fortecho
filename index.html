@@ -227,7 +227,53 @@
 </nav>
 
 
-  <main class="mainclass">
+  <main class="mainclass select-none">
+
+    <!-- Overlay + Toast -->
+    <div id="sitecode-toast-overlay"
+        class="fixed inset-0 z-50 hidden bg-black/30 backdrop-blur-md flex items-start justify-center pt-6 select-none">
+
+      <div id="toast-content"
+          class="flex items-center gap-4 px-6 py-3 rounded-xl shadow-lg
+                  bg-white/80 transition-all duration-300 ease-out
+                  translate-y-[-20px] opacity-0">
+
+        <!-- Icono warning -->
+        <svg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 9v2m0 4h.01M10.29 3.86l-8.18 14.14A2 2 0 004 21h16a2 2 0 001.89-2.99L13.71 3.86a2 2 0 00-3.42 0z" />
+        </svg>
+
+        <span class="font-medium whitespace-nowrap">
+          User has not been assigned to a location.
+        </span>
+
+        <div class="flex items-center gap-2 ml-2">
+          <button id="contact-support"
+                  class="text-sm px-3 py-1 rounded bg-gray-100 hover:bg-gray-200">
+            Contact
+          </button>
+          <button id="close-toast"
+                  class="text-sm px-3 py-1 rounded bg-custom-green text-white hover:bg-custom-green-dark">
+            Close
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  <!-- <div id="sitecode-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-lg hidden select-none">
+    <div class="bg-white rounded-2xl shadow-xl p-6 relative inline-block max-w-[90vw] overflow-x-auto">
+      <h2 class="text-xl font-semibold mb-4">Warning!!</h2>
+      <p class="mb-6 whitespace-nowrap">User has not been assigned to a location. Please contact Fortecho Solutions Ltd.</p>
+      <div class="flex justify-center">
+        <button id="close-modal" class="px-4 py-2 bg-custom-green text-white rounded hover:bg-custom-green-dark">
+          Close
+        </button>
+      </div>
+    </div>
+  </div> -->
     <!-- <h1 class="page-title">Telemetry Dashboard</h1> -->
   <!-- VIEW: TELEMETRY -->
   <section id="view-telemetry" class="view hidden">

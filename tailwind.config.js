@@ -16,6 +16,21 @@ module.exports = {
     {
       pattern: /^w-(0|1|2|3|4|5|6|8|10|11|12|14|16|20|24|28|32|36|40|44|45|46|48|52|56|60|64|72|80|96|auto|px|full|screen|min|max|fit)$/,
     },
+    // Width
+    { pattern: /^w-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
+    // Height
+    { pattern: /^h-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
+    // Padding
+    { pattern: /^p[trblxy]?-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
+    // Margin
+    { pattern: /^m[trblxy]?-(\d+(\.5)?|0|auto|px|full|min|max|fit)$/ },
+    // Gap
+    { pattern: /^gap-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
+    // Text sizes (opcional)
+    { pattern: /^text-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl)$/ },
+    // Padding start / end
+    { pattern: /^ps-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
+    { pattern: /^pe-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
     // Padding classes
     'px-4',
     'px-6',
@@ -242,21 +257,6 @@ module.exports = {
      "w-2/3",
      "w-1/2",
      "min-w-80",
-    // Width
-    { pattern: /^w-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
-    // Height
-    { pattern: /^h-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
-    // Padding
-    { pattern: /^p[trblxy]?-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
-    // Margin
-    { pattern: /^m[trblxy]?-(\d+(\.5)?|0|auto|px|full|min|max|fit)$/ },
-    // Gap
-    { pattern: /^gap-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
-    // Text sizes (opcional)
-    { pattern: /^text-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl)$/ },
-    // Padding start / end
-    { pattern: /^ps-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
-    { pattern: /^pe-(\d+(\.5)?|0|px|full|min|max|fit)$/ },
     "max-w-[40ch]",
     "max-w-[50ch]",
     "max-w-[60ch]",
@@ -275,8 +275,62 @@ module.exports = {
      "inset-0",
      "bg-black/30",
      "backdrop-blur-sm",
+     "backdrop-blur-lg",
+     "backdrop-blur-xl",
+     "backdrop-blur-2xl",
+     "backdrop-blur-3xl",
+     "backdrop-blur-none",
      "hidden",
-     "z-40"
+     "z-40",
+         "hidden",
+    "fixed",
+    "top-6",
+    "left-1/2",
+    "-translate-x-1/2",
+    "z-50",
+
+    // flex y spacing
+    "flex",
+    "items-center",
+    "justify-center",
+    "gap-2",
+    "gap-4",
+    "px-3",
+    "px-6",
+    "py-1",
+    "py-3",
+    "ml-2",
+
+    // estilos visuales
+    "bg-white/80",
+    "bg-black/30",
+    "bg-gray-100",
+    "hover:bg-gray-200",
+    "border",
+    "border-gray-200",
+    "rounded-xl",
+    "shadow-lg",
+
+    // blur / glass
+    "backdrop-blur-md",
+    "backdrop-blur-lg",
+
+    // animaciones
+    "transition-all",
+    "duration-300",
+    "ease-out",
+    "translate-y-[-20px]",
+    "opacity-0",
+
+    // texto
+    "font-medium",
+    "whitespace-nowrap",
+    "text-sm",
+
+    // colores custom (MUY IMPORTANTE)
+    "bg-custom-green",
+    "hover:bg-custom-green-dark",
+    "text-white",
   ],
   theme: {
     extend: {
