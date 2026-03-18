@@ -2433,11 +2433,6 @@ video {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
-.-translate-x-1\/2 {
-  --tw-translate-x: -50%;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
 .-translate-x-\[calc\(100dvh-40px\)\] {
   --tw-translate-x: calc(calc(100dvh - 40px) * -1);
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -4598,11 +4593,6 @@ video {
 .text-custom-green {
   --tw-text-opacity: 1;
   color: rgb(21 115 114 / var(--tw-text-opacity, 1));
-}
-
-.text-custom-orange {
-  --tw-text-opacity: 1;
-  color: rgb(255 166 77 / var(--tw-text-opacity, 1));
 }
 
 .text-custom-red {
