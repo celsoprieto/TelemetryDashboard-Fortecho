@@ -2368,6 +2368,10 @@ video {
   min-width: 0px;
 }
 
+.min-w-80 {
+  min-width: 20rem;
+}
+
 .min-w-\[38px\] {
   min-width: 38px;
 }

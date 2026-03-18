@@ -241,6 +241,7 @@ module.exports = {
      "w-full",
      "w-2/3",
      "w-1/2",
+     "min-w-80",
     // Width
     { pattern: /^w-(\d+(\.5)?|0|auto|px|full|screen|min|max|fit)$/ },
     // Height

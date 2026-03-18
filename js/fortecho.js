@@ -3896,7 +3896,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
 
     allTagsArray.forEach(tag => {
       const card = document.createElement("div");
-      card.className = `card relative bg-white rounded-xl shadow-sm border border-gray-200 p-4 group`;
+      card.className = `card relative bg-white rounded-xl shadow-sm border border-gray-200 p-4 group min-w-80`;
 
       const barClass = tag.isSelected ? "bg-custom-green" : "bg-custom-blue";
       const textColorClass = tag.isSelected ? "text-custom-green" : "text-custom-blue";
