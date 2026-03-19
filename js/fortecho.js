@@ -114,22 +114,24 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           await getOffice();
           if (window.appState.sitecode == 0) {
 
-          const overlay = document.getElementById('sitecode-toast-overlay');
-          const content = document.getElementById('toast-content');
-          const closeBtn = document.getElementById('close-toast');
+            noaccess();
 
-          if (window.appState.sitecode === 0) {
-            overlay.classList.remove('hidden');
-            setTimeout(() => {
-              content.classList.remove('translate-y-[-20px]', 'opacity-0');
-            }, 10);
-          }
+          // const overlay = document.getElementById('sitecode-toast-overlay');
+          // const content = document.getElementById('toast-content');
+          // const closeBtn = document.getElementById('close-toast');
 
-          closeBtn.addEventListener('click', () => {
-            content.classList.add('translate-y-[-20px]', 'opacity-0');
-            setTimeout(() => overlay.classList.add('hidden'), 300);
-            logout();
-          });
+          // if (window.appState.sitecode === 0) {
+          //   overlay.classList.remove('hidden');
+          //   setTimeout(() => {
+          //     content.classList.remove('translate-y-[-20px]', 'opacity-0');
+          //   }, 10);
+          // }
+
+          // closeBtn.addEventListener('click', () => {
+          //   content.classList.add('translate-y-[-20px]', 'opacity-0');
+          //   setTimeout(() => overlay.classList.add('hidden'), 300);
+          //   logout();
+          // });
 
             return;
           }
@@ -156,10 +158,34 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           currentSettings = data.Settings || {};
  
           window.appState.sitecode = data.Settings?.SiteCode || window.appState.sitecode; // use existing siteCode if available
+          if (window.appState.sitecode == 0) {
+            noaccess();
+            return;
+          }
           const patchBody = {
               lastLogin: new Date().toISOString()
           };
           const result = await UserApi.patchUser(patchBody,false);
+        }
+
+        function noaccess() {
+
+           const overlay = document.getElementById('sitecode-toast-overlay');
+          const content = document.getElementById('toast-content');
+          const closeBtn = document.getElementById('close-toast');
+
+          if (window.appState.sitecode === 0) {
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+              content.classList.remove('translate-y-[-20px]', 'opacity-0');
+            }, 10);
+          }
+
+          closeBtn.addEventListener('click', () => {
+            content.classList.add('translate-y-[-20px]', 'opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+            logout();
+          });
         }
 
 
