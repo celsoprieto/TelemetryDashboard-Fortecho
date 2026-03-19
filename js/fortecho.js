@@ -164,6 +164,8 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
 
       if (btn_menu && mobileMenu) {
         function openMenu() {
+          closeMenuT(); // ensure telemetry menu is closed when opening main menu
+          closeSettings(); // ensure settings panel is closed when opening menu
           mobileMenu.classList.remove("translate-x-full");
           mobileOverlay.classList.remove("hidden", "opacity-0", "pointer-events-none");
           mobileMenu.classList.add("translate-x-0");
@@ -199,7 +201,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
       //   }
       // });
 
-      if (btn_menuT && menuT) {
+      //if (btn_menuT && menuT) {
 
         function openMenuT() {
           menuT.classList.remove("-translate-x-full");
@@ -234,7 +236,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         menuT.querySelectorAll("a.nav-link").forEach(link => {
           link.addEventListener("click", closeMenuT);
         });
-      }
+      //}
 
       //------SETTINGS & UTILS END------
 
@@ -4521,13 +4523,13 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
             updatedAt: new Date().toISOString()
         };
 
-        const data = await UserApi.patchUser(patchBody); 
+        const data = await UserApi.patchUser(patchBody,false); 
 
 
         if (data) {
-            showToast("Language updated successfully!", "success",5000,"top-right");
+            showToast("Updated Settings successfully!", "success",5000,"top-right");
         } else {
-           showToast("Error updating language:", "error",5000,"top-right");
+           showToast("Error updating settings:", "error",5000,"top-right");
         }
     } catch (err) {
         showToast("Error calling API:", "error",5000,"top-right");
