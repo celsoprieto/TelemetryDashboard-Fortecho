@@ -80,23 +80,11 @@
         </button>
 
       <ul id="userMenu"
-          class="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg hidden">
+          class="absolute right-0 mt-2 w-auto whitespace-nowrap bg-white border rounded shadow-lg hidden">
 
         <li>
           <a id="settingsBtn"
             class="flex items-center px-4 py-2 hover:bg-teal-50 cursor-pointer">
-<!-- 
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="w-5 h-5 mr-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor">
-
-              <path stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53"/>
-            </svg> -->
 
             <svg xmlns="http://www.w3.org/2000/svg" 
               width="24" 
@@ -202,21 +190,27 @@
 
         
         <ul id="userMenuMobile"
-          class="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg hidden">
+          class="absolute right-0 mt-2 w-auto whitespace-nowrap bg-white border rounded shadow-lg hidden">
 
-          <li><a id="settingsBtnMobile" class="flex items-center px-4 py-2 hover:bg-teal-50">
-              <svg xmlns="http://www.w3.org/2000/svg"
-                    class="w-5 h-5 mr-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor">
+          <li>
+            <a id="settingsBtnMobile" class="flex items-center px-4 py-2 hover:bg-teal-50">
+              <svg xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2" 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                class="lucide lucide-user-icon lucide-user w-5 h-5 mr-3">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
 
-                  <path stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 4.75v.75M12 18.5v.75M4.75 12h.75M18.5 12h.75M6.75 6.75l.53.53M16.72 16.72l.53.53M6.75 17.25l.53-.53M16.72 7.28l.53-.53"/>
-                </svg>
-            Settings</a></li>
+              User Settings
+            </a>
+          </li>
           <li><a id="MenuBtnLogoutMobile"   class="flex items-center px-4 py-2 hover:bg-teal-50">
             <svg xmlns="http://www.w3.org/2000/svg"
                     class="w-5 h-5 mr-3"
