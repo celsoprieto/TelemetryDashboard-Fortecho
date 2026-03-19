@@ -416,7 +416,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         document.getElementById("settingsBtn").addEventListener("click", async (e) => {
             e.preventDefault();
             try {
-                callSettings();
+                await callSettings();
                 openSettings();
                 arrow.classList.toggle("rotate-180");
                 userMenu.classList.toggle("hidden");
@@ -431,7 +431,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         document.getElementById("settingsBtnMobile").addEventListener("click", async (e) => {
             e.preventDefault();
             try {
-                callSettings();
+                await callSettings();
                 openSettings();
                 arrow.classList.toggle("rotate-180");
                 userMenu.classList.toggle("hidden");
