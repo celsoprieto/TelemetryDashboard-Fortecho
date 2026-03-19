@@ -93,6 +93,25 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
     // Load tags on page load
     window.addEventListener("DOMContentLoaded", async () => {
 
+      // ---------------- LOAD USER INFO ----------------
+
+       async function updateUserLi() {
+        await loaduserdetails();
+          if (!userInfo) return; // Asegurarse que userInfo ya existe
+          const nameClaim = userInfo.claims.find(c => c.typ === "name");
+          const textEl = document.querySelector('#userBtn .user-text');
+          const textElMobile = document.querySelector('#userBtnMobile .user-text');
+
+          if (textEl && nameClaim) textEl.textContent = nameClaim.val;
+          if (textElMobile && nameClaim) textElMobile.textContent = nameClaim.val;
+          try {
+
+          } catch (err) {
+            console.error(err);
+          }
+        }
+        await updateUserLi();
+
               //-----------------USER SETTINGS HANDLER----------------------
 
         async function getOffice() {
@@ -468,46 +487,24 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         });
       });
 
-      // ---------------- LOAD USER INFO ----------------
+      // // ---------------- LOAD USER INFO ----------------
 
-       async function updateUserLi() {
-        await loaduserdetails();
-          if (!userInfo) return; // Asegurarse que userInfo ya existe
-          const nameClaim = userInfo.claims.find(c => c.typ === "name");
-          const textEl = document.querySelector('#userBtn .user-text');
-          const textElMobile = document.querySelector('#userBtnMobile .user-text');
+      //  async function updateUserLi() {
+      //   await loaduserdetails();
+      //     if (!userInfo) return; // Asegurarse que userInfo ya existe
+      //     const nameClaim = userInfo.claims.find(c => c.typ === "name");
+      //     const textEl = document.querySelector('#userBtn .user-text');
+      //     const textElMobile = document.querySelector('#userBtnMobile .user-text');
 
-          if (textEl && nameClaim) textEl.textContent = nameClaim.val;
-          if (textElMobile && nameClaim) textElMobile.textContent = nameClaim.val;
-          try {
-              // // 1️⃣ Get SWA user info (includes token)
-              // const meRes = await fetch(`/.auth/me`);
-              // if (!meRes.ok) throw new Error("Cannot get user info from /.auth/me");
+      //     if (textEl && nameClaim) textEl.textContent = nameClaim.val;
+      //     if (textElMobile && nameClaim) textElMobile.textContent = nameClaim.val;
+      //     try {
 
-              // const me = await meRes.json();
-
-              // // 2️⃣ Extract access token
-              // const swaToken = me?.[0]?.access_token;
-              // if (!swaToken) throw new Error("User is not authenticated");
-
-              // // 3️⃣ Call API with token
-              // const apiRes = await fetch(`${API_BASE}/api/GetUserOffice`, {
-              //   headers: {
-              //     "x-ms-client-principal-token": swaToken
-              //   }
-              // });
-
-              // if (!apiRes.ok) {
-              //   const text = await apiRes.text();
-              //   throw new Error(`API error: ${apiRes.status} - ${text}`);
-              // }
-
-              // const user = await apiRes.json();
-          } catch (err) {
-            console.error(err);
-          }
-        }
-        await updateUserLi();
+      //     } catch (err) {
+      //       console.error(err);
+      //     }
+      //   }
+      //   await updateUserLi();
 
         //-----------------------Settings button handler-----------------------
         document.getElementById("settingsBtn").addEventListener("click", async (e) => {
