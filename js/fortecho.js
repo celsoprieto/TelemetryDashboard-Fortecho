@@ -251,6 +251,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         mobileOverlay.classList.add("hidden", "opacity-0", "pointer-events-none");
         mobileMenu.classList.remove("translate-x-0");
         arrow.classList.remove("rotate-180");
+        closeMenuT(); // ensure telemetry menu is closed when opening settings
 
         //loadSettings();
       }
