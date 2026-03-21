@@ -2,10 +2,9 @@ import { UserApi } from "./UserApi.js";
 import { selectedIds , getRowClass, closeAlarmDetailModal,showAlarmDetailModal,
   metricToEventTypeIds,toggleIds} from "./fsalarms.js";
 import { generateReport,downloadFile,deleteReport} from "./reporting.js";
-// Replace this with your actual Function App URL:
-    //const API_BASE = 'https://fsfcpr.azurewebsites.net/api';
+
+
     const API_BASE = '';
-    //let API_BASE = ""; // declare a variable to hold the value
   
 
     window.appState = window.appState || {};
@@ -101,6 +100,7 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           const nameClaim = userInfo.claims.find(c => c.typ === "name");
           const textEl = document.querySelector('#userBtn .user-text');
           const textElMobile = document.querySelector('#userBtnMobile .user-text');
+          
 
           if (textEl && nameClaim) textEl.textContent = nameClaim.val;
           if (textElMobile && nameClaim) textElMobile.textContent = nameClaim.val;
@@ -175,6 +175,8 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         }else{
 
           currentSettings = data.Settings || {};
+          const emailClaim = userInfo.claims.find(c => c.typ === "preferred_username");
+          let email = data.email;
  
           window.appState.sitecode = data.Settings?.SiteCode || window.appState.sitecode; // use existing siteCode if available
           if (window.appState.sitecode == 0) {
@@ -182,7 +184,8 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
             return;
           }
           const patchBody = {
-              lastLogin: new Date().toISOString()
+              lastLogin: new Date().toISOString(),
+               ...(!email && emailClaim?.val && { email: emailClaim.val })
           };
           const result = await UserApi.patchUser(patchBody,false);
         }
