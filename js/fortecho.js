@@ -179,15 +179,16 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
           let email = data.email;
  
           window.appState.sitecode = data.Settings?.SiteCode || window.appState.sitecode; // use existing siteCode if available
-          if (window.appState.sitecode == 0) {
-            noaccess();
-            return;
-          }
           const patchBody = {
               lastLogin: new Date().toISOString(),
                ...(!email && emailClaim?.val && { email: emailClaim.val })
           };
           const result = await UserApi.patchUser(patchBody,false);
+          if (window.appState.sitecode == 0) {
+            noaccess();
+            return;
+          }
+          
         }
 
         function noaccess() {
