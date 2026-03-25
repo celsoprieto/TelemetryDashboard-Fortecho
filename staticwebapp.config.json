@@ -1,6 +1,10 @@
 {
   "routes": [
     {
+      "route": "/login",
+      "allowedRoles": ["anonymous", "authenticated"]
+    },
+    {
       "route": "/loggedout",
       "allowedRoles": ["anonymous", "authenticated"]
     },
@@ -22,7 +26,7 @@
     }
   ],
   "responseOverrides": {
-    "401": { "redirect": "/.auth/login/externalid" }
+    "401": { "redirect": "/login" }
   },
   "auth": {
     "identityProviders": {
@@ -35,6 +39,20 @@
             },
             "openIdConnectConfiguration": {
               "wellKnownOpenIdConfiguration": "https://celsoprietocustomers.ciamlogin.com/ab4a18a3-81ca-46ef-9ff5-c48f63662f31/v2.0/.well-known/openid-configuration"
+            }
+          },
+          "login": {
+            "nameClaimType": "name"
+          }
+        },
+        "entra": {
+          "registration": {
+            "clientIdSettingName": "ENTRA_CLIENT_ID",
+            "clientCredential": {
+              "clientSecretSettingName": "ENTRA_CLIENT_SECRET"
+            },
+            "openIdConnectConfiguration": {
+              "wellKnownOpenIdConfiguration": "https://login.microsoftonline.com/<TENANT_ID>/v2.0/.well-known/openid-configuration"
             }
           },
           "login": {
