@@ -1,10 +1,6 @@
 {
   "routes": [
     {
-      "route": "/login",
-      "allowedRoles": ["anonymous", "authenticated"]
-    },
-    {
       "route": "/loggedout",
       "allowedRoles": ["anonymous", "authenticated"]
     },
