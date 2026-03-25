@@ -52,7 +52,7 @@
               "clientSecretSettingName": "ENTRA_CLIENT_SECRET"
             },
             "openIdConnectConfiguration": {
-              "wellKnownOpenIdConfiguration": "https://login.microsoftonline.com/<TENANT_ID>/v2.0/.well-known/openid-configuration"
+              "wellKnownOpenIdConfiguration": "https://login.microsoftonline.com/e180796e-63ef-436d-9169-ea6d797836da/v2.0/.well-known/openid-configuration"
             }
           },
           "login": {
