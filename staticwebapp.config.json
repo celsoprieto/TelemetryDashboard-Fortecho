@@ -26,7 +26,7 @@
     }
   ],
   "responseOverrides": {
-    "401": { "redirect": "/login" }
+    "401": { "redirect": "/.auth/login/externalid" }
   },
   "auth": {
     "identityProviders": {
