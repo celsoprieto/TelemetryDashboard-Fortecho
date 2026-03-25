@@ -1,5 +1,6 @@
 {
   "routes": [
+    { "route": "/login", "allowedRoles": ["anonymous", "authenticated"] },
     {
       "route": "/loggedout",
       "allowedRoles": ["anonymous", "authenticated"]
@@ -22,7 +23,7 @@
     }
   ],
   "responseOverrides": {
-    "401": { "redirect": "/.auth/login/externalid" }
+    "401": { "redirect": "/login" }
   },
   "auth": {
     "identityProviders": {

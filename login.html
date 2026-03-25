@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sesión cerrada</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+    .buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+    a.button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #0d9488;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+    a.button:hover { background: #14b8a6; }
+    a.button.secondary { background: #2563eb; }
+    a.button.secondary:hover { background: #3b82f6; }
+  </style>
+</head>
+<body>
+  <h1>Sesión cerrada correctamente</h1>
+  <p>Elige cómo quieres iniciar sesión:</p>
+
+  <div class="buttons">
+    <a id="loginExternal" class="button" href="/.auth/login/externalid?prompt=login">
+      Entrar con External ID
+    </a>
+
+    <a id="loginEntra" class="button secondary" href="/.auth/login/entra?prompt=login">
+      Entrar con Entra ID
+    </a>
+  </div>
+
+  <script>
+    // Si prefieres controlar por JS (opcional), esto ya no rompe porque los IDs existen.
+    // document.getElementById("loginExternal").addEventListener("click", (e) => {});
+    // document.getElementById("loginEntra").addEventListener("click", (e) => {});
+  </script>
+</body>
+</html>
