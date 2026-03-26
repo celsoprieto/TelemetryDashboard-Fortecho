@@ -1,11 +1,11 @@
 {
   "routes": [
     {
-      "route": "/.auth/*",
+      "route": "/login.html",
       "allowedRoles": ["anonymous"]
     },
     {
-      "route": "/login.html",
+      "route": "/.auth/*",
       "allowedRoles": ["anonymous"]
     },
     {
@@ -31,7 +31,7 @@
   ],
   "responseOverrides": {
     "401": {
-      "rewrite": "/login.html"
+      "redirect": "/login.html"
     }
   },
   "auth": {
