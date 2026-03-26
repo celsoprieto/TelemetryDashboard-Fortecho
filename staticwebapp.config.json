@@ -1,6 +1,10 @@
 {
   "routes": [
     {
+      "route": "/.auth/*",
+      "allowedRoles": ["anonymous"]
+    },
+    {
       "route": "/login.html",
       "allowedRoles": ["anonymous"]
     },
