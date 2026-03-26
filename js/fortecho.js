@@ -4576,7 +4576,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
 
   function logout() {
     window.location.replace(
-      "/.auth/logout?post_logout_redirect_uri=/login.html"
+      "/.auth/logout?post_logout_redirect_uri=/loggedout"
     );
   }
 
