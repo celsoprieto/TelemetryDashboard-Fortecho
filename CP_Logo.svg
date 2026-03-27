@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 160">
+  <!-- Generator: Adobe Illustrator 29.5.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 141)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #157372;
+      }
+
+      .st1 {
+        fill: #fff;
+        font-family: TempusSansITC, 'Tempus Sans ITC';
+        font-size: 120px;
+      }
+    </style>
+  </defs>
+  <g>
+    <rect class="st0" x=".5" y=".5" width="159" height="159"/>
+    <path d="M159,1v158H1V1h158M160,0H0v160h160V0h0Z"/>
+  </g>
+  <text class="st1" transform="translate(9.57 110.01)"><tspan x="0" y="0">CP</tspan></text>
+</svg>
