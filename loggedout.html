@@ -24,11 +24,11 @@
 <body>
   <h1>Session closed successfully</h1>
   <p>Click below to log in again:</p>
-  <a class="button" href="/login.html">Log in</a>
+  <a id="loginBtn" class="button" href="/.auth/login/entra?prompt=login">Log in</a>
   <script>
   document.getElementById("loginBtn").addEventListener("click", () => {
     // prompt=login fuerza pedir credenciales aunque haya sesión SSO
-    window.location.href = "/login.html";
+    window.location.href = "/.auth/login/entra?prompt=login";
   });
 </script>
 </body>
