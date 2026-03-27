@@ -17,7 +17,7 @@ export const UserApi = {
       //console.log("User fetched:", data);
       return data;
     } catch (err) {
-      console.error("Fetch error:", err);
+      //console.error("Fetch error:", err);
       return null;
     }
   },
@@ -35,17 +35,17 @@ export const UserApi = {
 
       if (res.status === 201) {
         const data = await res.json();
-        console.log("User created:", data);
+        //console.log("User created:", data);
         return data;
       } else if (res.status === 409) {
-        console.warn("User already exists");
+        ///console.warn("User already exists");
         return null;
       } else {
-        console.error("Error creating user:", res.status);
+        //console.error("Error creating user:", res.status);
         return null;
       }
     } catch (err) {
-      console.error("Fetch error:", err);
+      //console.error("Fetch error:", err);
       return null;
     }
   },
@@ -67,10 +67,10 @@ export const UserApi = {
       }
 
       const data = await res.json();
-      console.log("User replaced:", data);
+      //console.log("User replaced:", data);
       return data;
     } catch (err) {
-      console.error("Fetch error:", err);
+      //console.error("Fetch error:", err);
       return null;
     }
   },
