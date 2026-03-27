@@ -3422,7 +3422,7 @@ function getFilteredDataReports() {
         `;
       }).join("");
 
-      return `<tr class="${trClass} cursor-pointer" data-id="${row.id}">${cells}</tr>`;
+      return `<tr class="${trClass} cursor-pointer" data-row-index="${row.id}">${cells}</tr>`;
     }).join("");
   }
 
