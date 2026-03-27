@@ -1,4 +1,4 @@
-    import { redTones, blueTones, currentSettings ,showToast,loadReports} from "./fortecho.js";
+    import { redTones, blueTones, currentSettings ,showToast,loadReports,updateReportRow} from "./fortecho.js";
 
 // export async function generateReport(tagIds, from, to, format, currentMetric, title) {
 //     try {
@@ -118,7 +118,7 @@ export async function generateReport(tagIds, from, to, format, currentMetric, ti
             switch(status.runtimeStatus) {
                 case "Completed":
                     reportReady = true;
-                    reportOutput = status.output;
+                    reportOutput = status.customStatus;
                     break;
                 case "Failed":
                 case "Terminated":
@@ -137,7 +137,8 @@ export async function generateReport(tagIds, from, to, format, currentMetric, ti
         // 3️⃣ Abrir enlace del reporte
         if (reportReady ) {
             // window.open(reportOutput.url, "_blank");
-            loadReports(); // Refrescar lista de reportes para mostrar el nuevo
+            updateReportRow(reportOutput);
+            //loadReports(); // Refrescar lista de reportes para mostrar el nuevo
             showToast("Report generation completed!", "success", 3000, "top-right");
         }
 

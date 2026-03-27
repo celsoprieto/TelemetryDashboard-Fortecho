@@ -449,6 +449,38 @@ import { generateReport,downloadFile,deleteReport} from "./reporting.js";
         });
       });
 
+      document.getElementById("tableRBody").addEventListener("click", async (e) => {
+        const downloadBtn = e.target.closest(".download-btn");
+        const deleteBtn = e.target.closest(".delete-btn");
+
+        // ---------- DOWNLOAD ----------
+        if (downloadBtn) {
+          const file = downloadBtn.dataset.file;
+          downloadFile(file);
+          return;
+        }
+
+        // ---------- DELETE ----------
+        if (deleteBtn) {
+          const reportId = deleteBtn.dataset.id;
+          const reportRow = currentReportsRows.find(r => r.id === reportId);
+          if (!reportRow) return;
+
+          const result = await deleteReport(
+            reportId,
+            reportRow.sitecode,
+            sanitizeUrlRemoveQuery(reportRow.blobUrl),
+            reportRow.userId
+          );
+
+          if (result.deleted) {
+            showToast(result.message, "success", 3000, "top-right");
+            currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
+            renderBodyReports(currentReportsRows);
+          }
+        }
+      });
+
       // ---------------- RANGE BUTTONS ----------------
       rangeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2640,6 +2672,166 @@ function hideLoading(el) {
 
   }
 
+  function renderSingleRow(row) {
+    const trClass = "hover:bg-gray-50 transition-colors";
+
+    const cells = columnreports.map(col => {
+      let value = row[col.key];
+
+      // ---------- DATE ----------
+      if (col.key === "createdat" && value) {
+        value = new Date(value).toLocaleDateString('en-GB', {
+          day: '2-digit', month: 'long', year: 'numeric'
+        });
+      }
+
+      // ---------- TRUNCATE + TOOLTIP ----------
+      let cellContent = value;
+      if (col.truncate && typeof value === "string") {
+        const maxLen = col.maxLen || 20;
+        const maxWidth = col.maxWidth || "200px";
+        const textSizeClass = col.textSize || "text-sm";
+        cellContent = truncateWithTooltip(value, maxLen, textSizeClass, maxWidth);
+      }
+
+      // ---------- STATUS ----------
+      if (col.key === "status") {
+        if (value === 1) {
+          return `
+            <td class="px-2 py-3 text-center">
+              <div class="flex items-center justify-center">
+                <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
+                        data-file="${row.blobUrl}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" class="lucide lucide-download">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </button>
+              </div>
+            </td>`;
+        }
+        if (value === 2) {
+        return `
+          <td class="px-2 py-3 text-center">
+            <div class="flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" class="lucide lucide-x text-red-600">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </div>
+          </td>`;
+      }
+        return `
+          <td class="px-2 py-3 text-center">
+            <div class="flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                stroke="currentColor" stroke-width="2"
+                class="lucide lucide-loader animate-spin text-gray-400">
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+                <path d="M22 12a10 10 0 0 1-10 10"/>
+              </svg>
+            </div>
+          </td>`;
+      }
+
+      // ---------- TYPE (PDF / EXCEL ICON) ----------
+      if (col.key === "type") {
+        const type = (value || "").toString().trim().toLowerCase();
+
+        const tdClass = "px-2 py-3";
+        const wrapClass = "flex items-center justify-center";
+
+        if (type === "pdf") {
+          return `
+            <td class="${tdClass}">
+              <div class="${wrapClass}">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24" height="24"
+                    fill="currentColor"
+                    class="text-[#DA494E]"
+                    aria-label="PDF" role="img">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7zm0 2.5L18.5 9H14zM8 13h2.2c1.3 0 2.3 1 2.3 2.3S11.5 17.6 10.2 17.6H9.2V19H8zm2.1 3.1c.5 0 .9-.4.9-.9s-.4-.9-.9-.9H9.2v1.8zM13 13h2.1c1.5 0 2.7 1.2 2.7 2.7S16.6 18.4 15.1 18.4H13zm2 3.9c.8 0 1.4-.6 1.4-1.4S15.8 14 15 14h-.7v2.9zM18 13h3v1.3h-1.7v1.1H21v1.3h-1.7V19H18z"/>
+                </svg>
+              </div>
+            </td>`;
+        }
+
+        if (type === "excel" || type === "xlsx" || type === "xls") {
+          return `
+            <td class="${tdClass}">
+              <div class="${wrapClass}">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24" height="24"
+                    fill="currentColor"
+                    class="text-[#107C41]"
+                    aria-label="Excel" role="img">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7zm0 2.5L18.5 9H14zM8 12h2l1 1.7L12 12h2l-2 3.1L14 18h-2l-1-1.8L10 18H8l2-2.9zm7 0h4v6h-4zm1.2 1.2v.9H18v-.9zm0 2v.9H18v-.9zm-1.2-2v.9h.8v-.9zm0 2v.9h.8v-.9z"/>
+                </svg>
+              </div>
+            </td>`;
+        }
+
+        return `
+          <td class="px-2 py-3 align-middle text-gray-800">
+            ${value ?? ""}
+          </td>`;
+      }
+
+      // ---------- DELETE ----------
+      if (col.key === "enabled" && (value === true || value === 1)) {
+        return `
+          <td class="px-2 py-3 text-center">
+            <div class="flex items-center justify-center">
+              <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
+                      data-id="${row.id}">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                    class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  <line x1="10" y1="11" x2="10" y2="17"/>
+                  <line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+              </button>
+            </div>
+          </td>`;
+      }
+
+      // ---------- DEFAULT ----------
+      const nowrapClass = col.nowrap ? "whitespace-nowrap" : "";
+      return `
+        <td class="px-2 py-3 align-middle text-gray-800 ${nowrapClass}">
+            ${cellContent}
+        </td>`;
+
+    }).join("");
+
+    return `<tr class="${trClass}" data-id="${row.id}">${cells}</tr>`;
+  }
+
+  export function updateReportRow(report) {
+    const index = currentReportsRows.findIndex(r => r.id === report.id);
+      if (index === -1) return;
+
+      currentReportsRows[index] = {
+        ...currentReportsRows[index],
+        ...report
+      };
+
+      const rowEl = document.querySelector(`tr[data-id='${report.id}']`);
+      if (!rowEl) return;
+
+      rowEl.outerHTML = renderSingleRow(currentReportsRows[index]);
+    }
+
    export async function loadReports() {
     //console.log("Loading events from Azure Function...");
     try {
@@ -3230,30 +3422,13 @@ function getFilteredDataReports() {
         `;
       }).join("");
 
-      return `<tr class="${trClass} cursor-pointer" data-row-index="${index}">${cells}</tr>`;
+      return `<tr class="${trClass} cursor-pointer" data-id="${row.id}">${cells}</tr>`;
     }).join("");
   }
 
   
-function renderBodyReports(rows) {
-  const body = document.getElementById("tableRBody");
-  currentReportsRows = rows;
-
-  if (!rows.length) {
-    body.innerHTML = `
-      <tr>
-        <td colspan="${columnreports.length}" class="px-4 py-10 text-center text-gray-500">
-          No results found
-        </td>
-      </tr>`;
-    return;
-  }
-
-  body.innerHTML = rows.map((row, index) => {
-    const trClass = "hover:bg-gray-50 transition-colors";
-
-    const cells = columnreports.map(col => {
-      let value = row[col.key];
+  function renderCell(row, col) {
+    let value = row[col.key];
 
       // ---------- DATE ----------
       if (col.key === "createdat" && value) {
@@ -3388,35 +3563,192 @@ function renderBodyReports(rows) {
         <td class="px-2 py-3 align-middle text-gray-800 ${nowrapClass}">
             ${cellContent}
         </td>`;
+
+  }
+
+  function renderBodyReports(rows) {
+    const body = document.getElementById("tableRBody");
+    currentReportsRows = rows;
+
+    if (!rows.length) {
+      body.innerHTML = `
+        <tr>
+          <td colspan="${columnreports.length}" class="px-4 py-10 text-center text-gray-500">
+            No results found
+          </td>
+        </tr>`;
+      return;
+    }
+
+    body.innerHTML = rows.map((row, index) => {
+      const trClass = "hover:bg-gray-50 transition-colors";
+
+      const cells = columnreports.map(col => 
+         renderCell(row, col)).join("");
+
+      return `<tr class="${trClass} cursor-pointer" data-id="${row.id}">${cells}</tr>`;
     }).join("");
+  }
 
-    return `<tr class="${trClass}" data-row-index="${index}">${cells}</tr>`;
-  }).join("");
+      //     day: '2-digit', month: 'long', year: 'numeric'
+      //   });
+      // }
 
-  // ---------- EVENTOS ----------
-  body.querySelectorAll(".download-btn").forEach(btn =>
-    btn.addEventListener("click", () => downloadFile(btn.dataset.file))
-  );
+      // // ---------- TRUNCATE + TOOLTIP ----------
+      // let cellContent = value;
+      // if (col.truncate && typeof value === "string") {
+      //   const maxLen = col.maxLen || 20;
+      //   const maxWidth = col.maxWidth || "200px";
+      //   const textSizeClass = col.textSize || "text-sm";
+      //   cellContent = truncateWithTooltip(value, maxLen, textSizeClass, maxWidth);
+      // }
 
-  body.querySelectorAll(".delete-btn").forEach(btn =>
-    btn.addEventListener("click", async () => {
-      const reportId = btn.dataset.id;
-      const reportRow = currentReportsRows.find(r => r.id === reportId);
-      if (!reportRow) return;
+      // // ---------- STATUS ----------
+      // if (col.key === "status") {
+      //   if (value === 1) {
+      //     return `
+      //       <td class="px-2 py-3 text-center">
+      //         <div class="flex items-center justify-center">
+      //           <button class="download-btn text-green-600 hover:text-green-800 transition-colors duration-150"
+      //                   data-file="${row.blobUrl}">
+      //             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+      //                 stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      //                 stroke-linejoin="round" class="lucide lucide-download">
+      //               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      //               <polyline points="7 10 12 15 17 10"/>
+      //               <line x1="12" y1="15" x2="12" y2="3"/>
+      //             </svg>
+      //           </button>
+      //         </div>
+      //       </td>`;
+      //   }
+      //   if (value === 2) {
+      //   return `
+      //     <td class="px-2 py-3 text-center">
+      //       <div class="flex items-center justify-center">
+      //         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+      //             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+      //             stroke-linejoin="round" class="lucide lucide-x text-red-600">
+      //           <line x1="18" y1="6" x2="6" y2="18"/>
+      //           <line x1="6" y1="6" x2="18" y2="18"/>
+      //         </svg>
+      //       </div>
+      //     </td>`;
+      // }
+      //   return `
+      //     <td class="px-2 py-3 text-center">
+      //       <div class="flex items-center justify-center">
+      //         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+      //           stroke="currentColor" stroke-width="2"
+      //           class="lucide lucide-loader animate-spin text-gray-400">
+      //           <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+      //           <path d="M22 12a10 10 0 0 1-10 10"/>
+      //         </svg>
+      //       </div>
+      //     </td>`;
+      // }
 
-      const siteCode = reportRow.sitecode;
-      const blobPath = sanitizeUrlRemoveQuery(reportRow.blobUrl);
-      const userId = reportRow.userId;
-      const result = await deleteReport(reportId, siteCode, blobPath, userId);
+      // // ---------- TYPE (PDF / EXCEL ICON) ----------
+      // if (col.key === "type") {
+      //   const type = (value || "").toString().trim().toLowerCase();
 
-      if (result.deleted) {
-        showToast(result.message, "success", 3000, "top-right");
-        currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
-        renderBodyReports(currentReportsRows);
-      }
-    })
-  );
-}
+      //   const tdClass = "px-2 py-3";
+      //   const wrapClass = "flex items-center justify-center";
+
+      //   if (type === "pdf") {
+      //     return `
+      //       <td class="${tdClass}">
+      //         <div class="${wrapClass}">
+      //           <svg xmlns="http://www.w3.org/2000/svg"
+      //               viewBox="0 0 24 24"
+      //               width="24" height="24"
+      //               fill="currentColor"
+      //               class="text-[#DA494E]"
+      //               aria-label="PDF" role="img">
+      //             <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7zm0 2.5L18.5 9H14zM8 13h2.2c1.3 0 2.3 1 2.3 2.3S11.5 17.6 10.2 17.6H9.2V19H8zm2.1 3.1c.5 0 .9-.4.9-.9s-.4-.9-.9-.9H9.2v1.8zM13 13h2.1c1.5 0 2.7 1.2 2.7 2.7S16.6 18.4 15.1 18.4H13zm2 3.9c.8 0 1.4-.6 1.4-1.4S15.8 14 15 14h-.7v2.9zM18 13h3v1.3h-1.7v1.1H21v1.3h-1.7V19H18z"/>
+      //           </svg>
+      //         </div>
+      //       </td>`;
+      //   }
+
+      //   if (type === "excel" || type === "xlsx" || type === "xls") {
+      //     return `
+      //       <td class="${tdClass}">
+      //         <div class="${wrapClass}">
+      //           <svg xmlns="http://www.w3.org/2000/svg"
+      //               viewBox="0 0 24 24"
+      //               width="24" height="24"
+      //               fill="currentColor"
+      //               class="text-[#107C41]"
+      //               aria-label="Excel" role="img">
+      //             <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7zm0 2.5L18.5 9H14zM8 12h2l1 1.7L12 12h2l-2 3.1L14 18h-2l-1-1.8L10 18H8l2-2.9zm7 0h4v6h-4zm1.2 1.2v.9H18v-.9zm0 2v.9H18v-.9zm-1.2-2v.9h.8v-.9zm0 2v.9h.8v-.9z"/>
+      //           </svg>
+      //         </div>
+      //       </td>`;
+      //   }
+
+      //   return `
+      //     <td class="px-2 py-3 align-middle text-gray-800">
+      //       ${value ?? ""}
+      //     </td>`;
+      // }
+
+      // // ---------- DELETE ----------
+      // if (col.key === "enabled" && (value === true || value === 1)) {
+      //   return `
+      //     <td class="px-2 py-3 text-center">
+      //       <div class="flex items-center justify-center">
+      //         <button class="delete-btn text-custom-red hover:text-custom-red-dark transition-colors duration-150"
+      //                 data-id="${row.id}">
+      //           <svg xmlns="http://www.w3.org/2000/svg"
+      //               width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+      //               class="lucide lucide-trash-2 text-custom-red hover:text-custom-red-dark transition-colors duration-150">
+      //             <path d="M3 6h18"/>
+      //             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+      //             <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      //             <line x1="10" y1="11" x2="10" y2="17"/>
+      //             <line x1="14" y1="11" x2="14" y2="17"/>
+      //           </svg>
+      //         </button>
+      //       </div>
+      //     </td>`;
+      // }
+
+      // // ---------- DEFAULT ----------
+      // const nowrapClass = col.nowrap ? "whitespace-nowrap" : "";
+      // return `
+      //   <td class="px-2 py-3 align-middle text-gray-800 ${nowrapClass}">
+      //       ${cellContent}
+      //   </td>`;
+//     }).join("");
+
+//     return `<tr class="${trClass}" data-id="${row.id}">${cells}</tr>`;
+//   }).join("");
+
+//   // ---------- EVENTOS ----------
+//   // body.querySelectorAll(".download-btn").forEach(btn =>
+//   //   btn.addEventListener("click", () => downloadFile(btn.dataset.file))
+//   // );
+
+//   // body.querySelectorAll(".delete-btn").forEach(btn =>
+//   //   btn.addEventListener("click", async () => {
+//   //     const reportId = btn.dataset.id;
+//   //     const reportRow = currentReportsRows.find(r => r.id === reportId);
+//   //     if (!reportRow) return;
+
+//   //     const siteCode = reportRow.sitecode;
+//   //     const blobPath = sanitizeUrlRemoveQuery(reportRow.blobUrl);
+//   //     const userId = reportRow.userId;
+//   //     const result = await deleteReport(reportId, siteCode, blobPath, userId);
+
+//   //     if (result.deleted) {
+//   //       showToast(result.message, "success", 3000, "top-right");
+//   //       currentReportsRows = currentReportsRows.filter(r => r.id !== reportId);
+//   //       renderBodyReports(currentReportsRows);
+//   //     }
+//   //   })
+//   // );
+// }
 
   
   
