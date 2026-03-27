@@ -2927,7 +2927,7 @@ const columnalarms = [
 ];
 
 const columnreports = [
-  { key: "title", label: "Title", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "250px", maxLen: 40 },
+  { key: "title", label: "Title", nowrap: true, truncate: true, textSize: "font-medium text-heading", maxWidth: "250px", maxLen: 60 },
   { key: "period", label: "Period", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "140px" , maxLen: 50 },
   { key: "name", label: "Created by", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "100px", maxLen: 20 },
   { key: "createdat", label: "Created at", nowrap: true, truncate: true, textSize: "text-xs", maxWidth: "160px" ,maxLen: 30 },
@@ -3285,7 +3285,9 @@ function getFilteredDataReports() {
 
       // Inner content
       const div = document.createElement('div');
-      div.className = "flex items-center gap-2";
+      div.className = col.key === "type"
+        ? "flex items-center justify-center gap-2"
+        : "flex items-center gap-2";
 
       const spanLabel = document.createElement('span');
       spanLabel.className = "eventscolumnheaderReports";
