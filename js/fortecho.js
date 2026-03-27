@@ -1064,7 +1064,7 @@ function showTagDetails() {
           Object.values(data.light || {}).some(arr => arr.length > 0);
 
         if (!hasData) {
-          alert('No data returned for this tag/time range.');
+          showToast('No data returned for this tag/time range.', 'warning', 3000, 'top-right');
           return;
         }
 
@@ -1779,7 +1779,7 @@ function startFollowAnimation(chart) {
     Object.values(data.light || {}).some(arr => arr.length > 0);
 
     if (!hasData) {
-      alert('No data returned for this tag/time range.');
+      showToast('No data returned for this tag/time range.', 'warning', 3000, 'top-right');
       return;
     }
 
@@ -2623,7 +2623,7 @@ function hideLoading(el) {
     const deviceevents = await res.json();
 
     if (!Array.isArray(deviceevents) || deviceevents.length === 0) {
-      alert('No data returned for this tag/time range.');
+      showToast('No data returned for this tag/time range.', 'warning', 3000, 'top-right');
       return;
     }
 
@@ -2656,7 +2656,7 @@ function hideLoading(el) {
     const reports = await res.json();
 
     if (!Array.isArray(reports) || reports.length === 0) {
-      alert('No data returned for this tag/time range.');
+      showToast('No data returned for this tag/time range.', 'warning', 3000, 'top-right');
       return;
     }
 
@@ -4139,7 +4139,7 @@ function truncateWithTooltipHtml(html, plainText, maxLen = 20, textClass = "", m
     const alarms = await res.json();
 
     if (!Array.isArray(alarms) || alarms.length === 0) {
-      alert('No data returned for this tag/time range.');
+      showToast('No data returned for this tag/time range.', 'warning', 3000, 'top-right');
       return;
     }
 
