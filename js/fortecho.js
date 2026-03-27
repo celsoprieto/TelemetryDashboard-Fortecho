@@ -3433,7 +3433,11 @@ function getFilteredDataReports() {
       // ---------- DATE ----------
       if (col.key === "createdat" && value) {
         value = new Date(value).toLocaleDateString('en-GB', {
-          day: '2-digit', month: 'long', year: 'numeric'
+          day: '2-digit', month: 'long', year: 'numeric',
+          hour: "2-digit",
+          minute: "2-digit",
+          // second: "2-digit", 
+          hour12: false,      // 24h
         });
       }
 
